@@ -21,35 +21,39 @@ class EventTable extends Table {
 
   TextColumn get tTags => text()
       .withDefault(const Constant('[]'))
-      .map(const StringListOfListConverter())();
+      .map(const StringListConverter())();
 
   TextColumn get pTags => text()
       .withDefault(const Constant('[]'))
-      .map(const StringListOfListConverter())();
+      .map(const StringListConverter())();
 
   TextColumn get capitalpTags => text()
       .withDefault(const Constant('[]'))
-      .map(const StringListOfListConverter())();
+      .map(const StringListConverter())();
 
   TextColumn get kTags => text()
       .withDefault(const Constant('[]'))
-      .map(const StringListOfListConverter())();
+      .map(const StringListConverter())();
 
   TextColumn get eTags => text()
       .withDefault(const Constant('[]'))
-      .map(const StringListOfListConverter())();
+      .map(const StringListConverter())();
 
   TextColumn get lTags => text()
       .withDefault(const Constant('[]'))
-      .map(const StringListOfListConverter())();
+      .map(const StringListConverter())();
 
   TextColumn get aTags => text()
       .withDefault(const Constant('[]'))
-      .map(const StringListOfListConverter())();
+      .map(const StringListConverter())();
 
-  TextColumn get other => text()
+  TextColumn get cTags => text()
       .withDefault(const Constant('[]'))
-      .map(const StringListOfListConverter())();
+      .map(const StringListConverter())();
+
+  TextColumn get qTags => text()
+      .withDefault(const Constant('[]'))
+      .map(const StringListConverter())();
 
   TextColumn get dTag => text().nullable()();
   TextColumn get root => text().nullable()();

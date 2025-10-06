@@ -224,14 +224,10 @@ class Nip51Set extends Nip51List {
   Nip51Set(
       {required String pubKey,
       required this.name,
-      required int createdAt,
-      required List<Nip51ListElement> elements,
+      required super.createdAt,
+      required super.elements,
       this.title})
-      : super(
-            pubkey: pubKey,
-            kind: Nip51List.RELAY_SET,
-            elements: elements,
-            createdAt: createdAt);
+      : super(pubkey: pubKey, kind: Nip51List.RELAY_SET);
 
   static Future<Nip51Set?> fromEvent(
     Event event,

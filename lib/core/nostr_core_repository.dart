@@ -9,6 +9,8 @@ import 'dart:isolate';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:nostr_core_enhanced/db/db_wrapper.dart';
 import 'package:nostr_core_enhanced/db/nostr_cache_manager.dart';
 import 'package:nostr_core_enhanced/models/models.dart';
 import 'package:nostr_core_enhanced/nostr/nostr.dart';
@@ -44,11 +46,23 @@ const List<String> DEFAULT_DM_RELAYS = [
 ];
 
 class NostrCore {
-  NostrCacheManager cacheManager = NostrCacheManager();
+  late NostrDB db;
+  late DbWrapper dbWrapper;
 
-  RemoteCacheService remoteCacheService = RemoteCacheService(
-    cacheUrl: 'wss://cache2.primal.net/v1',
-  );
+  late RemoteCacheService remoteCacheService;
+
+  NostrCore({
+    NostrDB? db,
+    bool loadRemoteCache = true,
+  }) {
+    this.db = db ?? NostrDB();
+    dbWrapper = DbWrapper(this.db);
+    automaticFlush();
+
+    if (loadRemoteCache) {
+      initRemoteCache();
+    }
+  }
 
   EventSigner? currentSigner;
 
@@ -62,8 +76,6 @@ class NostrCore {
 
   Set<String> closedRelays = {};
 
-  Map<String, RelayInfo> relayInfos = {};
-
   Map<String, int> connectStatus = {};
 
   Map<String, Requests> requestsMap = {};
@@ -74,13 +86,30 @@ class NostrCore {
 
   List<ConnectStatusCallBack> connectStatusListeners = [];
 
-  //************************************** Signer **************************************************************/
+  // =====================================================================
+  // MARK: Init remote cache
+  // =====================================================================
+
+  Future<void> initRemoteCache() async {
+    await dotenv.load();
+    final remoteCache = dotenv.env['REMOTE_CACHE']!;
+
+    remoteCacheService = RemoteCacheService(
+      cacheUrl: remoteCache,
+    );
+  }
+  // =====================================================================
+  // MARK: SIGNER
+  // =====================================================================
 
   void setSigner(EventSigner? signer) {
     currentSigner = signer;
   }
 
-  //************************************** Relays connectivity **************************************************************/
+  // =====================================================================
+  // MARK: Relay connectivity
+  // =====================================================================
+
   @pragma('vm:entry-point')
   void relaysAutoReconnect() {
     for (final webSocketKey in webSockets.keys) {
@@ -89,6 +118,12 @@ class NostrCore {
         connect(webSocketKey);
       }
     }
+  }
+
+  void automaticFlush() {
+    Timer.periodic(Duration(seconds: 10), (_) {
+      db.flushEventsSeenRelays(dbWrapper);
+    });
   }
 
   Future<void> forceReconnect() async {
@@ -150,6 +185,14 @@ class NostrCore {
     return keys.map((e) => Relay.clean(e)!).toList();
   }
 
+  List<String> missingRelays(List<String> currentRelays) {
+    return currentRelays
+        .where(
+          (element) => !relays().contains(element),
+        )
+        .toList();
+  }
+
   Future<void> connect(
     String r, {
     bool? fromIdleState,
@@ -157,8 +200,6 @@ class NostrCore {
   }) async {
     try {
       WebSocket? socket;
-
-      getRelayInfo(r);
 
       if (fromIdleState == null) {
         if ((connectStatus[r] == 0 && webSockets[r] != null) ||
@@ -231,7 +272,10 @@ class NostrCore {
     }
   }
 
-  //************************************** Queries & subcriptions **************************************************************/
+  // =====================================================================
+  // MARK: QUERIES AND SUBSCRIPTIONS
+  // =====================================================================
+
   void setTimerAndApply({
     required Timer? timer,
     required int timeOut,
@@ -256,24 +300,85 @@ class NostrCore {
     List<Filter> filters,
     List<String> relays, {
     int timeOut = 5,
+    EventsSource source = EventsSource.cacheFirst,
     void Function()? onFinished,
     void Function(Event, String)? eventCallBack,
     void Function(String, OKEvent, String, List<String>)? eoseCallBack,
+    int? startingTimeout,
   }) async {
     final completer = Completer<String>();
     Timer? timer = Timer(Duration(seconds: timeOut), () {});
     String id = '';
 
-    id = addSubscription(
-      filters,
-      relays,
-      eoseCallBack: (requestId, ok, relay, unCompletedRelays) {
-        closeSubscription(requestId, relay);
+    if (source != EventsSource.relays) {
+      final events = await dbWrapper.loadEvents(
+        filters: filters,
+        relays: relays,
+        db: db,
+      );
 
+      if (source == EventsSource.cacheFirst) {
+        final mostRecentEvent = events.isEmpty ? 0 : events.first.createdAt;
+
+        if (mostRecentEvent != 0) {
+          for (final filter in filters) {
+            if ((filter.since ?? 0) < mostRecentEvent) {
+              filter.since = mostRecentEvent + 1;
+            }
+          }
+        }
+      }
+
+      for (final e in events) {
+        eventCallBack?.call(e, '');
+      }
+
+      if (source == EventsSource.cache) {
+        completer.complete('');
+      }
+    }
+
+    if (source != EventsSource.cache) {
+      id = addSubscription(
+        filters,
+        relays,
+        onConnectionStatus: (status) {
+          if (!status) {
+            closeRequests(<String>[id]);
+            completer.complete(id);
+          }
+        },
+        eoseCallBack: (requestId, ok, relay, unCompletedRelays) {
+          closeSubscription(requestId, relay);
+
+          setTimerAndApply(
+            timer: timer,
+            timeOut: timeOut,
+            shouldClose: unCompletedRelays.isEmpty,
+            onClose: () {
+              if (!completer.isCompleted) {
+                closeRequests(<String>[id]);
+                completer.complete(id);
+                db.flushEventsSeenRelays(dbWrapper);
+              }
+            },
+          );
+
+          if (eoseCallBack != null) {
+            eoseCallBack.call(requestId, ok, relay, unCompletedRelays);
+          }
+        },
+        eventCallBack: (event, relay) {
+          dbWrapper.markEvent(event, relay);
+          eventCallBack?.call(event, relay);
+        },
+      );
+
+      if (startingTimeout != null) {
         setTimerAndApply(
           timer: timer,
-          timeOut: timeOut,
-          shouldClose: unCompletedRelays.isEmpty,
+          timeOut: startingTimeout,
+          shouldClose: false,
           onClose: () {
             if (!completer.isCompleted) {
               closeRequests(<String>[id]);
@@ -281,33 +386,73 @@ class NostrCore {
             }
           },
         );
-
-        if (eoseCallBack != null) {
-          eoseCallBack.call(requestId, ok, relay, unCompletedRelays);
-        }
-      },
-      eventCallBack: (event, relay) {
-        if (eventCallBack != null) {
-          eventCallBack.call(event, relay);
-        }
-      },
-    );
+      }
+    }
 
     return completer.future;
   }
 
-  String doSubscribe(
+  Future<String> doSubscribe(
     List<Filter> filters,
     List<String> relays, {
+    EventsSource source = EventsSource.cacheFirst,
     void Function(Event, String)? eventCallBack,
     void Function(String, OKEvent, String, List<String>)? eoseCallBack,
-  }) {
-    return addSubscription(
-      filters,
-      relays,
-      eoseCallBack: eoseCallBack,
-      eventCallBack: eventCallBack,
-    );
+  }) async {
+    Timer? timer = Timer(Duration(seconds: 5), () {});
+
+    if (source != EventsSource.relays) {
+      final events = await dbWrapper.loadEvents(
+        filters: filters,
+        relays: relays,
+        db: db,
+      );
+
+      if (source == EventsSource.cacheFirst) {
+        final mostRecentEvent = events.isEmpty ? 0 : events.first.createdAt;
+
+        if (mostRecentEvent != 0) {
+          for (final filter in filters) {
+            if ((filter.since ?? 0) < mostRecentEvent) {
+              filter.since = mostRecentEvent + 1;
+            }
+          }
+        }
+      }
+
+      for (final e in events) {
+        eventCallBack?.call(e, '');
+      }
+
+      if (source == EventsSource.cache) {
+        return '';
+      }
+    }
+
+    if (source != EventsSource.cache) {
+      return addSubscription(
+        filters,
+        relays,
+        eoseCallBack: (requestId, ok, relay, unCompletedRelays) {
+          eoseCallBack?.call(requestId, ok, relay, unCompletedRelays);
+
+          setTimerAndApply(
+            timer: timer,
+            timeOut: 5,
+            shouldClose: unCompletedRelays.isEmpty,
+            onClose: () {
+              db.flushEventsSeenRelays(dbWrapper);
+            },
+          );
+        },
+        eventCallBack: (event, relay) {
+          dbWrapper.markEvent(event, relay);
+          eventCallBack?.call(event, relay);
+        },
+      );
+    }
+
+    return '';
   }
 
   String addSubscription(
@@ -315,6 +460,7 @@ class NostrCore {
     List<String> relays, {
     EventCallBack? eventCallBack,
     EOSECallBack? eoseCallBack,
+    Function(bool)? onConnectionStatus,
   }) {
     Map<String, List<Filter>> result = {};
 
@@ -333,6 +479,7 @@ class NostrCore {
       relays,
       eventCallBack: eventCallBack,
       eoseCallBack: eoseCallBack,
+      onConnectionStatus: onConnectionStatus,
     );
   }
 
@@ -341,6 +488,7 @@ class NostrCore {
     List<String> relays, {
     EventCallBack? eventCallBack,
     EOSECallBack? eoseCallBack,
+    Function(bool)? onConnectionStatus,
   }) {
     String requestsId = generate64RandomHexChars();
 
@@ -352,6 +500,8 @@ class NostrCore {
       eventCallBack,
       eoseCallBack,
     );
+
+    bool status = false;
 
     for (String relay in filters.keys) {
       Request requestWithFilter = Request(
@@ -366,8 +516,13 @@ class NostrCore {
       requestsMap[requestWithFilter.subscriptionId + relay] = requests;
 
       _send(subscriptionString, chosenRelays: [relay]);
+
+      if (!status) {
+        status = connectStatus[relay] == 1;
+      }
     }
 
+    onConnectionStatus?.call(status);
     return requestsId;
   }
 
@@ -408,7 +563,10 @@ class NostrCore {
     }
   }
 
-  //******************************************* Events publish *****************************************************************/
+  // =====================================================================
+  // MARK: EVENT PUBLISH
+  // =====================================================================
+
   Future<bool> publish(
     Event event,
     List<String> relays, {
@@ -435,6 +593,38 @@ class NostrCore {
       const Duration(milliseconds: 500),
       (timer) {
         if (isSuccessful || timer.tick > TIMER_TICKS) {
+          completer.complete(isSuccessful);
+          timer.cancel();
+        }
+      },
+    );
+
+    return completer.future;
+  }
+
+  Future<bool> sendEventAsync({
+    required Event event,
+    required bool setProgress,
+    List<String>? relays,
+    int? timeout,
+  }) async {
+    final completer = Completer<bool>();
+    bool isSuccessful = false;
+
+    sendEvent(
+      event,
+      relays ?? [],
+      sendCallBack: (ok, relay, unCompletedRelays) {
+        if (ok.status && !isSuccessful) {
+          isSuccessful = true;
+        }
+      },
+    );
+
+    Timer.periodic(
+      const Duration(milliseconds: 500),
+      (timer) {
+        if (isSuccessful || timer.tick > (timeout ?? TIMER_TICKS)) {
           completer.complete(isSuccessful);
           timer.cancel();
         }
@@ -489,7 +679,10 @@ class NostrCore {
     } catch (_) {}
   }
 
-  //*********************************** Messages and events handling ***********************************************************/
+  // =====================================================================
+  // MARK: MESSAGES AND EVENTS HANDLING
+  // =====================================================================
+
   Future<void> _authenticateRelay(String message, String relay) async {
     final completer = Completer<void>();
 
@@ -551,7 +744,7 @@ class NostrCore {
           break;
 
         default:
-          logger.i(m);
+          logger.i('$relay ${m.message}');
           printLog('Received message not supported: $message');
           break;
       }
@@ -590,7 +783,7 @@ class NostrCore {
   }
 
   void _handleNotice(String notice, String relay) {
-    printLog('receive notice: $notice');
+    printLog('receive notice <$relay>: $notice');
     String n = jsonDecode(notice)[0];
     noticeCallBack?.call(n, relay);
   }
@@ -630,16 +823,78 @@ class NostrCore {
     } catch (_) {}
   }
 
-  Future _connectWs(String relay) async {
+  Future<WebSocket?> _connectWs(String relay) async {
     try {
       _setConnectStatus(relay, 0);
-      return await WebSocket.connect(relay).timeout(
-        const Duration(seconds: 5),
-      );
+
+      final uri = Uri.parse(relay);
+      final isOnionRelay = uri.host.endsWith('.onion');
+
+      if (isOnionRelay) {
+        // Configure HttpClient with proxy
+        final httpClient = HttpClient();
+        httpClient.findProxy = (uri) => 'PROXY 127.0.0.1:9050';
+        httpClient.badCertificateCallback = (cert, host, port) => true;
+        final httpUri = Uri(
+          scheme: uri.scheme == 'wss' ? 'https' : 'http',
+          host: uri.host,
+          port: uri.port,
+          path: uri.path.isEmpty ? '/' : uri.path,
+        );
+        // Connect to get the WebSocket directly
+        final request = await httpClient.getUrl(httpUri);
+        request.headers.add('Connection', 'Upgrade');
+        request.headers.add('Upgrade', 'websocket');
+        request.headers.add('Sec-WebSocket-Version', '13');
+        request.headers.add('Sec-WebSocket-Key', _generateWebSocketKey());
+
+        final response = await request.close();
+        logger.i(response.statusCode);
+
+        if (response.statusCode == 101) {
+          final socket = await response.detachSocket();
+          return WebSocket.fromUpgradedSocket(socket, serverSide: false);
+        } else {
+          return null;
+        }
+      } else {
+        return await WebSocket.connect(relay).timeout(
+          const Duration(seconds: 5),
+        );
+      }
     } catch (e) {
       _setConnectStatus(relay, 3);
-      printLog('Error! can not connect WS connectWs $e');
+      printLog('Error: $e');
       return null;
+    }
+  }
+
+  String _generateWebSocketKey() {
+    final random = math.Random.secure();
+    final bytes = List<int>.generate(16, (_) => random.nextInt(256));
+    return base64.encode(bytes);
+  }
+
+  Future<bool> checkRelayConnectivity(String relay) async {
+    try {
+      final socket = await WebSocket.connect(relay).timeout(
+        const Duration(seconds: 1),
+      );
+
+      // Send a ping
+      socket.add("ping");
+
+      // Wait for first response (or close)
+      final response = await socket.first.timeout(
+        const Duration(seconds: 1),
+        onTimeout: () => "timeout",
+      );
+
+      await socket.close();
+
+      return response != "timeout";
+    } catch (_) {
+      return false;
     }
   }
 
@@ -658,26 +913,14 @@ class NostrCore {
     }
   }
 
-  //************************************************ Relays info **************************************************************/
-  Future<RelayInfo?> getRelayInfo(String url) async {
-    if (relayInfos[url] == null) {
-      final info = await RelayInfo.get(url);
+  // =====================================================================
+  // MARK: CONTACT LISTS
+  // =====================================================================
 
-      if (info != null) {
-        relayInfos[url] = info;
-      }
-
-      return relayInfos[url];
-    } else {
-      return relayInfos[url];
-    }
-  }
-
-  //********************************************** Contacts lists **************************************************************/
   Future<ContactList> ensureUpToDateContactListOrEmpty(
     EventSigner signer,
   ) async {
-    ContactList? contactList = await cacheManager.loadContactList(
+    ContactList? contactList = await db.loadContactList(
       signer.getPublicKey(),
     );
 
@@ -707,7 +950,7 @@ class NostrCore {
   }) async {
     final completer = Completer<ContactList?>();
 
-    ContactList? contactList = await cacheManager.loadContactList(pubkey);
+    ContactList? contactList = await db.loadContactList(pubkey);
 
     if (contactList == null || forceRefresh) {
       ContactList? loadedContactList;
@@ -739,7 +982,7 @@ class NostrCore {
         loadedContactList!.loadedTimestamp =
             DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
-        await cacheManager.saveContactList(loadedContactList!);
+        await db.saveContactList(loadedContactList!);
         contactList = loadedContactList;
         completer.complete(contactList);
       } else if (contactList != null) {
@@ -754,6 +997,64 @@ class NostrCore {
     return completer.future;
   }
 
+  Future<List<ContactList>> loadContactLists(
+    List<String> pubkeys, {
+    bool forceRefresh = false,
+    int idleTimeout = DEFAULT_STREAM_IDLE_TIMEOUT,
+    EventsSource source = EventsSource.cacheFirst,
+  }) async {
+    // Load existing ones from DB
+
+    final localLists = await db.loadContactLists(pubkeys);
+    final localMap = {for (final cl in localLists) cl.pubkey: cl};
+
+    // Figure out which pubkeys still need fetching
+    final toFetch = forceRefresh
+        ? pubkeys
+        : pubkeys.where((p) => !localMap.containsKey(p)).toList();
+
+    final fetchedMap = <String, ContactList>{};
+
+    if (toFetch.isNotEmpty) {
+      final id = await doQuery(
+        [
+          Filter(
+            kinds: [EventKind.CONTACT_LIST],
+            authors: toFetch,
+          ),
+        ],
+        [],
+        timeOut: 3,
+        source: source,
+        eventCallBack: (event, relay) {
+          final existing = fetchedMap[event.pubkey];
+          if (existing == null || existing.createdAt < event.createdAt) {
+            fetchedMap[event.pubkey] = ContactList.fromEvent(event);
+          }
+        },
+        eoseCallBack: (requestId, ok, relay, unCompletedRelays) {},
+      );
+
+      closeRequests([id]);
+
+      if (fetchedMap.isNotEmpty) {
+        final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+        for (final cl in fetchedMap.values) {
+          cl.loadedTimestamp = now;
+        }
+
+        await db.saveContactLists(fetchedMap.values.toList());
+      }
+    }
+
+    // Merge local and fetched, keeping freshest per pubkey
+    final merged = {
+      for (final cl in [...localMap.values, ...fetchedMap.values]) cl.pubkey: cl
+    }.values.toList();
+
+    return merged;
+  }
+
   Future<MuteList?> loadMutesList(
     String pubkey, {
     bool forceRefresh = false,
@@ -761,7 +1062,7 @@ class NostrCore {
   }) async {
     final completer = Completer<MuteList?>();
 
-    MuteList? muteList = await cacheManager.loadMuteList(pubkey);
+    MuteList? muteList = await db.loadMuteList(pubkey);
 
     if (muteList == null || forceRefresh) {
       MuteList? loadedMuteList;
@@ -793,7 +1094,7 @@ class NostrCore {
         loadedMuteList!.loadedTimestamp =
             DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
-        await cacheManager.saveMuteList(loadedMuteList!);
+        await db.saveMuteList(loadedMuteList!);
         muteList = loadedMuteList;
         completer.complete(muteList);
       } else if (muteList != null) {
@@ -819,8 +1120,8 @@ class NostrCore {
     List<String> remainingMutesPubkeys = List.from(pubkeys);
 
     for (final pubkey in pubkeys) {
-      final contactList = await cacheManager.loadContactList(pubkey);
-      final muteList = await cacheManager.loadMuteList(pubkey);
+      final contactList = await db.loadContactList(pubkey);
+      final muteList = await db.loadMuteList(pubkey);
 
       if (contactList != null) {
         remainingContactsPubkeys.remove(pubkey);
@@ -851,13 +1152,13 @@ class NostrCore {
         eventCallBack: (event, relay) {
           if (remainingContactsPubkeys.contains(event.pubkey) &&
               event.kind == EventKind.CONTACT_LIST) {
-            cacheManager.saveContactList(ContactList.fromEvent(event));
+            db.saveContactList(ContactList.fromEvent(event));
             remainingContactsPubkeys.remove(event.pubkey);
           }
 
           if (remainingMutesPubkeys.contains(event.pubkey) &&
               event.kind == EventKind.MUTE_LIST) {
-            cacheManager.saveMuteList(MuteList.fromEvent(event));
+            db.saveMuteList(MuteList.fromEvent(event));
             remainingMutesPubkeys.remove(event.pubkey);
           }
         },
@@ -911,7 +1212,7 @@ class NostrCore {
 
     try {
       // Step 1: Batch load existing scores using the new Map method
-      final existingScores = await cacheManager.loadWotScoreMap(
+      final existingScores = await db.loadWotScoreMap(
         peerPubkeys,
         originPubkey,
       );
@@ -930,7 +1231,7 @@ class NostrCore {
       if (needCalculation.isEmpty) return scores;
 
       // Step 2: Load contact list once
-      final contactsList = await cacheManager.loadContactList(originPubkey);
+      final contactsList = await db.loadContactList(originPubkey);
       if (contactsList == null || contactsList.contacts.isEmpty) {
         for (final pubkey in needCalculation) {
           scores[pubkey] = null;
@@ -960,7 +1261,7 @@ class NostrCore {
 
       // Step 4: Batch calculate WoT using the new batch method
       if (needWotCalculation.isNotEmpty) {
-        final wotResults = await cacheManager.getWotAvailabilityBatch(
+        final wotResults = await db.getWotAvailabilityBatch(
           originPubkeyList: contacts,
           peerPubkeys: needWotCalculation,
         );
@@ -991,7 +1292,7 @@ class NostrCore {
       }
 
       if (newScores.isNotEmpty) {
-        cacheManager.saveWotScoresBatch(newScores);
+        db.saveWotScoresBatch(newScores);
       }
 
       return scores;
@@ -1031,7 +1332,7 @@ class NostrCore {
     final score = batchResult[peerPubkey];
     if (score == null) return null;
 
-    return cacheManager.loadWotScore(peerPubkey, originPubkey);
+    return db.loadWotScore(peerPubkey, originPubkey);
   }
 
   Future<Map<String, double>> calculateWot({
@@ -1039,13 +1340,13 @@ class NostrCore {
     required Set<String> mutes,
     bool forceRefresh = false,
   }) async {
-    final currentWot = await cacheManager.loadUserWot(pubkey);
+    final currentWot = await db.loadUserWot(pubkey);
 
     if (currentWot != null && !forceRefresh) {
       return currentWot.wot;
     }
 
-    const int batchSize = 50;
+    // const int batchSize = 50;
     final Map<String, Set<String>> followings = {};
 
     final contactList = await loadContactList(pubkey);
@@ -1055,26 +1356,41 @@ class NostrCore {
       return {};
     }
 
-    final csList = cs.toList();
-    for (var i = 0; i < csList.length; i += batchSize) {
-      final batch = csList.sublist(
-        i,
-        i + batchSize < csList.length ? i + batchSize : csList.length,
-      );
+    final csList = cs.take(200).toList();
 
-      final followingsContactList = await loadContactDataByBatch(batch);
+    final followingsContactList = await loadContactDataByBatch(
+      csList,
+      forceRefresh: forceRefresh,
+    );
 
-      for (final key in followingsContactList.keys) {
-        followings[key] = Set<String>.from(followingsContactList[key] ?? []);
-      }
+    for (final key in followingsContactList.keys) {
+      followings[key] = Set<String>.from(followingsContactList[key] ?? []);
     }
+
+    // for (var i = 0; i < csList.length; i += batchSize) {
+    //   final batch = csList.sublist(
+    //     i,
+    //     i + batchSize < csList.length ? i + batchSize : csList.length,
+    //   );
+
+    //   final followingsContactList = await loadContactDataByBatch(
+    //     batch,
+    //     forceRefresh: forceRefresh,
+    //   );
+
+    //   for (final key in followingsContactList.keys) {
+    //     followings[key] = Set<String>.from(followingsContactList[key] ?? []);
+    //   }
+
+    //   await Future.delayed(const Duration(milliseconds: 300));
+    // }
 
     // Create a calculation data object containing only serializable data
     final calculationData = WotCalculationData(
       pubkey: pubkey,
       mutes: Set<String>.from(mutes),
       followings: Map<String, Set<String>>.from(followings),
-      contacts: cs,
+      contacts: csList.toSet(),
     );
 
     // Serialize the data completely before spawning the isolate
@@ -1101,7 +1417,7 @@ class NostrCore {
               logger.e('Error in isolate: ${message['error']}');
               completer.complete({});
             } else {
-              cacheManager.saveUserWot(
+              db.saveUserWot(
                 WotModel(
                   pubkey: pubkey,
                   wot: Map<String, double>.from(message),
@@ -1135,23 +1451,14 @@ class NostrCore {
     bool forceRefresh = false,
     int idleTimeout = 5000,
   }) async {
-    final completer = Completer<Map<String, List<String>>>();
-    Map<String, List<String>> contactsList = {};
+    final loadedContactLists = await loadContactLists(
+      pubkeys,
+      forceRefresh: forceRefresh,
+      idleTimeout: idleTimeout,
+      source: EventsSource.relays,
+    );
 
-    List<String> remainingContactsPubkeys = List.from(pubkeys);
-
-    for (final pubkey in pubkeys) {
-      final contactList = await cacheManager.loadContactList(pubkey);
-
-      if (contactList != null) {
-        contactsList[pubkey] = contactList.contacts;
-        remainingContactsPubkeys.remove(pubkey);
-      }
-    }
-
-    completer.complete(contactsList);
-
-    return completer.future;
+    return {for (final c in loadedContactLists) c.pubkey: c.contacts};
   }
 
   Future<ContactList?> publishRemoveContacts(
@@ -1183,7 +1490,7 @@ class NostrCore {
       final isSuccessful = await publish(e, relays);
 
       if (isSuccessful) {
-        await cacheManager.saveContactList(contactList);
+        await db.saveContactList(contactList);
       } else {
         return null;
       }
@@ -1222,7 +1529,7 @@ class NostrCore {
       final isSuccessful = await publish(e, relays);
 
       if (isSuccessful) {
-        await cacheManager.saveContactList(contactList);
+        await db.saveContactList(contactList);
       } else {
         return null;
       }
@@ -1274,7 +1581,7 @@ class NostrCore {
           mutes: mutes,
           forceRefresh: true,
         );
-        await cacheManager.saveContactList(contactList);
+        await db.saveContactList(contactList);
       } else {
         return null;
       }
@@ -1283,7 +1590,10 @@ class NostrCore {
     return contactList;
   }
 
-  //********************************************** Metadata handling ***********************************************************/
+  // =====================================================================
+  // MARK: METADATA HANDLING
+  // =====================================================================
+
   Future<List<Metadata>> loadMissingMetadatas(
     List<String> pubKeys,
     List<String> relays, {
@@ -1295,12 +1605,7 @@ class NostrCore {
     if (forceSeach != null) {
       missingPubKeys = pubKeys;
     } else {
-      for (var pubKey in pubKeys) {
-        Metadata? userMetadata = await cacheManager.loadMetadata(pubKey);
-        if (userMetadata == null) {
-          missingPubKeys.add(pubKey);
-        }
-      }
+      missingPubKeys = await db.getMissingMetadatas(pubKeys);
     }
 
     Map<String, Metadata> metadatas = {};
@@ -1320,11 +1625,10 @@ class NostrCore {
               metadatas[event.pubkey] = m.copyWith(
                 refreshedTimestamp: Helpers.now,
               );
-
-              await cacheManager.saveMetadata(metadatas[event.pubkey]!);
             }
           }
         },
+        timeOut: 2,
         eoseCallBack: (p0, p1, p2, p3) {
           onRefresh?.call(metadatas.keys.toSet());
         },
@@ -1333,7 +1637,10 @@ class NostrCore {
       closeRequests([id]);
     }
 
-    return metadatas.values.toList();
+    final ms = metadatas.values.toList();
+    await db.saveMetadatas(ms);
+
+    return ms;
   }
 
   Future<Metadata?> broadcastMetadata(
@@ -1353,7 +1660,7 @@ class NostrCore {
           refreshedTimestamp: Helpers.now,
         );
 
-        await cacheManager.saveMetadata(newMetadata);
+        await db.saveMetadata(newMetadata);
 
         return newMetadata;
       }
@@ -1364,13 +1671,16 @@ class NostrCore {
     return null;
   }
 
-  //********************************************** User relay list *************************************************************/
+  // =====================================================================
+  // MARK: USER RELAY LIST
+  // =====================================================================
+
   Future<RelaySet?> getRelaySet(String name, String pubKey) async {
-    return await cacheManager.loadRelaySet(name, pubKey);
+    return await db.loadRelaySet(name, pubKey);
   }
 
   Future<void> saveRelaySet(RelaySet relaySet) async {
-    return await cacheManager.saveRelaySet(relaySet);
+    return await db.saveRelaySet(relaySet);
   }
 
   Future<RelaySet> calculateRelaySet({
@@ -1396,11 +1706,10 @@ class NostrCore {
 
     return RelaySet(
       name: name,
-      pubKey: ownerPubKey,
+      pubkey: ownerPubKey,
       relayMinCountPerPubkey: relayMinCountPerPubKey,
       direction: direction,
       relaysMap: _allConnectedRelays(pubKeys),
-      notCoveredPubkeys: [],
     );
   }
 
@@ -1450,12 +1759,6 @@ class NostrCore {
       );
     }
 
-    Map<String, int> notCoveredPubkeys = {};
-
-    for (var pubKey in pubKeys) {
-      notCoveredPubkeys[pubKey] = relayMinCountPerPubKey;
-    }
-
     for (String url in pubKeysByRelayUrl.keys) {
       if (!pubKeysByRelayUrl[url]!.any((pubKey) =>
           minimumRelaysCoverageByPubkey[pubKey.pubKey] == null ||
@@ -1485,9 +1788,6 @@ class NostrCore {
 
         if (!bestRelays[url]!.contains(pubKey)) {
           bestRelays[url]!.add(pubKey);
-          int count =
-              notCoveredPubkeys[pubKey.pubKey] ?? relayMinCountPerPubKey;
-          notCoveredPubkeys[pubKey.pubKey] = count - 1;
         }
       }
 
@@ -1500,19 +1800,12 @@ class NostrCore {
       }
     }
 
-    notCoveredPubkeys.removeWhere((key, value) => value <= 0);
-
     return RelaySet(
       name: name,
-      pubKey: ownerPubKey,
+      pubkey: ownerPubKey,
       relayMinCountPerPubkey: relayMinCountPerPubKey,
       direction: direction,
       relaysMap: bestRelays,
-      notCoveredPubkeys: notCoveredPubkeys.entries
-          .map(
-            (entry) => NotCoveredPubKey(entry.key, entry.value),
-          )
-          .toList(),
     );
   }
 
@@ -1523,8 +1816,7 @@ class NostrCore {
     Map<String, Set<PubkeyMapping>> pubKeysByRelayUrl = {};
     int foundCount = 0;
     for (String pubKey in pubKeys) {
-      UserRelayList? userRelayList =
-          await cacheManager.loadUserRelayList(pubKey);
+      UserRelayList? userRelayList = await db.loadUserRelayList(pubKey);
       if (userRelayList != null) {
         if (userRelayList.relays.isNotEmpty) {
           foundCount++;
@@ -1542,7 +1834,7 @@ class NostrCore {
       } else {
         int now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
-        await cacheManager.saveUserRelayList(
+        await db.saveUserRelayList(
           UserRelayList(
             pubkey: pubKey,
             relays: {},
@@ -1597,7 +1889,7 @@ class NostrCore {
   }
 
   Future<UserRelayList?> ensureUpToDateUserRelayList(EventSigner signer) async {
-    UserRelayList? userRelayList = await cacheManager.loadUserRelayList(
+    UserRelayList? userRelayList = await db.loadUserRelayList(
       signer.getPublicKey(),
     );
 
@@ -1621,7 +1913,7 @@ class NostrCore {
     String pubKey, {
     bool forceRefresh = false,
   }) async {
-    UserRelayList? userRelayList = await cacheManager.loadUserRelayList(pubKey);
+    UserRelayList? userRelayList = await db.loadUserRelayList(pubKey);
 
     if (userRelayList == null || forceRefresh) {
       await loadMissingRelayListsFromNip65OrNip02(
@@ -1629,7 +1921,7 @@ class NostrCore {
         forceRefresh: forceRefresh,
       );
 
-      userRelayList = await cacheManager.loadUserRelayList(pubKey);
+      userRelayList = await db.loadUserRelayList(pubKey);
     }
     return userRelayList;
   }
@@ -1658,7 +1950,7 @@ class NostrCore {
       );
 
       if (isSuccessful) {
-        await cacheManager.saveUserRelayList(userRelayList);
+        await db.saveUserRelayList(userRelayList);
         return userRelayList;
       }
 
@@ -1680,8 +1972,7 @@ class NostrCore {
     Set<String> missingPubKeys = {};
 
     for (var pubKey in pubKeys) {
-      UserRelayList? userRelayList =
-          await cacheManager.loadUserRelayList(pubKey);
+      UserRelayList? userRelayList = await db.loadUserRelayList(pubKey);
       if (userRelayList == null || forceRefresh) {
         missingPubKeys.add(pubKey);
       }
@@ -1756,19 +2047,18 @@ class NostrCore {
         }
       }
 
-      await cacheManager.saveUserRelayLists(relayLists.toList());
+      await db.saveUserRelayLists(relayLists.toList());
 
       List<ContactList> contactListsSave = [];
 
       for (ContactList contactList in contactLists) {
-        ContactList? existing =
-            await cacheManager.loadContactList(contactList.pubkey);
+        ContactList? existing = await db.loadContactList(contactList.pubkey);
         if (existing == null || existing.createdAt < contactList.createdAt) {
           contactListsSave.add(contactList);
         }
       }
 
-      await cacheManager.saveContactLists(contactListsSave);
+      await db.saveContactLists(contactListsSave);
 
       if (onProgress != null) {
         onProgress.call(
@@ -1852,7 +2142,9 @@ void calculateWotIsolate(SendPort sendPort) {
               }
 
               final score = cs.isNotEmpty ? (count * 10) / cs.length : 0.0;
-              if (score >= 5) wot[p] = score.clamp(0, 10);
+              if (score >= 2) {
+                wot[p] = score.clamp(0, 10);
+              }
             }
           }
 
@@ -1868,7 +2160,9 @@ void calculateWotIsolate(SendPort sendPort) {
                   }
 
                   final score = cs.isNotEmpty ? (count * 10) / cs.length : 0.0;
-                  if (score >= 5) wot[p] = score.clamp(0, 10);
+                  if (score >= 2) {
+                    wot[p] = score.clamp(0, 10);
+                  }
                 }
               }
             }

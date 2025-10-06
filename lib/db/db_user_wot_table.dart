@@ -1,12 +1,13 @@
 // User WoT table
 import 'package:drift/drift.dart';
+import 'package:nostr_core_enhanced/db/db_type_converters.dart';
 
 class UserWotTable extends Table {
-  TextColumn get id => text()();
   TextColumn get pubkey => text()();
-  TextColumn get wotData =>
-      text().withDefault(const Constant('{}'))(); // JSON object
-  IntColumn get lastUpdated => integer().nullable()();
+  IntColumn get createdAt => integer()();
+  TextColumn get wot => text()
+      .withDefault(const Constant('{}'))
+      .map(const DoubleMapConverter())();
 
   @override
   Set<Column> get primaryKey => {pubkey};

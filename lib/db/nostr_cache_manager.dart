@@ -1,371 +1,63 @@
-// import 'dart:convert';
-
-// import 'package:drift/drift.dart';
-// import 'package:nostr_core_enhanced/cache/cache_manager.dart';
-// import 'package:nostr_core_enhanced/models/contact_list.dart';
-// import 'package:nostr_core_enhanced/models/event_filter.dart';
-// import 'package:nostr_core_enhanced/models/metadata.dart';
-// import 'package:nostr_core_enhanced/models/relay_set.dart';
-// import 'package:nostr_core_enhanced/models/user_relay_list.dart';
-// import 'package:nostr_core_enhanced/nostr/event.dart';
-// import 'package:nostr_core_enhanced/utils/enums.dart';
-
-// import 'drift_database.dart' as drift_db;
-
-// class DriftCacheManager extends CacheManager {
-//   late drift_db.NostrDatabase _database;
-//   EventFilter? eventFilter;
-
-//   Future<void> init({String? directory}) async {
-//     _database = drift_db.NostrDatabase();
-//   }
-
-//   double getDatabaseSizeInMb() {
-//     // For Drift, we'll need to check the file size manually
-//     return 0.0; // Placeholder - implement file size check if needed
-//   }
-
-//   // User Relay List methods
-//   @override
-//   Future<void> saveUserRelayList(UserRelayList userRelayList) async {
-//     if (userRelayList.pubkey.isEmpty) return;
-
-//     await _database.into(_database.userRelayLists).insertOnConflictUpdate(
-//           drift_db.UserRelayListsCompanion.insert(
-//             pubkey: userRelayList.pubkey,
-//             readRelays: Value(jsonEncode(userRelayList.readUrls.toList())),
-//             writeRelays: Value(jsonEncode(userRelayList.writes)),
-//             createdAt: userRelayList.createdAt,
-//             loadedTimestamp: Value(userRelayList.refreshedTimestamp),
-//             sources: Value(
-//                 jsonEncode([])), // UserRelayList doesn't have sources field
-//           ),
-//         );
-//   }
-
-//   @override
-//   Future<UserRelayList?> loadUserRelayList(String pubKey) async {
-//     final query = _database.select(_database.userRelayLists)
-//       ..where((tbl) => tbl.pubkey.equals(pubKey));
-
-//     final row = await query.getSingleOrNull();
-//     if (row == null) return null;
-
-//     // Reconstruct relays map from stored read/write lists
-//     final readRelaysList = List<String>.from(jsonDecode(row.readRelays));
-//     final writeRelaysList = List<String>.from(jsonDecode(row.writeRelays));
-
-//     final relays = <String, ReadWriteMarker>{};
-
-//     // Add read relays
-//     for (final relay in readRelaysList) {
-//       relays[relay] = writeRelaysList.contains(relay)
-//           ? ReadWriteMarker.readWrite
-//           : ReadWriteMarker.readOnly;
-//     }
-
-//     // Add write-only relays
-//     for (final relay in writeRelaysList) {
-//       if (!relays.containsKey(relay)) {
-//         relays[relay] = ReadWriteMarker.writeOnly;
-//       }
-//     }
-
-//     return UserRelayList(
-//       pubkey: row.pubkey,
-//       relays: relays,
-//       createdAt: row.createdAt,
-//       refreshedTimestamp:
-//           row.loadedTimestamp ?? DateTime.now().millisecondsSinceEpoch ~/ 1000,
-//     );
-//   }
-
-//   @override
-//   Future<void> saveUserRelayLists(List<UserRelayList> userRelayLists) async {
-//     final validRelayLists =
-//         userRelayLists.where((r) => r.pubkey.isNotEmpty).toList();
-
-//     await _database.batch((batch) {
-//       for (final relayList in validRelayLists) {
-//         batch.insertAllOnConflictUpdate(
-//           _database.userRelayLists,
-//           drift_db.UserRelayListsCompanion.insert(
-//             pubkey: relayList.pubkey,
-//             readRelays: Value(jsonEncode(relayList.readUrls.toList())),
-//             writeRelays: Value(jsonEncode(relayList.writes)),
-//             createdAt: relayList.createdAt,
-//             loadedTimestamp: Value(relayList.refreshedTimestamp),
-//             sources: Value(
-//                 jsonEncode([])), // UserRelayList doesn't have sources field
-//           ),
-//         );
-//       }
-//     });
-//   }
-
-//   // Relay Set methods
-//   @override
-//   RelaySet? loadRelaySet(String name, String pubKey) {
-//     // Note: This should be async but interface requires sync
-//     // Return null for now - use loadRelaySetAsync for actual functionality
-//     return null;
-//   }
-
-//   // Async version that actually works
-//   Future<RelaySet?> loadRelaySetAsync(String name, String pubKey) async {
-//     final id = RelaySet.buildId(name, pubKey);
-//     final query = _database.select(_database.relaySets)
-//       ..where((tbl) => tbl.id.equals(id));
-
-//     final row = await query.getSingleOrNull();
-//     if (row == null) return null;
-
-//     return RelaySet(
-//       name: row.name,
-//       pubkey: row.pubkey,
-//       relays: Map<String, dynamic>.from(jsonDecode(row.relays)),
-//     )
-//       ..createdAt = row.createdAt
-//       ..loadedTimestamp = row.loadedTimestamp
-//       ..sources = List<String>.from(jsonDecode(row.sources));
-//   }
-
-//   @override
-//   Future<void> saveRelaySet(RelaySet relaySet) async {
-//     if (relaySet.id.isEmpty) return;
-
-//     await _database.into(_database.relaySets).insertOnConflictUpdate(
-//           drift_db.RelaySetsCompanion.insert(
-//             id: relaySet.id,
-//             name: relaySet.name,
-//             pubkey: relaySet.pubkey,
-//             relays: Value(jsonEncode(relaySet.relays)),
-//             createdAt: relaySet.createdAt,
-//             loadedTimestamp: Value(relaySet.loadedTimestamp),
-//             sources: Value(jsonEncode(relaySet.sources)),
-//           ),
-//         );
-//   }
-
-//   // Contact List methods
-//   @override
-//   ContactList? loadContactList(String pubKey) {
-//     // Note: This should be async but interface requires sync
-//     // Return null for now - use loadContactListAsync for actual functionality
-//     return null;
-//   }
-
-//   // Async version that actually works
-//   Future<ContactList?> loadContactListAsync(String pubKey) async {
-//     final query = _database.select(_database.contactLists)
-//       ..where((tbl) => tbl.pubkey.equals(pubKey));
-
-//     final row = await query.getSingleOrNull();
-//     if (row == null) return null;
-
-//     return ContactList(
-//       pubkey: row.pubkey,
-//       contacts: List<String>.from(jsonDecode(row.contacts)),
-//     )
-//       ..createdAt = row.createdAt
-//       ..loadedTimestamp = row.loadedTimestamp
-//       ..sources = List<String>.from(jsonDecode(row.sources))
-//       ..followedCommunities =
-//           List<String>.from(jsonDecode(row.followedCommunities))
-//       ..followedTags = List<String>.from(jsonDecode(row.followedTags))
-//       ..followedEvents = List<String>.from(jsonDecode(row.followedEvents))
-//       ..contactRelays =
-//           Map<String, List<String>>.from(jsonDecode(row.contactRelays))
-//       ..petnames = Map<String, List<String>>.from(jsonDecode(row.petnames));
-//   }
-
-//   @override
-//   Future<void> saveContactList(ContactList contactList) async {
-//     await _database.into(_database.contactLists).insertOnConflictUpdate(
-//           drift_db.ContactListsCompanion.insert(
-//             pubkey: contactList.pubkey,
-//             contacts: Value(jsonEncode(contactList.contacts)),
-//             createdAt: contactList.createdAt,
-//             loadedTimestamp: Value(contactList.loadedTimestamp),
-//             sources: Value(jsonEncode(contactList.sources)),
-//             followedCommunities:
-//                 Value(jsonEncode(contactList.followedCommunities)),
-//             followedTags: Value(jsonEncode(contactList.followedTags)),
-//             followedEvents: Value(jsonEncode(contactList.followedEvents)),
-//             contactRelays: Value(jsonEncode(contactList.contactRelays)),
-//             petnames: Value(jsonEncode(contactList.petnames)),
-//           ),
-//         );
-//   }
-
-//   // Event methods
-//   @override
-//   Future<Event?> loadEvent(String id) async {
-//     final query = _database.select(_database.events)
-//       ..where((tbl) => tbl.id.equals(id));
-
-//     final row = await query.getSingleOrNull();
-//     if (row == null) return null;
-
-//     return Event(
-//       row.id,
-//       row.pubkey,
-//       row.createdAt,
-//       row.kind,
-//       jsonDecode(row.tags),
-//       row.content,
-//       row.sig,
-//       currentUser: row.currentUser,
-//       seenOn: List<String>.from(jsonDecode(row.seenOn)),
-//       lastUpdated: row.lastUpdated,
-//     );
-//   }
-
-//   @override
-//   Future<void> saveEvent(Event event) async {
-//     await _database.into(_database.events).insertOnConflictUpdate(
-//           drift_db.EventsCompanion.insert(
-//             id: event.id,
-//             pubkey: event.pubkey,
-//             createdAt: event.createdAt,
-//             kind: event.kind,
-//             tags: jsonEncode(event.tags),
-//             content: event.content,
-//             sig: event.sig,
-//             currentUser: event.currentUser,
-//             seenOn: jsonEncode(event.seenOn),
-//             lastUpdated: Value(event.lastUpdated),
-//             subscriptionId: Value(event.subscriptionId),
-//           ),
-//         );
-//   }
-
-//   // Metadata methods
-//   @override
-//   Future<Metadata?> loadMetadata(String pubKey) async {
-//     final query = _database.select(_database.metadatas)
-//       ..where((tbl) => tbl.pubkey.equals(pubKey));
-
-//     final row = await query.getSingleOrNull();
-//     if (row == null) return null;
-
-//     return Metadata(
-//       pubkey: row.pubkey,
-//       name: row.name,
-//       displayName: row.displayName,
-//       picture: row.picture,
-//       banner: row.banner,
-//       website: row.website,
-//       about: row.about,
-//       nip05: row.nip05,
-//       lud16: row.lud16,
-//       lud06: row.lud06,
-//       createdAt: row.createdAt,
-//       isDeleted: row.isDeleted,
-//       refreshedTimestamp: row.refreshedTimestamp,
-//     );
-//   }
-
-//   @override
-//   Future<void> saveMetadata(Metadata metadata) async {
-//     await _database.into(_database.metadatas).insertOnConflictUpdate(
-//           drift_db.MetadatasCompanion.insert(
-//             pubkey: metadata.pubkey,
-//             name: Value(metadata.name),
-//             displayName: Value(metadata.displayName),
-//             picture: Value(metadata.picture),
-//             banner: Value(metadata.banner),
-//             website: Value(metadata.website),
-//             about: Value(metadata.about),
-//             nip05: Value(metadata.nip05),
-//             lud16: Value(metadata.lud16),
-//             lud06: Value(metadata.lud06),
-//             createdAt: metadata.createdAt,
-//             isDeleted: Value(metadata.isDeleted),
-//             refreshedTimestamp: Value(metadata.refreshedTimestamp),
-//           ),
-//         );
-//   }
-
-//   // Placeholder methods - implement remaining methods following the same pattern
-//   @override
-//   Future<void> removeAllContactLists() async {
-//     await _database.delete(_database.contactLists).go();
-//   }
-
-//   @override
-//   Future<void> removeAllEvents() async {
-//     await _database.delete(_database.events).go();
-//   }
-
-//   @override
-//   Future<void> removeAllMetadatas() async {
-//     await _database.delete(_database.metadatas).go();
-//   }
-
-//   @override
-//   Future<void> clearCache() async {
-//     await Future.wait([
-//       removeAllContactLists(),
-//       removeAllEvents(),
-//       removeAllMetadatas(),
-//       _database.delete(_database.userRelayLists).go(),
-//       _database.delete(_database.relaySets).go(),
-//       _database.delete(_database.eventStats).go(),
-//       _database.delete(_database.muteLists).go(),
-//       _database.delete(_database.wotScores).go(),
-//       _database.delete(_database.dmSessionInfos).go(),
-//     ]);
-//   }
-
-//   // Add remaining method implementations...
-//   // (This is a partial implementation - you'll need to implement all methods from CacheManager)
-// }
-
 import 'package:drift/drift.dart';
 import 'package:nostr_core_enhanced/cache/cache_manager.dart';
+import 'package:nostr_core_enhanced/db/db_wrapper.dart';
 import 'package:nostr_core_enhanced/models/app_shared_settings.dart';
-import 'package:nostr_core_enhanced/models/contact_list.dart';
-import 'package:nostr_core_enhanced/models/dm_session_info.dart';
 import 'package:nostr_core_enhanced/models/event_stats.dart';
-import 'package:nostr_core_enhanced/models/metadata.dart';
+import 'package:nostr_core_enhanced/models/models.dart';
 import 'package:nostr_core_enhanced/models/mute_list.dart';
-import 'package:nostr_core_enhanced/models/nip05.dart';
-import 'package:nostr_core_enhanced/models/relay_set.dart';
 import 'package:nostr_core_enhanced/models/user_drafts.dart';
 import 'package:nostr_core_enhanced/models/user_followers.dart';
-import 'package:nostr_core_enhanced/models/user_relay_list.dart';
 import 'package:nostr_core_enhanced/models/wot_models.dart';
 import 'package:nostr_core_enhanced/nostr/event.dart';
+import 'package:nostr_core_enhanced/nostr/filter.dart';
 import 'package:nostr_core_enhanced/utils/utils.dart';
 
 import 'drift_database.dart';
 
-class NostrCacheManager extends CacheManager {
+class NostrDB extends CacheManager {
   late NostrDatabase _database;
+
+  // =====================================================================
+  // MARK: INITIALIZATION
+  // =====================================================================
 
   Future<void> init({String? directory}) async {
     _database = NostrDatabase();
   }
 
-  @override
-  Future<void> clearCache() async {
-    await Future.wait([
-      removeAllAppSettings(),
-      removeAllContactLists(),
-      removeAllDmSessionsInfo(),
-      removeAllEvents(),
-      removeAllMetadatas(),
-      removeAllMuteLists(),
-      removeAllNip05s(),
-      removeAllRelaySets(),
-      removeAllUserDrafts(),
-      removeAllUserFollowers(),
-      removeAllUserRelayLists(),
-      removeAllWot(),
-      removeAllWotScore(),
-    ]);
+  // =====================================================================
+  // MARK: DATABASE SIZE CALCULATOR
+  // =====================================================================
+
+  Future<double> getDatabaseSizeInMB() async {
+    try {
+      final pageSizeRow =
+          await _database.customSelect('PRAGMA page_size;').getSingle();
+      final pageCountRow =
+          await _database.customSelect('PRAGMA page_count;').getSingle();
+
+      final pageSize = pageSizeRow.data.values.first as int;
+      final pageCount = pageCountRow.data.values.first as int;
+
+      final sizeInBytes = pageSize * pageCount;
+      return sizeInBytes / (1024 * 1024);
+
+      // final appSupportDir = await getApplicationSupportDirectory();
+      // final dbFile = File(p.join(appSupportDir.path, 'nostr_core.sqlite'));
+
+      // if (await dbFile.exists()) {
+      //   final sizeInBytes = await dbFile.length();
+      //   return sizeInBytes / (1024 * 1024);
+      // }
+      // return 0.0;
+    } catch (e) {
+      return 0.0;
+    }
   }
+
+  // =====================================================================
+  // MARK: METADATA OPERATIONS
+  // =====================================================================
 
   @override
   Future<List<Metadata>> getAllMetadatas() async {
@@ -373,6 +65,956 @@ class NostrCacheManager extends CacheManager {
         .map((e) => Metadata.fromMetadataTableData(e))
         .toList();
   }
+
+  @override
+  Future<Metadata?> getMetadataByNip05(String nip05) async {
+    final query = _database.select(_database.metadataTable)
+      ..where(
+        (tbl) => tbl.nip05.equals(nip05),
+      );
+
+    final m = await query.get();
+
+    return m.isNotEmpty ? Metadata.fromMetadataTableData(m.first) : null;
+  }
+
+  @override
+  Stream<Metadata?> watchMetadata(String pubkey) {
+    final query = _database.select(_database.metadataTable)
+      ..where((tbl) => tbl.pubkey.equals(pubkey));
+
+    return query.watchSingleOrNull().map(
+          (m) => m != null ? Metadata.fromMetadataTableData(m) : null,
+        );
+  }
+
+  @override
+  Future<Metadata?> loadMetadata(String pubkey) async {
+    final query = _database.select(_database.metadataTable)
+      ..where((tbl) => tbl.pubkey.equals(pubkey))
+      ..limit(1);
+
+    final m = await query.getSingleOrNull();
+
+    return m != null ? Metadata.fromMetadataTableData(m) : null;
+  }
+
+  @override
+  Future<List<String>> getMissingMetadatas(List<String> pubkeys) async {
+    if (pubkeys.isEmpty) return [];
+
+    final query = _database.select(_database.metadataTable)
+      ..where((tbl) => tbl.pubkey.isIn(pubkeys));
+
+    final existingMetadatas = await query.get();
+    final existingPubkeys = existingMetadatas.map((m) => m.pubkey).toSet();
+
+    // Return the pubkeys that are not in the database
+    return pubkeys.where((pk) => !existingPubkeys.contains(pk)).toList();
+  }
+
+  @override
+  Future<List<Metadata>> loadMetadatas(List<String> pubkeys) async {
+    final query = _database.select(_database.metadataTable)
+      ..where((tbl) => tbl.pubkey.isIn(pubkeys));
+
+    final ms = await query.get();
+
+    return ms.map((m) => Metadata.fromMetadataTableData(m)).toList();
+  }
+
+  @override
+  Future<List<Metadata>> searchMetadatas(String search, int limit) async {
+    final lcSearch = search.toLowerCase();
+    final query = _database.select(_database.metadataTable)
+      ..where(
+        (tbl) =>
+            tbl.name.lower().contains(lcSearch) |
+            tbl.nip05.lower().contains(lcSearch) |
+            tbl.displayName.lower().contains(lcSearch),
+      )
+      ..limit(limit);
+
+    final ms = await query.get();
+
+    return ms.map((e) => Metadata.fromMetadataTableData(e)).toList();
+  }
+
+  @override
+  Future<List<Metadata>> searchRelatedMetadatas(
+    String search,
+    List<String> pubkeys,
+    int limit,
+  ) async {
+    final lcSearch = search.toLowerCase();
+    final query = _database.select(_database.metadataTable)
+      ..where(
+        (tbl) =>
+            tbl.pubkey.isIn(pubkeys) &
+            (tbl.name.lower().contains(lcSearch) |
+                tbl.nip05.lower().contains(lcSearch) |
+                tbl.displayName.lower().contains(lcSearch)),
+      )
+      ..limit(limit);
+
+    final ms = await query.get();
+
+    return ms.map((e) => Metadata.fromMetadataTableData(e)).toList();
+  }
+
+  @override
+  Future<void> saveMetadata(Metadata metadata) async {
+    await _database.into(_database.metadataTable).insertOnConflictUpdate(
+          metadata.toCompanion(),
+        );
+  }
+
+  @override
+  Future<void> saveMetadatas(List<Metadata> metadatas) async {
+    await _database.batch(
+      (batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.metadataTable,
+          metadatas.map(
+            (e) => e.toCompanion(),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Future<void> removeMetadata(String pubkey) async {
+    await (_database.delete(_database.metadataTable)
+          ..where(
+            (tbl) => tbl.pubkey.equals(pubkey),
+          ))
+        .go();
+  }
+
+  @override
+  Future<void> removeAllMetadatas() async {
+    await _database.delete(_database.metadataTable).go();
+  }
+
+  // =====================================================================
+  // MARK: CONTACT LIST OPERATIONS
+  // =====================================================================
+
+  @override
+  Future<ContactList?> loadContactList(String pubkey) async {
+    final query = _database.select(_database.contactListTable)
+      ..where((tbl) => tbl.pubkey.equals(pubkey))
+      ..limit(1);
+
+    final c = await query.getSingleOrNull();
+
+    return c != null ? ContactList.fromContactListTableData(c) : null;
+  }
+
+  @override
+  Future<List<ContactList>> loadContactLists(List<String> pubkeys) async {
+    final query = _database.select(_database.contactListTable)
+      ..where((tbl) => tbl.pubkey.isIn(pubkeys));
+
+    final c = await query.get();
+
+    return c.isNotEmpty
+        ? c
+            .map(
+              (e) => ContactList.fromContactListTableData(e),
+            )
+            .toList()
+        : [];
+  }
+
+  @override
+  Future<void> saveContactList(ContactList contactList) async {
+    await _database.into(_database.contactListTable).insertOnConflictUpdate(
+          contactList.toCompanion(),
+        );
+  }
+
+  @override
+  Future<void> saveContactLists(List<ContactList> contactLists) async {
+    await _database.batch(
+      (batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.contactListTable,
+          contactLists.map(
+            (e) => e.toCompanion(),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Future<void> removeContactList(String pubkey) async {
+    await (_database.delete(_database.contactListTable)
+          ..where(
+            (tbl) => tbl.pubkey.equals(pubkey),
+          ))
+        .go();
+  }
+
+  @override
+  Future<void> removeAllContactLists() async {
+    await _database.delete(_database.contactListTable).go();
+  }
+
+  // =====================================================================
+  // MARK: MUTE LIST OPERATIONS
+  // =====================================================================
+
+  @override
+  Future<MuteList?> loadMuteList(String pubkey) async {
+    final query = _database.select(_database.muteListTable)
+      ..where((tbl) => tbl.pubkey.equals(pubkey))
+      ..limit(1);
+
+    final m = await query.getSingleOrNull();
+
+    return m != null ? MuteList.fromMuteListTableData(m) : null;
+  }
+
+  @override
+  Future<void> saveMuteList(MuteList muteList) async {
+    await _database.into(_database.muteListTable).insertOnConflictUpdate(
+          muteList.toCompanion(),
+        );
+  }
+
+  @override
+  Future<void> saveMuteLists(List<MuteList> muteLists) async {
+    await _database.batch(
+      (batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.muteListTable,
+          muteLists.map(
+            (e) => e.toCompanion(),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Future<void> removeMuteList(String pubkey) async {
+    await (_database.delete(_database.muteListTable)
+          ..where(
+            (tbl) => tbl.pubkey.equals(pubkey),
+          ))
+        .go();
+  }
+
+  @override
+  Future<void> removeAllMuteLists() async {
+    await _database.delete(_database.muteListTable).go();
+  }
+
+  // =====================================================================
+  // MARK: EVENT OPERATIONS
+  // =====================================================================
+
+  @override
+  Future<Event?> loadEvent({
+    String? e,
+    String? pubkey,
+    String? kTag,
+    String? pTag,
+    int? kind,
+  }) async {
+    String tagPattern(String type, String value) => '%["$type","$value"%';
+
+    final query = _database.select(_database.eventTable)
+      ..where((tbl) {
+        final conditions = <Expression<bool>>[];
+
+        if (kind != null) {
+          conditions.add(tbl.kind.equals(kind));
+        }
+        if (Helpers.isNotBlank(kTag)) {
+          conditions.add(tbl.tags.like(tagPattern('k', kTag!)));
+        }
+        if (Helpers.isNotBlank(e)) {
+          conditions.add(tbl.tags.like(tagPattern('e', e!)));
+        }
+        if (Helpers.isNotBlank(pTag)) {
+          conditions.add(tbl.tags.like(tagPattern('p', pTag!)));
+        }
+        if (Helpers.isNotBlank(pubkey)) {
+          conditions.add(tbl.pubkey.equals(pubkey!));
+        }
+
+        if (conditions.isEmpty) {
+          return const Constant(true);
+        }
+        return conditions.reduce((a, b) => a & b);
+      })
+      ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)])
+      ..limit(1);
+
+    final ev = await query.getSingleOrNull();
+    return ev != null ? Event.fromEventTableData(ev) : null;
+  }
+
+  @override
+  Future<void> flushEventsSeenRelays(DbWrapper dbWrapper) async {
+    if (DateTime.now().difference(dbWrapper.lastFlush).inSeconds < 2) return;
+    dbWrapper.lastFlush = DateTime.now();
+
+    final r = dbWrapper.currentEvents;
+    if (r.isEmpty) return;
+
+    await _database.batch(
+      (batch) => batch.insertAllOnConflictUpdate(
+        _database.eventTable,
+        r.values.map(
+          (e) {
+            return e.toCompanion();
+          },
+        ).toList(),
+      ),
+    );
+  }
+
+  @override
+  Future<Event?> loadEventById(String id, bool r) async {
+    final query = _database.select(_database.eventTable)
+      ..where((tbl) {
+        if (r) {
+          return tbl.dTag.equals(id);
+        } else {
+          return tbl.id.equals(id);
+        }
+      })
+      ..limit(1);
+
+    final e = await query.getSingleOrNull();
+
+    return e != null ? Event.fromEventTableData(e) : null;
+  }
+
+  @override
+  Future<List<Event>> loadEvents({
+    required Filter f,
+    String? currentUser,
+    List<String>? relays,
+  }) async {
+    final query = _database.select(_database.eventTable)
+      ..where((tbl) {
+        final conditions = <Expression<bool>>[];
+
+        void addIfNotEmpty<T>(
+          List<T>? values,
+          Expression<bool> Function(T) builder,
+        ) {
+          if (values != null && values.isNotEmpty) {
+            conditions.add(values.map(builder).reduce((a, b) => a | b));
+          }
+        }
+
+        if (f.authors?.isNotEmpty ?? false) {
+          conditions.add(tbl.pubkey.isIn(f.authors!));
+        }
+        if (f.ids?.isNotEmpty ?? false) conditions.add(tbl.id.isIn(f.ids!));
+        if (f.kinds?.isNotEmpty ?? false) {
+          conditions.add(tbl.kind.isIn(f.kinds!));
+        }
+        if (currentUser?.isNotEmpty ?? false) {
+          conditions.add(tbl.currentUser.equals(currentUser!));
+        }
+        if (f.d?.isNotEmpty ?? false) conditions.add(tbl.dTag.isIn(f.d!));
+        if (f.since != null) {
+          conditions.add(tbl.createdAt.isBiggerOrEqualValue(f.since!));
+        }
+        if (f.until != null) {
+          conditions.add(tbl.createdAt.isSmallerOrEqualValue(f.until!));
+        }
+
+        // Tag-based filters
+        addIfNotEmpty(f.e, (v) => tbl.eTags.contains('"$v"'));
+        addIfNotEmpty(f.k, (v) => tbl.kTags.contains('"$v"'));
+        addIfNotEmpty(f.p, (v) => tbl.pTags.contains('"$v"'));
+        addIfNotEmpty(f.l, (v) => tbl.lTags.contains('"$v"'));
+        addIfNotEmpty(f.q, (v) => tbl.qTags.contains('"$v"'));
+        addIfNotEmpty(f.c, (v) => tbl.cTags.contains('"$v"'));
+        addIfNotEmpty(relays, (v) => tbl.seenOn.contains('"$v"'));
+
+        // Combine all with AND
+        return conditions.isEmpty
+            ? const Constant(false)
+            : conditions.reduce((a, b) => a & b);
+      })
+      ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)]);
+
+    if (f.limit != null) {
+      query.limit(f.limit!);
+    }
+
+    final events = await query.get();
+
+    return events.map(Event.fromEventTableData).toList();
+  }
+
+  @override
+  Future<void> saveEvent(Event event) async {
+    await _database.into(_database.eventTable).insertOnConflictUpdate(
+          event.toCompanion(),
+        );
+  }
+
+  @override
+  Future<void> saveEvents(List<Event> events) async {
+    await _database.batch(
+      (batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.eventTable,
+          events.map(
+            (e) => e.toCompanion(),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Future<void> removeEvent(String id) async {
+    await (_database.delete(_database.eventTable)
+          ..where(
+            (tbl) => tbl.id.equals(id),
+          ))
+        .go();
+  }
+
+  @override
+  Future<void> removeAllEvents() async {
+    await _database.delete(_database.eventTable).go();
+  }
+
+  @override
+  Future<void> removeAllEventsByKinds(List<int> kinds) async {
+    await (_database.delete(_database.eventTable)
+          ..where(
+            (tbl) => tbl.kind.isIn(kinds),
+          ))
+        .go();
+  }
+
+  @override
+  Future<void> removeAllEventsByPubKey(String pubkey) async {
+    await (_database.delete(_database.eventTable)
+          ..where(
+            (tbl) => tbl.pubkey.equals(pubkey),
+          ))
+        .go();
+  }
+
+  // =====================================================================
+  // MARK: EVENT STATS OPERATIONS
+  // =====================================================================
+
+  @override
+  Future<EventStats?> loadEventStats(String eventId) async {
+    final query = _database.select(_database.eventStatsTable)
+      ..where((tbl) => tbl.id.equals(eventId))
+      ..limit(1);
+
+    final es = await query.getSingleOrNull();
+
+    return es != null ? EventStats.fromEventStatsTableData(es) : null;
+  }
+
+  @override
+  Stream<EventStats?> watchEventStats(String eventId) {
+    final query = _database.select(_database.eventStatsTable)
+      ..where((tbl) => tbl.id.equals(eventId))
+      ..limit(1);
+
+    return query.watchSingleOrNull().map(
+          (event) =>
+              event != null ? EventStats.fromEventStatsTableData(event) : null,
+        );
+  }
+
+  @override
+  Future<List<EventStats?>> loadEventStatsList(List<String> eventIds) async {
+    final query = _database.select(_database.eventStatsTable)
+      ..where((tbl) => tbl.id.isIn(eventIds));
+
+    final es = await query.get();
+
+    return es.map((e) => EventStats.fromEventStatsTableData(e)).toList();
+  }
+
+  @override
+  Future<void> saveEventStats(EventStats stats) async {
+    await _database.into(_database.eventStatsTable).insertOnConflictUpdate(
+          stats.toCompanion(),
+        );
+  }
+
+  @override
+  Future<void> saveEventStatsList(List<EventStats> stats) async {
+    await _database.batch(
+      (batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.eventStatsTable,
+          stats.map(
+            (e) => e.toCompanion(),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Future<void> removeEventStats(String eventId) async {
+    await (_database.delete(_database.eventStatsTable)
+          ..where(
+            (tbl) => tbl.id.equals(eventId),
+          ))
+        .go();
+  }
+
+  @override
+  Future<void> removeAllEventStats() async {
+    await _database.delete(_database.eventStatsTable).go();
+  }
+
+  // =====================================================================
+  // MARK: DM SESSION INFO OPERATIONS
+  // =====================================================================
+
+  @override
+  Future<List<DMSessionInfo>> loadDmSessionsInfo(String id) async {
+    final query = _database.select(_database.dmSessionInfosTable)
+      ..where((tbl) => tbl.dmSessionId.like("$id%"));
+
+    final dms = await query.get();
+
+    return dms
+        .map((e) => DMSessionInfo.fromDmSessionInfosTableData(e))
+        .toList();
+  }
+
+  @override
+  Future<List<DMSessionInfo>> loadDmSessionsInfos(List<String> ids) async {
+    final query = _database.select(_database.dmSessionInfosTable)
+      ..where((tbl) => tbl.dmSessionId.isIn(ids));
+
+    final dms = await query.get();
+
+    return dms
+        .map(
+          (dm) => DMSessionInfo.fromDmSessionInfosTableData(dm),
+        )
+        .toList();
+  }
+
+  @override
+  Future<void> saveDmSessionsInfo(DMSessionInfo info) async {
+    await _database.into(_database.dmSessionInfosTable).insertOnConflictUpdate(
+          info.toCompanion(),
+        );
+  }
+
+  @override
+  Future<void> saveDmSessionsInfos(List<DMSessionInfo> infos) async {
+    await _database.batch(
+      (batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.dmSessionInfosTable,
+          infos.map(
+            (e) => e.toCompanion(),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Future<void> removeDmSessionsInfo(String id) async {
+    await (_database.delete(_database.dmSessionInfosTable)
+          ..where(
+            (tbl) => tbl.dmSessionId.equals(id),
+          ))
+        .go();
+  }
+
+  @override
+  Future<void> removeAllDmSessionsInfo() async {
+    await _database.delete(_database.dmSessionInfosTable).go();
+  }
+
+  // =====================================================================
+  // MARK: NIP05 OPERATIONS
+  // =====================================================================
+
+  @override
+  Future<Nip05?> loadNip05(String pubkey) async {
+    final query = _database.select(_database.nip05Table)
+      ..where((tbl) => tbl.pubkey.equals(pubkey))
+      ..limit(1);
+
+    final n = await query.getSingleOrNull();
+
+    return n != null ? Nip05.fromNip05TableData(n) : null;
+  }
+
+  @override
+  Future<Map<String, Nip05>> loadNip05s(List<String> pubkeys) async {
+    final query = _database.select(_database.nip05Table)
+      ..where(
+        (tbl) => tbl.pubkey.isIn(pubkeys),
+      );
+
+    final n = await query.get();
+
+    return {for (final e in n) e.pubkey: Nip05.fromNip05TableData(e)};
+  }
+
+  @override
+  Future<void> saveNip05(Nip05 nip05) async {
+    await _database.into(_database.nip05Table).insertOnConflictUpdate(
+          nip05.toCompanion(),
+        );
+  }
+
+  @override
+  Future<void> saveNip05s(List<Nip05> nip05s) async {
+    await _database.batch(
+      (batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.nip05Table,
+          nip05s.map(
+            (e) => e.toCompanion(),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Future<void> removeNip05(String pubkey) async {
+    await (_database.delete(_database.nip05Table)
+          ..where(
+            (tbl) => tbl.pubkey.equals(pubkey),
+          ))
+        .go();
+  }
+
+  @override
+  Future<void> removeAllNip05s() async {
+    await _database.delete(_database.nip05Table).go();
+  }
+
+  // =====================================================================
+  // MARK: RELAY SET OPERATIONS
+  // =====================================================================
+
+  @override
+  Future<RelaySet?> loadRelaySet(String name, String pubkey) async {
+    final query = _database.select(_database.relaySetTable)
+      ..where((tbl) => tbl.id.equals(RelaySet.buildId(name, pubkey)))
+      ..limit(1);
+
+    final r = await query.getSingleOrNull();
+
+    return r != null ? RelaySet.fromRelaySetTableData(r) : null;
+  }
+
+  @override
+  Future<void> saveRelaySet(RelaySet relaySet) async {
+    await _database.into(_database.relaySetTable).insertOnConflictUpdate(
+          relaySet.toCompanion(),
+        );
+  }
+
+  @override
+  Future<void> removeRelaySet(String name, String pubkey) async {
+    await (_database.delete(_database.relaySetTable)
+          ..where(
+            (tbl) => tbl.id.equals(RelaySet.buildId(name, pubkey)),
+          ))
+        .go();
+  }
+
+  @override
+  Future<void> removeAllRelaySets() async {
+    await _database.delete(_database.relaySetTable).go();
+  }
+
+  // =====================================================================
+  // MARK: USER APP SETTINGS OPERATIONS
+  // =====================================================================
+
+  @override
+  Future<AppSharedSettings?> loadUserAppSettings(String pubkey) async {
+    final query = _database.select(_database.userAppSettingsTable)
+      ..where((tbl) => tbl.pubkey.equals(pubkey))
+      ..limit(1);
+
+    final as = await query.getSingleOrNull();
+
+    return as != null
+        ? AppSharedSettings.fromAppSharedSettingsTableData(as)
+        : null;
+  }
+
+  @override
+  Future<void> saveUserAppSettings(AppSharedSettings userAppSettings) async {
+    await _database.into(_database.userAppSettingsTable).insertOnConflictUpdate(
+          userAppSettings.toCompanion(),
+        );
+  }
+
+  @override
+  Future<void> removeUserAppSettings(String pubkey) async {
+    await (_database.delete(_database.userAppSettingsTable)
+          ..where(
+            (tbl) => tbl.pubkey.equals(pubkey),
+          ))
+        .go();
+  }
+
+  @override
+  Future<void> removeAllAppSettings() async {
+    await _database.delete(_database.userAppSettingsTable).go();
+  }
+
+  // =====================================================================
+  // MARK: USER DRAFTS OPERATIONS
+  // =====================================================================
+
+  @override
+  Future<UserDrafts?> loadUserDrafts(String pubkey) async {
+    final query = _database.select(_database.userDraftTable)
+      ..where((tbl) => tbl.pubkey.equals(pubkey))
+      ..limit(1);
+
+    final ud = await query.getSingleOrNull();
+
+    return ud != null ? UserDrafts.fromUserDraftTableData(ud) : null;
+  }
+
+  @override
+  Future<void> saveUserDrafts(UserDrafts userDrafts) async {
+    await _database.into(_database.userDraftTable).insertOnConflictUpdate(
+          userDrafts.toCompanion(),
+        );
+  }
+
+  @override
+  Future<void> removeUserDrafts(String pubkey) async {
+    await (_database.delete(_database.userDraftTable)
+          ..where(
+            (tbl) => tbl.pubkey.equals(pubkey),
+          ))
+        .go();
+  }
+
+  @override
+  Future<void> removeAllUserDrafts() async {
+    await _database.delete(_database.userDraftTable).go();
+  }
+
+  // =====================================================================
+  // MARK: USER FOLLOWERS OPERATIONS
+  // =====================================================================
+
+  @override
+  Future<UserFollowers?> loadUserFollowers(String pubkey) async {
+    final query = _database.select(_database.userFollowersTable)
+      ..where((tbl) => tbl.pubkey.equals(pubkey))
+      ..limit(1);
+
+    final uf = await query.getSingleOrNull();
+
+    return uf != null ? UserFollowers.fromUserFollowersTableData(uf) : null;
+  }
+
+  @override
+  Future<void> saveUserFollowers(UserFollowers userFollowers) async {
+    await _database.into(_database.userFollowersTable).insertOnConflictUpdate(
+          userFollowers.toCompanion(),
+        );
+  }
+
+  @override
+  Future<void> removeUserFollowers(String pubkey) async {
+    await (_database.delete(_database.userFollowersTable)
+          ..where(
+            (tbl) => tbl.pubkey.equals(pubkey),
+          ))
+        .go();
+  }
+
+  @override
+  Future<void> removeAllUserFollowers() async {
+    await _database.delete(_database.userFollowersTable).go();
+  }
+
+  // =====================================================================
+  // MARK: RELAY INFO
+  // =====================================================================
+
+  @override
+  Future<RelayInfo?> loadRelayInfo(String relay) async {
+    final query = _database.select(_database.relayInfoListTable)
+      ..where((tbl) => tbl.url.equals(relay))
+      ..limit(1);
+
+    final ri = await query.getSingleOrNull();
+
+    return ri != null ? RelayInfo.fromRelayInfoListTableData(ri) : null;
+  }
+
+  @override
+  Future<List<RelayInfo>> loadRelayInfoByRelays(List<String> relays) async {
+    final query = _database.select(_database.relayInfoListTable)
+      ..where((tbl) => tbl.url.isIn(relays));
+
+    final ri = await query.get();
+
+    return ri
+        .map(
+          (e) => RelayInfo.fromRelayInfoListTableData(e),
+        )
+        .toList();
+  }
+
+  @override
+  Future<void> saveRelayInfo(RelayInfo relayInfo) async {
+    await _database.into(_database.relayInfoListTable).insertOnConflictUpdate(
+          relayInfo.toCompanion(),
+        );
+  }
+
+  @override
+  Future<void> saveRelayInfoList(List<RelayInfo> relayInfoList) async {
+    await _database.batch(
+      (batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.relayInfoListTable,
+          relayInfoList.map(
+            (e) => e.toCompanion(),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Future<void> removeRelayInfo(String relay) async {
+    await (_database.delete(_database.relayInfoListTable)
+          ..where(
+            (tbl) => tbl.name.equals(relay),
+          ))
+        .go();
+  }
+
+  @override
+  Future<void> removeAllRelayInfo() async {
+    await _database.delete(_database.relayInfoListTable).go();
+  }
+
+  // =====================================================================
+  // MARK: USER RELAY LIST OPERATIONS
+  // =====================================================================
+
+  @override
+  Future<UserRelayList?> loadUserRelayList(String pubkey) async {
+    final query = _database.select(_database.userRelayListTable)
+      ..where((tbl) => tbl.pubkey.equals(pubkey))
+      ..limit(1);
+
+    final ur = await query.getSingleOrNull();
+
+    return ur != null ? UserRelayList.fromUserRelayListTableData(ur) : null;
+  }
+
+  @override
+  Future<List<UserRelayList>> loadUserRelayListByPubkeys(
+      List<String> pubkeys) async {
+    final query = _database.select(_database.userRelayListTable)
+      ..where((tbl) => tbl.pubkey.isIn(pubkeys));
+
+    final ur = await query.get();
+
+    return ur
+        .map(
+          (e) => UserRelayList.fromUserRelayListTableData(e),
+        )
+        .toList();
+  }
+
+  @override
+  Future<List<UserRelayList>> loadUserRelayListAll() async {
+    final query = _database.select(_database.userRelayListTable);
+
+    final ur = await query.get();
+
+    return ur
+        .map(
+          (e) => UserRelayList.fromUserRelayListTableData(e),
+        )
+        .toList();
+  }
+
+  @override
+  Future<List<String>> getPubkeysByRelayAvailability(String relay) async {
+    final query = _database.select(_database.userRelayListTable)
+      ..where((tbl) => tbl.relays.contains(relay));
+
+    final ur = await query.get();
+
+    return ur
+        .map(
+          (e) => e.pubkey,
+        )
+        .toList();
+  }
+
+  @override
+  Future<void> saveUserRelayList(UserRelayList userRelayList) async {
+    await _database.into(_database.userRelayListTable).insertOnConflictUpdate(
+          userRelayList.toCompanion(),
+        );
+  }
+
+  @override
+  Future<void> saveUserRelayLists(List<UserRelayList> userRelayLists) async {
+    await _database.batch(
+      (batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.userRelayListTable,
+          userRelayLists.map(
+            (e) => e.toCompanion(),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Future<void> removeUserRelayList(String pubkey) async {
+    await (_database.delete(_database.userRelayListTable)
+          ..where(
+            (tbl) => tbl.pubkey.equals(pubkey),
+          ))
+        .go();
+  }
+
+  @override
+  Future<void> removeAllUserRelayLists() async {
+    await _database.delete(_database.userRelayListTable).go();
+  }
+
+  // =====================================================================
+  // MARK: WEB OF TRUST (WOT) OPERATIONS
+  // =====================================================================
 
   @override
   Future<int?> getContactWotAvailability({
@@ -388,27 +1030,12 @@ class NostrCacheManager extends CacheManager {
     final query = _database.selectOnly(_database.contactListTable)
       ..addColumns([countExp])
       ..where(_database.contactListTable.pubkey.isIn(originPubkeyList) &
-          _database.contactListTable.contacts.contains(peerPubkey));
+          _database.contactListTable.contacts.contains(peerPubkey))
+      ..limit(1);
 
     final row = await query.getSingleOrNull();
 
     return row == null ? 0 : row.read(countExp);
-  }
-
-  @override
-  Future<Metadata?> getMetadataByNip05(String nip05) async {
-    final query = _database.select(_database.metadataTable)
-      ..where(
-        (tbl) => tbl.nip05.equals(nip05),
-      );
-
-    final m = await query.getSingleOrNull();
-
-    if (m != null) {
-      return Metadata.fromMetadataTableData(m);
-    }
-
-    return null;
   }
 
   @override
@@ -421,7 +1048,8 @@ class NostrCacheManager extends CacheManager {
     final query = _database.selectOnly(_database.muteListTable)
       ..addColumns([countExp])
       ..where(_database.muteListTable.pubkey.isIn(originPubkeyList) &
-          _database.muteListTable.mutes.contains(peerPubkey));
+          _database.muteListTable.mutes.contains(peerPubkey))
+      ..limit(1);
 
     final row = await query.getSingleOrNull();
 
@@ -476,288 +1104,30 @@ class NostrCacheManager extends CacheManager {
   }
 
   @override
-  Future<ContactList?> loadContactList(String pubKey) async {
-    final query = _database.select(_database.contactListTable)
-      ..where((tbl) => tbl.pubkey.equals(pubKey));
-
-    final c = await query.getSingleOrNull();
-
-    if (c != null) {
-      return ContactList.fromContactListTableData(c);
-    }
-
-    return null;
-  }
-
-  @override
-  Future<DMSessionInfo?> loadDmSessionsInfo(String id) async {
-    final query = _database.select(_database.dmSessionInfosTable)
-      ..where((tbl) => tbl.dmSessionId.equals(id));
-
-    final dm = await query.getSingleOrNull();
-
-    if (dm != null) {
-      return DMSessionInfo.fromDmSessionInfosTableData(dm);
-    }
-
-    return null;
-  }
-
-  @override
-  Future<List<DMSessionInfo>> loadDmSessionsInfos(List<String> ids) async {
-    final query = _database.select(_database.dmSessionInfosTable)
-      ..where((tbl) => tbl.dmSessionId.isIn(ids));
-
-    final dms = await query.get();
-
-    return dms
-        .map(
-          (dm) => DMSessionInfo.fromDmSessionInfosTableData(dm),
-        )
-        .toList();
-  }
-
-  @override
-  Future<Event?> loadEvent({
-    String? e,
-    String? pubkey,
-    String? kTag,
-    String? pTag,
-    int? kind,
-  }) async {
-    final query = _database.select(_database.eventTable)
-      ..where((tbl) {
-        final conditions = <Expression<bool>>[];
-
-        if (kind != null) {
-          conditions.add(tbl.kind.equals(kind));
-        }
-
-        if (Helpers.isNotBlank(kTag)) {
-          final pattern = '%["k","$kTag"%';
-          conditions.add(tbl.tags.like(pattern));
-        }
-
-        if (Helpers.isNotBlank(e)) {
-          final pattern = '%["e","$e"%';
-          conditions.add(tbl.tags.like(pattern));
-        }
-
-        if (Helpers.isNotBlank(pTag)) {
-          final pattern = '%["p","$pTag"%';
-          conditions.add(tbl.tags.like(pattern));
-        }
-
-        if (Helpers.isNotBlank(pubkey)) {
-          conditions.add(tbl.pubkey.equals(pubkey!));
-        }
-
-        return conditions.fold<Expression<bool>>(
-            const Constant(true), (a, b) => a & b);
-      })
-      ..orderBy([
-        (tbl) => OrderingTerm.desc(tbl.createdAt),
-      ])
+  Future<WotModel?> loadUserWot(String pubkey) async {
+    final query = _database.select(_database.userWotTable)
+      ..where((tbl) => tbl.pubkey.equals(pubkey))
       ..limit(1);
 
-    final ev = await query.getSingleOrNull();
+    final wot = await query.getSingleOrNull();
 
-    if (ev != null) {
-      return Event.fromEventTableData(ev);
-    }
-
-    return null;
+    return wot != null ? WotModel.fromUserWotTableData(wot) : null;
   }
 
   @override
-  Future<Event?> loadEventById(String id, bool r) async {
-    final query = _database.select(_database.eventTable)
-      ..where((tbl) {
-        if (r) {
-          return tbl.dTag.equals(id);
-        } else {
-          return tbl.id.equals(id);
-        }
-      });
-
-    final e = await query.getSingleOrNull();
-    if (e != null) {}
+  Future<void> saveUserWot(WotModel wotModel) async {
+    await _database.into(_database.userWotTable).insertOnConflictUpdate(
+          wotModel.toCompanion(),
+        );
   }
 
   @override
-  Future<EventStats?> loadEventStats(String eventId) {
-    // TODO: implement loadEventStats
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<List<EventStats?>> loadEventStatsList(List<String> eventIds) {
-    // TODO: implement loadEventStatsList
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<List<Event>> loadEvents(
-      {List<String>? pubkeys,
-      List<String>? ids,
-      List<String>? eTags,
-      List<int>? kinds,
-      String? pTag,
-      String? currentUser}) {
-    // TODO: implement loadEvents
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Metadata?> loadMetadata(String pubKey) {
-    // TODO: implement loadMetadata
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<List<Metadata?>> loadMetadatas(List<String> pubKeys) {
-    // TODO: implement loadMetadatas
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<MuteList?> loadMuteList(String pubKey) {
-    // TODO: implement loadMuteList
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Nip05?> loadNip05(String pubKey) {
-    // TODO: implement loadNip05
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<List<Nip05?>> loadNip05s(List<String> pubKeys) {
-    // TODO: implement loadNip05s
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<RelaySet?> loadRelaySet(String name, String pubKey) {
-    // TODO: implement loadRelaySet
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<AppSharedSettings?> loadUserAppSettings(String pubkey) {
-    // TODO: implement loadUserAppSettings
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<UserDrafts?> loadUserDrafts(String pubkey) {
-    // TODO: implement loadUserDrafts
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<UserFollowers?> loadUserFollowers(String pubkey) {
-    // TODO: implement loadUserFollowers
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<UserRelayList?> loadUserRelayList(String pubKey) {
-    // TODO: implement loadUserRelayList
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<WotModel?> loadUserWot(String pubkey) {
-    // TODO: implement loadUserWot
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<WotScore?> loadWotScore(String pubkey, String originPubkey) {
-    // TODO: implement loadWotScore
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<List<WotScore>> loadWotScoreList(
-      List<String> pubkeys, String originPubkey) {
-    // TODO: implement loadWotScoreList
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Map<String, WotScore>> loadWotScoreMap(
-      List<String> pubkeys, String originPubkey) {
-    // TODO: implement loadWotScoreMap
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> removeAllAppSettings() async {
-    await _database.delete(_database.userAppSettingsTable).go();
-  }
-
-  @override
-  Future<void> removeAllContactLists() async {
-    await _database.delete(_database.contactListTable).go();
-  }
-
-  @override
-  Future<void> removeAllDmSessionsInfo() async {
-    await _database.delete(_database.dmSessionInfosTable).go();
-  }
-
-  @override
-  Future<void> removeAllEventStats() async {
-    await _database.delete(_database.eventStatsTable).go();
-  }
-
-  @override
-  Future<void> removeAllEvents() async {
-    await _database.delete(_database.eventTable).go();
-  }
-
-  @override
-  Future<void> removeAllEventsByKinds(List<int> kinds) async {}
-
-  @override
-  Future<void> removeAllEventsByPubKey(String pubKey) async {}
-
-  @override
-  Future<void> removeAllMetadatas() async {
-    await _database.delete(_database.metadataTable).go();
-  }
-
-  @override
-  Future<void> removeAllMuteLists() async {
-    await _database.delete(_database.muteListTable).go();
-  }
-
-  @override
-  Future<void> removeAllNip05s() async {
-    await _database.delete(_database.nip05Table).go();
-  }
-
-  @override
-  Future<void> removeAllRelaySets() async {
-    await _database.delete(_database.relaySetTable).go();
-  }
-
-  @override
-  Future<void> removeAllUserDrafts() async {
-    await _database.delete(_database.userDraftTable).go();
-  }
-
-  @override
-  Future<void> removeAllUserFollowers() async {
-    await _database.delete(_database.userFollowersTable).go();
-  }
-
-  @override
-  Future<void> removeAllUserRelayLists() async {
-    await _database.delete(_database.userRelayListTable).go();
+  Future<void> removeUserWot(String pubkey) async {
+    await (_database.delete(_database.userWotTable)
+          ..where(
+            (tbl) => tbl.pubkey.equals(pubkey),
+          ))
+        .go();
   }
 
   @override
@@ -765,242 +1135,105 @@ class NostrCacheManager extends CacheManager {
     await _database.delete(_database.userWotTable).go();
   }
 
+  // =====================================================================
+  // MARK: WOT SCORE OPERATIONS
+  // =====================================================================
+
+  @override
+  Future<WotScore?> loadWotScore(String pubkey, String originPubkey) async {
+    final query = _database.select(_database.wotScoreTable)
+      ..where((tbl) =>
+          tbl.pubkey.equals(pubkey) & tbl.originPubkey.equals(originPubkey))
+      ..limit(1);
+
+    final ws = await query.getSingleOrNull();
+
+    return ws != null ? WotScore.fromWotScoreTableData(ws) : null;
+  }
+
+  @override
+  Future<List<WotScore>> loadWotScoreList(
+    List<String> pubkeys,
+    String originPubkey,
+  ) async {
+    final query = _database.select(_database.wotScoreTable)
+      ..where((tbl) =>
+          tbl.pubkey.isIn(pubkeys) & tbl.originPubkey.equals(originPubkey));
+
+    final ws = await query.get();
+
+    return ws.map((w) => WotScore.fromWotScoreTableData(w)).toList();
+  }
+
+  @override
+  Future<Map<String, WotScore>> loadWotScoreMap(
+    List<String> pubkeys,
+    String originPubkey,
+  ) async {
+    final scores = await loadWotScoreList(pubkeys, originPubkey);
+
+    return {for (final score in scores) score.pubkey: score};
+  }
+
+  @override
+  Future<void> saveWotScore(WotScore wotScore) async {
+    await _database.into(_database.wotScoreTable).insertOnConflictUpdate(
+          wotScore.toCompanion(),
+        );
+  }
+
+  @override
+  Future<void> saveWotScoresBatch(List<WotScore> wotScores) async {
+    await _database.batch(
+      (batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.wotScoreTable,
+          wotScores.map(
+            (e) => e.toCompanion(),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Future<void> removeWotScore(String id) async {
+    await (_database.delete(_database.wotScoreTable)
+          ..where(
+            (tbl) => tbl.id.equals(id),
+          ))
+        .go();
+  }
+
   @override
   Future<void> removeAllWotScore() async {
     await _database.delete(_database.wotScoreTable).go();
   }
 
-  @override
-  Future<void> removeContactList(String pubKey) async {
-    throw UnimplementedError();
-  }
+  // =====================================================================
+  // MARK: CACHE MANAGEMENT
+  // =====================================================================
 
   @override
-  Future<void> removeDmSessionsInfo(String id) {
-    // TODO: implement removeDmSessionsInfo
-    throw UnimplementedError();
-  }
+  Future<void> clearCache() async {
+    await Future.wait([
+      removeAllAppSettings(),
+      removeAllContactLists(),
+      removeAllDmSessionsInfo(),
+      removeAllEvents(),
+      removeAllMetadatas(),
+      removeAllMuteLists(),
+      removeAllNip05s(),
+      removeAllRelaySets(),
+      removeAllUserDrafts(),
+      removeAllUserFollowers(),
+      removeAllUserRelayLists(),
+      removeAllWotScore(),
+      removeAllWot(),
+      removeAllWotScore(),
+      removeAllRelayInfo(),
+    ]);
 
-  @override
-  Future<void> removeEvent(String id) {
-    // TODO: implement removeEvent
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> removeEventStats(String eventId) {
-    // TODO: implement removeEventStats
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> removeMetadata(String pubKey) {
-    // TODO: implement removeMetadata
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> removeMuteList(String pubKey) {
-    // TODO: implement removeMuteList
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> removeNip05(String pubKey) {
-    // TODO: implement removeNip05
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> removeRelaySet(String name, String pubKey) {
-    // TODO: implement removeRelaySet
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> removeUserAppSettings(String pubkey) {
-    // TODO: implement removeUserAppSettings
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> removeUserDrafts(String pubkey) {
-    // TODO: implement removeUserDrafts
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> removeUserFollowers(String pubkey) {
-    // TODO: implement removeUserFollowers
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> removeUserRelayList(String pubKey) {
-    // TODO: implement removeUserRelayList
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> removeUserWot(String pubkey) {
-    // TODO: implement removeUserWot
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> removeWotScore(String id) {
-    // TODO: implement removeWotScore
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveContactList(ContactList contactList) {
-    // TODO: implement saveContactList
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveContactLists(List<ContactList> contactLists) {
-    // TODO: implement saveContactLists
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveDmSessionsInfo(DMSessionInfo info) {
-    // TODO: implement saveDmSessionsInfo
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveDmSessionsInfos(List<DMSessionInfo> infos) {
-    // TODO: implement saveDmSessionsInfos
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveEvent(Event event) {
-    // TODO: implement saveEvent
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveEventStats(EventStats stats) {
-    // TODO: implement saveEventStats
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveEventStatsList(List<EventStats> stats) {
-    // TODO: implement saveEventStatsList
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveEvents(List<Event> events) {
-    // TODO: implement saveEvents
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveMetadata(Metadata metadata) {
-    // TODO: implement saveMetadata
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveMetadatas(List<Metadata> metadatas) {
-    // TODO: implement saveMetadatas
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveMuteList(MuteList muteList) {
-    // TODO: implement saveMuteList
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveMuteLists(List<MuteList> muteLists) {
-    // TODO: implement saveMuteLists
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveNip05(Nip05 nip05) {
-    // TODO: implement saveNip05
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveNip05s(List<Nip05> nip05s) {
-    // TODO: implement saveNip05s
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveRelaySet(RelaySet relaySet) {
-    // TODO: implement saveRelaySet
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveUserAppSettings(AppSharedSettings dbUserAppSettings) {
-    // TODO: implement saveUserAppSettings
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveUserDrafts(UserDrafts dbUserDrafts) {
-    // TODO: implement saveUserDrafts
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveUserFollowers(UserFollowers dbUserFollowers) {
-    // TODO: implement saveUserFollowers
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveUserRelayList(UserRelayList userRelayList) {
-    // TODO: implement saveUserRelayList
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveUserRelayLists(List<UserRelayList> userRelayLists) {
-    // TODO: implement saveUserRelayLists
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveUserWot(WotModel wotModel) {
-    // TODO: implement saveUserWot
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveWotScore(WotScore wotScore) {
-    // TODO: implement saveWotScore
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> saveWotScoresBatch(List<WotScore> wotScores) {
-    // TODO: implement saveWotScoresBatch
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Iterable<Metadata>> searchMetadatas(String search, int limit) {
-    // TODO: implement searchMetadatas
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Iterable<Metadata>> searchRelatedMetadatas(
-      String search, List<String> pubkeys, int limit) {
-    // TODO: implement searchRelatedMetadatas
-    throw UnimplementedError();
+    await _database.customStatement('VACUUM;');
   }
 }

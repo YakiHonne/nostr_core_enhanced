@@ -21,6 +21,7 @@ part 'drift_database.g.dart';
   UserAppSettingsTable,
   UserWotTable,
   WotScoreTable,
+  RelayInfoListTable,
 ])
 class NostrDatabase extends _$NostrDatabase {
   NostrDatabase() : super(_openConnection());

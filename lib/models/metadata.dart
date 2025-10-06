@@ -3,11 +3,19 @@
 
 import 'dart:convert';
 
+import 'package:drift/drift.dart';
 import 'package:equatable/equatable.dart';
 import 'package:nostr_core_enhanced/db/drift_database.dart';
 import 'package:nostr_core_enhanced/nostr/nostr.dart';
 import 'package:nostr_core_enhanced/utils/utils.dart';
 import 'package:string_validator/string_validator.dart';
+
+class MetadataWithNip05 {
+  final Metadata metadata;
+  final bool isNip05Valid;
+
+  MetadataWithNip05(this.metadata, this.isNip05Valid);
+}
 
 class Metadata extends Equatable {
   final String pubkey;
@@ -39,6 +47,24 @@ class Metadata extends Equatable {
     required this.isDeleted,
     this.refreshedTimestamp,
   });
+
+  MetadataTableCompanion toCompanion() {
+    return MetadataTableCompanion.insert(
+      pubkey: pubkey,
+      name: Value(name),
+      displayName: Value(displayName),
+      picture: Value(picture),
+      banner: Value(banner),
+      website: Value(website),
+      about: Value(about),
+      nip05: Value(nip05),
+      lud16: Value(lud16),
+      lud06: Value(lud06),
+      createdAt: createdAt,
+      isDeleted: Value(isDeleted),
+      refreshedTimestamp: Value(refreshedTimestamp),
+    );
+  }
 
   factory Metadata.fromMetadataTableData(MetadataTableData data) {
     return Metadata(
@@ -99,13 +125,6 @@ class Metadata extends Equatable {
     return nip05.trim().toLowerCase();
   }
 
-  Map<String, dynamic> toFullJson() {
-    var data = toMap();
-    data['pub_key'] = pubkey;
-
-    return data;
-  }
-
   Map<String, dynamic> toMap() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['name'] = name;
@@ -117,6 +136,7 @@ class Metadata extends Equatable {
     data['nip05'] = nip05;
     data['lud16'] = lud16;
     data['lud06'] = lud06;
+    data['pubkey'] = pubkey;
     data['is_deleted'] = isDeleted;
 
     return data;
@@ -126,12 +146,12 @@ class Metadata extends Equatable {
     return jsonEncode(toMap());
   }
 
-  factory Metadata.empty() {
-    return const Metadata(
+  factory Metadata.empty({String? pubkey}) {
+    return Metadata(
       picture: '',
       name: '',
       about: '',
-      pubkey: '',
+      pubkey: pubkey ?? '',
       banner: '',
       displayName: '',
       lud16: '',

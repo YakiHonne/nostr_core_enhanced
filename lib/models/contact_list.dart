@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:nostr_core_enhanced/db/drift_database.dart';
 import 'package:nostr_core_enhanced/nostr/nostr.dart';
@@ -35,6 +36,21 @@ class ContactList {
       ..followedCommunities = data.followedCommunities
       ..followedEvents = data.followedEvents
       ..sources = data.sources;
+  }
+
+  ContactListTableCompanion toCompanion() {
+    return ContactListTableCompanion.insert(
+      pubkey: pubkey,
+      contacts: Value(contacts),
+      contactRelays: Value(contactRelays),
+      petnames: Value(petnames),
+      followedTags: Value(followedTags),
+      followedCommunities: Value(followedCommunities),
+      followedEvents: Value(followedEvents),
+      createdAt: createdAt,
+      loadedTimestamp: Value(loadedTimestamp),
+      sources: Value(sources),
+    );
   }
 
   factory ContactList.fromEvent(Event event) {

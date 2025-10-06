@@ -6,8 +6,7 @@ class WotScoreTable extends Table {
   TextColumn get pubkey => text()();
   TextColumn get originPubkey => text()();
   RealColumn get score => real().withDefault(const Constant(0.0))();
-  IntColumn get depth => integer().withDefault(const Constant(0))();
-  IntColumn get lastUpdated => integer().nullable()();
+  IntColumn get createdAt => integer()();
 
   @override
   Set<Column> get primaryKey => {pubkey};

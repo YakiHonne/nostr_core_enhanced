@@ -38,3 +38,5 @@ enum DvmType { notesContent, articlesContent }
 enum CurationTypes { all, videos, articles }
 
 enum VideoSourceTypes { all, youtube, vimeo, others }
+
+enum EventsSource { cache, cacheFirst, relays, all }

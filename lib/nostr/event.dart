@@ -1,8 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:convert/convert.dart';
+import 'package:drift/drift.dart';
 import 'package:nostr_core_enhanced/db/drift_database.dart';
 import 'package:nostr_core_enhanced/nostr/nostr.dart';
 import 'package:nostr_core_enhanced/nostr/remote_cache_event.dart';
@@ -31,14 +31,15 @@ class Event implements BaseEvent {
   int? lastUpdated;
 
   // Parsed tag collections
-  List<List<String>> tTags = [];
-  List<List<String>> pTags = [];
-  List<List<String>> capitalpTags = [];
-  List<List<String>> kTags = [];
-  List<List<String>> eTags = [];
-  List<List<String>> lTags = [];
-  List<List<String>> aTags = [];
-  List<List<String>> other = [];
+  List<String> tTags = [];
+  List<String> pTags = [];
+  List<String> capitalpTags = [];
+  List<String> kTags = [];
+  List<String> eTags = [];
+  List<String> lTags = [];
+  List<String> aTags = [];
+  List<String> cTags = [];
+  List<String> qTags = [];
 
   // Special tag values
   String? dTag;
@@ -96,6 +97,34 @@ class Event implements BaseEvent {
     );
   }
 
+  EventTableCompanion toCompanion() {
+    return EventTableCompanion.insert(
+      id: id,
+      pubkey: pubkey,
+      createdAt: createdAt,
+      kind: kind,
+      content: content,
+      sig: sig,
+      tags: Value(tags),
+      aTags: Value(aTags),
+      capitalpTags: Value(capitalpTags),
+      currentUser: Value(currentUser),
+      dTag: Value(dTag),
+      eTags: Value(eTags),
+      kTags: Value(kTags),
+      lTags: Value(lTags),
+      pTags: Value(pTags),
+      reply: Value(reply),
+      root: Value(root),
+      seenOn: Value(seenOn),
+      subscriptionId: Value(subscriptionId),
+      tTags: Value(tTags),
+      lastUpdated: Value(lastUpdated),
+      cTags: Value(cTags),
+      qTags: Value(qTags),
+    );
+  }
+
   factory Event.withoutSignature({
     int createdAt = 0,
     required int kind,
@@ -143,7 +172,19 @@ class Event implements BaseEvent {
       seenOn: data.seenOn,
       subscriptionId: data.subscriptionId,
       lastUpdated: data.lastUpdated,
-    );
+    )
+      ..aTags = data.aTags
+      ..tTags = data.tTags
+      ..pTags = data.pTags
+      ..kTags = data.kTags
+      ..eTags = data.eTags
+      ..lTags = data.lTags
+      ..capitalpTags = data.capitalpTags
+      ..root = data.root
+      ..reply = data.reply
+      ..dTag = data.dTag
+      ..cTags = data.cTags
+      ..qTags = data.qTags;
   }
 
   factory Event.fromJson(
@@ -168,6 +209,16 @@ class Event implements BaseEvent {
       seenOn: seenOn ?? [],
       verify: verify,
     );
+  }
+
+  void updateValuefromNewEvent(Event e) {
+    id = e.id;
+    pubkey = e.pubkey;
+    createdAt = e.createdAt;
+    kind = e.kind;
+    content = e.content;
+    tags = e.tags;
+    sig = e.sig;
   }
 
   factory Event.deserialize(
@@ -213,27 +264,35 @@ class Event implements BaseEvent {
   // CORE METHODS
   // ============================================================================
 
+  void addSeenOnRelay(String relay) {
+    if (!seenOn.contains(relay)) {
+      seenOn.add(relay);
+    }
+  }
+
   void setTags(List<List<String>> tags) {
     for (final tagArray in tags) {
       if (tagArray.length >= 2) {
         if (tagArray.first == 'e') {
-          eTags.add(tagArray);
+          eTags.add(tagArray[1]);
         } else if (tagArray.first == 'p') {
-          pTags.add(tagArray);
+          pTags.add(tagArray[1]);
         } else if (tagArray.first == 'P') {
-          capitalpTags.add(tagArray);
+          capitalpTags.add(tagArray[1]);
         } else if (tagArray.first == 'k') {
-          kTags.add(tagArray);
+          kTags.add(tagArray[1]);
         } else if (tagArray.first == 'a') {
-          aTags.add(tagArray);
+          aTags.add(tagArray[1]);
         } else if (tagArray.first == 'l') {
-          lTags.add(tagArray);
+          lTags.add(tagArray[1]);
         } else if (tagArray.first == 't') {
-          tTags.add(tagArray);
+          tTags.add(tagArray[1]);
         } else if (tagArray.first == 'd') {
           dTag = tagArray[1];
-        } else {
-          other.add(tagArray);
+        } else if (tagArray.first == 'c') {
+          cTags.add(tagArray[1]);
+        } else if (tagArray.first == 'q') {
+          qTags.add(tagArray[1]);
         }
 
         reply ??= getRelationId(tagArray, 'reply');
@@ -245,6 +304,22 @@ class Event implements BaseEvent {
   // ============================================================================
   // GETTER METHODS
   // ============================================================================
+
+  bool canBeRepublished(EventSigner? signer) {
+    if (signer != null && signer.getPublicKey() != pubkey && isProtected()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  bool isProtected() {
+    return tags
+        .where(
+          (element) => element.length == 1 && element.first == '-',
+        )
+        .isNotEmpty;
+  }
 
   String? getEventParent() {
     String? root;
@@ -282,7 +357,7 @@ class Event implements BaseEvent {
 
     final e = emoji.replaceAll(':', '');
 
-    for (final tag in other) {
+    for (final tag in tags) {
       if (tag.first == 'emoji' && tag.length > 2 && tag[1] == e) {
         url = tag[2];
       }
@@ -291,13 +366,13 @@ class Event implements BaseEvent {
     return url;
   }
 
-  MapEntry<String, bool>? getQtag() {
+  MapEntry<String, bool>? getQtag({bool getDTag = true}) {
     MapEntry<String, bool>? q;
 
-    for (final tag in other) {
+    for (final tag in tags) {
       if (tag.length >= 2 && tag.first == 'q') {
         if (tag[1].contains(':')) {
-          q = MapEntry(tag[1].split(':').last, true);
+          q = MapEntry(getDTag ? tag[1].split(':').last : tag[1], true);
         } else {
           q = MapEntry(tag[1], false);
         }
@@ -332,7 +407,7 @@ class Event implements BaseEvent {
     );
   }
 
-  List<String> currentPtags() => getTags(pTags, 'p');
+  List<String> currentPtags() => pTags;
 
   // ============================================================================
   // BOOLEAN CHECK METHODS
@@ -355,7 +430,7 @@ class Event implements BaseEvent {
   bool isUnRate() {
     bool hasEncryption = false;
 
-    for (final tag in other) {
+    for (final tag in tags) {
       if (tag.first == 'yaki_flash_news' && tag.length > 1) {
         hasEncryption = true;
       }
@@ -366,7 +441,7 @@ class Event implements BaseEvent {
 
   bool isQuote() {
     if (kind == EventKind.TEXT_NOTE) {
-      for (final tag in other) {
+      for (final tag in tags) {
         if (tag.first == 'q' && tag.length >= 2) {
           return true;
         }
@@ -551,5 +626,33 @@ class Event implements BaseEvent {
     } catch (e) {
       return null;
     }
+  }
+
+  Event copyWith({
+    String? id,
+    String? pubkey,
+    int? createdAt,
+    List<List<String>>? tags,
+    int? kind,
+    String? sig,
+    String? content,
+    List<String>? seenOn,
+    String? currentUser,
+    String? subscriptionId,
+    int? lastUpdated,
+  }) {
+    return Event(
+      id: id ?? this.id,
+      pubkey: pubkey ?? this.pubkey,
+      createdAt: createdAt ?? this.createdAt,
+      tags: tags ?? this.tags,
+      kind: kind ?? this.kind,
+      sig: sig ?? this.sig,
+      content: content ?? this.content,
+      seenOn: seenOn ?? this.seenOn,
+      currentUser: currentUser ?? this.currentUser,
+      subscriptionId: subscriptionId,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
+    );
   }
 }

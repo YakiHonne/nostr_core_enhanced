@@ -40,11 +40,13 @@ class Nip17 {
     Bip340EventSigner signer,
   ) async {
     try {
-      Event sealedGossipEvent =
-          await Nip59.decode(event, signer.publicKey, signer.privateKey!);
+      final sealedGossipEvent = await Nip59.decode(
+        event,
+        signer.publicKey,
+        signer.privateKey!,
+      );
 
-      Event decodeEvent = await _decodeSealedGossip(sealedGossipEvent, signer);
-      return decodeEvent;
+      return await _decodeSealedGossip(sealedGossipEvent, signer);
     } catch (e) {
       return null;
     }

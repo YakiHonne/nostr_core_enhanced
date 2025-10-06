@@ -8,10 +8,21 @@ import 'package:kepler/kepler.dart';
 import 'package:pointycastle/export.dart';
 
 /// generates 32 random bytes converted in hex
+
 String generate64RandomHexChars() {
   final random = Random.secure();
   final randomBytes = List<int>.generate(32, (i) => random.nextInt(256));
   return hex.encode(randomBytes);
+}
+
+String randomizeString(int length) {
+  Random random = Random();
+
+  final StringBuffer sb = StringBuffer();
+  for (var i = 0; i < length; i++) {
+    sb.write(random.nextInt(16).toRadixString(16));
+  }
+  return sb.toString();
 }
 
 /// current unix timestamp in seconds

@@ -6,6 +6,7 @@ export 'db_event_table.dart';
 export 'db_metadata_table.dart';
 export 'db_mute_list_table.dart';
 export 'db_nip_05_table.dart';
+export 'db_relay_info_table.dart';
 export 'db_relay_sets_table.dart';
 export 'db_user_drafts_table.dart';
 export 'db_user_followers_table.dart';

@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:drift/drift.dart';
 import 'package:nostr_core_enhanced/db/drift_database.dart';
 
 class DMSessionInfo {
@@ -15,6 +16,15 @@ class DMSessionInfo {
       peerPubkey: data.peer,
       ownPubkey: data.pubkey,
       readTime: data.readMessageTime ?? 0,
+    );
+  }
+
+  DmSessionInfosTableCompanion toCompanion() {
+    return DmSessionInfosTableCompanion.insert(
+      dmSessionId: id,
+      peer: peerPubkey,
+      pubkey: ownPubkey,
+      readMessageTime: Value(readTime),
     );
   }
 

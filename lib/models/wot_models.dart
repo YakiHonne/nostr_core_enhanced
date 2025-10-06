@@ -1,6 +1,9 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:drift/drift.dart';
+import 'package:nostr_core_enhanced/db/drift_database.dart';
+
 class WotCalculationData {
   final String pubkey;
   final Set<String> mutes;
@@ -14,6 +17,14 @@ class WotCalculationData {
     required this.contacts,
   });
 
+  // factory WotCalculationData.fromUserWotTableData(UserWotTableData data) {
+  //   return WotCalculationData(
+  //     pubkey: data.pubkey,
+  //     mutes: data.mutes,
+  //     contacts: data.contacts,
+  //     followings: jsonDecode(data.followings),
+  //   );
+  // }
   // Convert to JSON-compatible format
   Map<String, dynamic> toJson() {
     return {
@@ -47,6 +58,22 @@ class WotModel {
     required this.createdAt,
     required this.wot,
   });
+
+  UserWotTableCompanion toCompanion() {
+    return UserWotTableCompanion(
+      pubkey: Value(pubkey),
+      createdAt: Value(createdAt),
+      wot: Value(wot),
+    );
+  }
+
+  factory WotModel.fromUserWotTableData(UserWotTableData data) {
+    return WotModel(
+      pubkey: data.pubkey,
+      createdAt: data.createdAt,
+      wot: data.wot,
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
@@ -84,6 +111,26 @@ class WotScore {
     required this.createdAt,
     required this.originPubkey,
   });
+
+  WotScoreTableCompanion toCompanion() {
+    return WotScoreTableCompanion(
+      id: Value(id),
+      pubkey: Value(pubkey),
+      score: Value(score),
+      createdAt: Value(createdAt),
+      originPubkey: Value(originPubkey),
+    );
+  }
+
+  factory WotScore.fromWotScoreTableData(WotScoreTableData data) {
+    return WotScore(
+      id: data.id,
+      pubkey: data.pubkey,
+      score: data.score,
+      createdAt: data.createdAt,
+      originPubkey: data.originPubkey,
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{

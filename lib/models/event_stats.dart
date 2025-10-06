@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:bolt11_decoder/bolt11_decoder.dart';
+import 'package:drift/drift.dart';
 import 'package:equatable/equatable.dart';
+import 'package:nostr_core_enhanced/db/drift_database.dart';
 import 'package:nostr_core_enhanced/nostr/nostr.dart';
 import 'package:nostr_core_enhanced/utils/utils.dart';
 
@@ -23,6 +25,30 @@ class EventStats extends Equatable {
   final Map<String, String> reposts;
   final Map<String, Map<String, int>> zaps;
   final int newestCreatedAt;
+
+  EventStatsTableCompanion toCompanion() {
+    return EventStatsTableCompanion.insert(
+      id: eventId,
+      reactions: Value(reactions),
+      replies: Value(replies),
+      quotes: Value(quotes),
+      reposts: Value(reposts),
+      zaps: Value(zaps),
+      newestCreatedAt: Value(newestCreatedAt),
+    );
+  }
+
+  factory EventStats.fromEventStatsTableData(EventStatsTableData data) {
+    return EventStats(
+      eventId: data.id,
+      reactions: data.reactions,
+      replies: data.replies,
+      quotes: data.quotes,
+      reposts: data.reposts,
+      zaps: data.zaps,
+      newestCreatedAt: data.newestCreatedAt ?? 0,
+    );
+  }
 
   factory EventStats.empty(String id) {
     return EventStats(
@@ -195,19 +221,15 @@ class EventStats extends Equatable {
   }
 
   EventStats addEvent(Event ev) {
-    final createdAt = getNewestCreatedAt(ev.createdAt);
-
     if (ev.kind == EventKind.REACTION && !reactions.containsKey(ev.id)) {
       return copyWith(
         reactions: Map<String, String>.from(reactions)
           ..addAll({ev.id: ev.pubkey}),
-        newestCreatedAt: createdAt,
       );
     } else if (ev.kind == EventKind.TEXT_NOTE) {
       if (ev.isQuote() && !quotes.containsKey(ev.id)) {
         return copyWith(
           quotes: Map<String, String>.from(quotes)..addAll({ev.id: ev.pubkey}),
-          newestCreatedAt: createdAt,
         );
       } else {
         for (final tags in ev.tags) {
@@ -215,7 +237,6 @@ class EventStats extends Equatable {
             return copyWith(
               replies: Map<String, String>.from(replies)
                 ..addAll({ev.id: ev.pubkey}),
-              newestCreatedAt: createdAt,
             );
           }
         }
@@ -223,7 +244,6 @@ class EventStats extends Equatable {
     } else if (ev.kind == EventKind.REPOST && !reposts.containsKey(ev.id)) {
       return copyWith(
         reposts: Map<String, String>.from(reposts)..addAll({ev.id: ev.pubkey}),
-        newestCreatedAt: createdAt,
       );
     } else if (ev.kind == EventKind.ZAP && !hasZapId(ev.id)) {
       final p = getZapPubkey(ev.tags).first;
@@ -233,7 +253,6 @@ class EventStats extends Equatable {
 
       return copyWith(
         zaps: newZaps,
-        newestCreatedAt: createdAt,
       );
     }
 

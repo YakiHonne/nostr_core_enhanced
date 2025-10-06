@@ -10,6 +10,7 @@ import '../cache/remote_cache_service.dart';
 class Message {
   late String type;
   late dynamic message;
+  late bool isSuccess;
 
 // nostr message deserializer
   Message.deserialize(String payload) {

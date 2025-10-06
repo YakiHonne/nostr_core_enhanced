@@ -76,63 +76,69 @@ class $EventTableTable extends EventTable
       'subscription_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
   @override
-  late final GeneratedColumnWithTypeConverter<List<List<String>>, String>
-      tTags = GeneratedColumn<String>('t_tags', aliasedName, false,
+  late final GeneratedColumnWithTypeConverter<List<String>, String> tTags =
+      GeneratedColumn<String>('t_tags', aliasedName, false,
               type: DriftSqlType.string,
               requiredDuringInsert: false,
               defaultValue: const Constant('[]'))
-          .withConverter<List<List<String>>>($EventTableTable.$convertertTags);
+          .withConverter<List<String>>($EventTableTable.$convertertTags);
   @override
-  late final GeneratedColumnWithTypeConverter<List<List<String>>, String>
-      pTags = GeneratedColumn<String>('p_tags', aliasedName, false,
+  late final GeneratedColumnWithTypeConverter<List<String>, String> pTags =
+      GeneratedColumn<String>('p_tags', aliasedName, false,
               type: DriftSqlType.string,
               requiredDuringInsert: false,
               defaultValue: const Constant('[]'))
-          .withConverter<List<List<String>>>($EventTableTable.$converterpTags);
+          .withConverter<List<String>>($EventTableTable.$converterpTags);
   @override
-  late final GeneratedColumnWithTypeConverter<List<List<String>>, String>
+  late final GeneratedColumnWithTypeConverter<List<String>, String>
       capitalpTags = GeneratedColumn<String>(
               'capitalp_tags', aliasedName, false,
               type: DriftSqlType.string,
               requiredDuringInsert: false,
               defaultValue: const Constant('[]'))
-          .withConverter<List<List<String>>>(
-              $EventTableTable.$convertercapitalpTags);
+          .withConverter<List<String>>($EventTableTable.$convertercapitalpTags);
   @override
-  late final GeneratedColumnWithTypeConverter<List<List<String>>, String>
-      kTags = GeneratedColumn<String>('k_tags', aliasedName, false,
+  late final GeneratedColumnWithTypeConverter<List<String>, String> kTags =
+      GeneratedColumn<String>('k_tags', aliasedName, false,
               type: DriftSqlType.string,
               requiredDuringInsert: false,
               defaultValue: const Constant('[]'))
-          .withConverter<List<List<String>>>($EventTableTable.$converterkTags);
+          .withConverter<List<String>>($EventTableTable.$converterkTags);
   @override
-  late final GeneratedColumnWithTypeConverter<List<List<String>>, String>
-      eTags = GeneratedColumn<String>('e_tags', aliasedName, false,
+  late final GeneratedColumnWithTypeConverter<List<String>, String> eTags =
+      GeneratedColumn<String>('e_tags', aliasedName, false,
               type: DriftSqlType.string,
               requiredDuringInsert: false,
               defaultValue: const Constant('[]'))
-          .withConverter<List<List<String>>>($EventTableTable.$convertereTags);
+          .withConverter<List<String>>($EventTableTable.$convertereTags);
   @override
-  late final GeneratedColumnWithTypeConverter<List<List<String>>, String>
-      lTags = GeneratedColumn<String>('l_tags', aliasedName, false,
+  late final GeneratedColumnWithTypeConverter<List<String>, String> lTags =
+      GeneratedColumn<String>('l_tags', aliasedName, false,
               type: DriftSqlType.string,
               requiredDuringInsert: false,
               defaultValue: const Constant('[]'))
-          .withConverter<List<List<String>>>($EventTableTable.$converterlTags);
+          .withConverter<List<String>>($EventTableTable.$converterlTags);
   @override
-  late final GeneratedColumnWithTypeConverter<List<List<String>>, String>
-      aTags = GeneratedColumn<String>('a_tags', aliasedName, false,
+  late final GeneratedColumnWithTypeConverter<List<String>, String> aTags =
+      GeneratedColumn<String>('a_tags', aliasedName, false,
               type: DriftSqlType.string,
               requiredDuringInsert: false,
               defaultValue: const Constant('[]'))
-          .withConverter<List<List<String>>>($EventTableTable.$converteraTags);
+          .withConverter<List<String>>($EventTableTable.$converteraTags);
   @override
-  late final GeneratedColumnWithTypeConverter<List<List<String>>, String>
-      other = GeneratedColumn<String>('other', aliasedName, false,
+  late final GeneratedColumnWithTypeConverter<List<String>, String> cTags =
+      GeneratedColumn<String>('c_tags', aliasedName, false,
               type: DriftSqlType.string,
               requiredDuringInsert: false,
               defaultValue: const Constant('[]'))
-          .withConverter<List<List<String>>>($EventTableTable.$converterother);
+          .withConverter<List<String>>($EventTableTable.$convertercTags);
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String> qTags =
+      GeneratedColumn<String>('q_tags', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('[]'))
+          .withConverter<List<String>>($EventTableTable.$converterqTags);
   static const VerificationMeta _dTagMeta = const VerificationMeta('dTag');
   @override
   late final GeneratedColumn<String> dTag = GeneratedColumn<String>(
@@ -168,7 +174,8 @@ class $EventTableTable extends EventTable
         eTags,
         lTags,
         aTags,
-        other,
+        cTags,
+        qTags,
         dTag,
         root,
         reply
@@ -301,9 +308,12 @@ class $EventTableTable extends EventTable
       aTags: $EventTableTable.$converteraTags.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}a_tags'])!),
-      other: $EventTableTable.$converterother.fromSql(attachedDatabase
+      cTags: $EventTableTable.$convertercTags.fromSql(attachedDatabase
           .typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}other'])!),
+          .read(DriftSqlType.string, data['${effectivePrefix}c_tags'])!),
+      qTags: $EventTableTable.$converterqTags.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}q_tags'])!),
       dTag: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}d_tag']),
       root: attachedDatabase.typeMapping
@@ -322,22 +332,24 @@ class $EventTableTable extends EventTable
       const StringListOfListConverter();
   static TypeConverter<List<String>, String> $converterseenOn =
       const StringListConverter();
-  static TypeConverter<List<List<String>>, String> $convertertTags =
-      const StringListOfListConverter();
-  static TypeConverter<List<List<String>>, String> $converterpTags =
-      const StringListOfListConverter();
-  static TypeConverter<List<List<String>>, String> $convertercapitalpTags =
-      const StringListOfListConverter();
-  static TypeConverter<List<List<String>>, String> $converterkTags =
-      const StringListOfListConverter();
-  static TypeConverter<List<List<String>>, String> $convertereTags =
-      const StringListOfListConverter();
-  static TypeConverter<List<List<String>>, String> $converterlTags =
-      const StringListOfListConverter();
-  static TypeConverter<List<List<String>>, String> $converteraTags =
-      const StringListOfListConverter();
-  static TypeConverter<List<List<String>>, String> $converterother =
-      const StringListOfListConverter();
+  static TypeConverter<List<String>, String> $convertertTags =
+      const StringListConverter();
+  static TypeConverter<List<String>, String> $converterpTags =
+      const StringListConverter();
+  static TypeConverter<List<String>, String> $convertercapitalpTags =
+      const StringListConverter();
+  static TypeConverter<List<String>, String> $converterkTags =
+      const StringListConverter();
+  static TypeConverter<List<String>, String> $convertereTags =
+      const StringListConverter();
+  static TypeConverter<List<String>, String> $converterlTags =
+      const StringListConverter();
+  static TypeConverter<List<String>, String> $converteraTags =
+      const StringListConverter();
+  static TypeConverter<List<String>, String> $convertercTags =
+      const StringListConverter();
+  static TypeConverter<List<String>, String> $converterqTags =
+      const StringListConverter();
 }
 
 class EventTableData extends DataClass implements Insertable<EventTableData> {
@@ -352,14 +364,15 @@ class EventTableData extends DataClass implements Insertable<EventTableData> {
   final List<String> seenOn;
   final int? lastUpdated;
   final String? subscriptionId;
-  final List<List<String>> tTags;
-  final List<List<String>> pTags;
-  final List<List<String>> capitalpTags;
-  final List<List<String>> kTags;
-  final List<List<String>> eTags;
-  final List<List<String>> lTags;
-  final List<List<String>> aTags;
-  final List<List<String>> other;
+  final List<String> tTags;
+  final List<String> pTags;
+  final List<String> capitalpTags;
+  final List<String> kTags;
+  final List<String> eTags;
+  final List<String> lTags;
+  final List<String> aTags;
+  final List<String> cTags;
+  final List<String> qTags;
   final String? dTag;
   final String? root;
   final String? reply;
@@ -382,7 +395,8 @@ class EventTableData extends DataClass implements Insertable<EventTableData> {
       required this.eTags,
       required this.lTags,
       required this.aTags,
-      required this.other,
+      required this.cTags,
+      required this.qTags,
       this.dTag,
       this.root,
       this.reply});
@@ -439,8 +453,12 @@ class EventTableData extends DataClass implements Insertable<EventTableData> {
           Variable<String>($EventTableTable.$converteraTags.toSql(aTags));
     }
     {
-      map['other'] =
-          Variable<String>($EventTableTable.$converterother.toSql(other));
+      map['c_tags'] =
+          Variable<String>($EventTableTable.$convertercTags.toSql(cTags));
+    }
+    {
+      map['q_tags'] =
+          Variable<String>($EventTableTable.$converterqTags.toSql(qTags));
     }
     if (!nullToAbsent || dTag != null) {
       map['d_tag'] = Variable<String>(dTag);
@@ -478,7 +496,8 @@ class EventTableData extends DataClass implements Insertable<EventTableData> {
       eTags: Value(eTags),
       lTags: Value(lTags),
       aTags: Value(aTags),
-      other: Value(other),
+      cTags: Value(cTags),
+      qTags: Value(qTags),
       dTag: dTag == null && nullToAbsent ? const Value.absent() : Value(dTag),
       root: root == null && nullToAbsent ? const Value.absent() : Value(root),
       reply:
@@ -501,15 +520,15 @@ class EventTableData extends DataClass implements Insertable<EventTableData> {
       seenOn: serializer.fromJson<List<String>>(json['seenOn']),
       lastUpdated: serializer.fromJson<int?>(json['lastUpdated']),
       subscriptionId: serializer.fromJson<String?>(json['subscriptionId']),
-      tTags: serializer.fromJson<List<List<String>>>(json['tTags']),
-      pTags: serializer.fromJson<List<List<String>>>(json['pTags']),
-      capitalpTags:
-          serializer.fromJson<List<List<String>>>(json['capitalpTags']),
-      kTags: serializer.fromJson<List<List<String>>>(json['kTags']),
-      eTags: serializer.fromJson<List<List<String>>>(json['eTags']),
-      lTags: serializer.fromJson<List<List<String>>>(json['lTags']),
-      aTags: serializer.fromJson<List<List<String>>>(json['aTags']),
-      other: serializer.fromJson<List<List<String>>>(json['other']),
+      tTags: serializer.fromJson<List<String>>(json['tTags']),
+      pTags: serializer.fromJson<List<String>>(json['pTags']),
+      capitalpTags: serializer.fromJson<List<String>>(json['capitalpTags']),
+      kTags: serializer.fromJson<List<String>>(json['kTags']),
+      eTags: serializer.fromJson<List<String>>(json['eTags']),
+      lTags: serializer.fromJson<List<String>>(json['lTags']),
+      aTags: serializer.fromJson<List<String>>(json['aTags']),
+      cTags: serializer.fromJson<List<String>>(json['cTags']),
+      qTags: serializer.fromJson<List<String>>(json['qTags']),
       dTag: serializer.fromJson<String?>(json['dTag']),
       root: serializer.fromJson<String?>(json['root']),
       reply: serializer.fromJson<String?>(json['reply']),
@@ -530,14 +549,15 @@ class EventTableData extends DataClass implements Insertable<EventTableData> {
       'seenOn': serializer.toJson<List<String>>(seenOn),
       'lastUpdated': serializer.toJson<int?>(lastUpdated),
       'subscriptionId': serializer.toJson<String?>(subscriptionId),
-      'tTags': serializer.toJson<List<List<String>>>(tTags),
-      'pTags': serializer.toJson<List<List<String>>>(pTags),
-      'capitalpTags': serializer.toJson<List<List<String>>>(capitalpTags),
-      'kTags': serializer.toJson<List<List<String>>>(kTags),
-      'eTags': serializer.toJson<List<List<String>>>(eTags),
-      'lTags': serializer.toJson<List<List<String>>>(lTags),
-      'aTags': serializer.toJson<List<List<String>>>(aTags),
-      'other': serializer.toJson<List<List<String>>>(other),
+      'tTags': serializer.toJson<List<String>>(tTags),
+      'pTags': serializer.toJson<List<String>>(pTags),
+      'capitalpTags': serializer.toJson<List<String>>(capitalpTags),
+      'kTags': serializer.toJson<List<String>>(kTags),
+      'eTags': serializer.toJson<List<String>>(eTags),
+      'lTags': serializer.toJson<List<String>>(lTags),
+      'aTags': serializer.toJson<List<String>>(aTags),
+      'cTags': serializer.toJson<List<String>>(cTags),
+      'qTags': serializer.toJson<List<String>>(qTags),
       'dTag': serializer.toJson<String?>(dTag),
       'root': serializer.toJson<String?>(root),
       'reply': serializer.toJson<String?>(reply),
@@ -556,14 +576,15 @@ class EventTableData extends DataClass implements Insertable<EventTableData> {
           List<String>? seenOn,
           Value<int?> lastUpdated = const Value.absent(),
           Value<String?> subscriptionId = const Value.absent(),
-          List<List<String>>? tTags,
-          List<List<String>>? pTags,
-          List<List<String>>? capitalpTags,
-          List<List<String>>? kTags,
-          List<List<String>>? eTags,
-          List<List<String>>? lTags,
-          List<List<String>>? aTags,
-          List<List<String>>? other,
+          List<String>? tTags,
+          List<String>? pTags,
+          List<String>? capitalpTags,
+          List<String>? kTags,
+          List<String>? eTags,
+          List<String>? lTags,
+          List<String>? aTags,
+          List<String>? cTags,
+          List<String>? qTags,
           Value<String?> dTag = const Value.absent(),
           Value<String?> root = const Value.absent(),
           Value<String?> reply = const Value.absent()}) =>
@@ -587,7 +608,8 @@ class EventTableData extends DataClass implements Insertable<EventTableData> {
         eTags: eTags ?? this.eTags,
         lTags: lTags ?? this.lTags,
         aTags: aTags ?? this.aTags,
-        other: other ?? this.other,
+        cTags: cTags ?? this.cTags,
+        qTags: qTags ?? this.qTags,
         dTag: dTag.present ? dTag.value : this.dTag,
         root: root.present ? root.value : this.root,
         reply: reply.present ? reply.value : this.reply,
@@ -618,7 +640,8 @@ class EventTableData extends DataClass implements Insertable<EventTableData> {
       eTags: data.eTags.present ? data.eTags.value : this.eTags,
       lTags: data.lTags.present ? data.lTags.value : this.lTags,
       aTags: data.aTags.present ? data.aTags.value : this.aTags,
-      other: data.other.present ? data.other.value : this.other,
+      cTags: data.cTags.present ? data.cTags.value : this.cTags,
+      qTags: data.qTags.present ? data.qTags.value : this.qTags,
       dTag: data.dTag.present ? data.dTag.value : this.dTag,
       root: data.root.present ? data.root.value : this.root,
       reply: data.reply.present ? data.reply.value : this.reply,
@@ -646,7 +669,8 @@ class EventTableData extends DataClass implements Insertable<EventTableData> {
           ..write('eTags: $eTags, ')
           ..write('lTags: $lTags, ')
           ..write('aTags: $aTags, ')
-          ..write('other: $other, ')
+          ..write('cTags: $cTags, ')
+          ..write('qTags: $qTags, ')
           ..write('dTag: $dTag, ')
           ..write('root: $root, ')
           ..write('reply: $reply')
@@ -674,7 +698,8 @@ class EventTableData extends DataClass implements Insertable<EventTableData> {
         eTags,
         lTags,
         aTags,
-        other,
+        cTags,
+        qTags,
         dTag,
         root,
         reply
@@ -701,7 +726,8 @@ class EventTableData extends DataClass implements Insertable<EventTableData> {
           other.eTags == this.eTags &&
           other.lTags == this.lTags &&
           other.aTags == this.aTags &&
-          other.other == this.other &&
+          other.cTags == this.cTags &&
+          other.qTags == this.qTags &&
           other.dTag == this.dTag &&
           other.root == this.root &&
           other.reply == this.reply);
@@ -719,14 +745,15 @@ class EventTableCompanion extends UpdateCompanion<EventTableData> {
   final Value<List<String>> seenOn;
   final Value<int?> lastUpdated;
   final Value<String?> subscriptionId;
-  final Value<List<List<String>>> tTags;
-  final Value<List<List<String>>> pTags;
-  final Value<List<List<String>>> capitalpTags;
-  final Value<List<List<String>>> kTags;
-  final Value<List<List<String>>> eTags;
-  final Value<List<List<String>>> lTags;
-  final Value<List<List<String>>> aTags;
-  final Value<List<List<String>>> other;
+  final Value<List<String>> tTags;
+  final Value<List<String>> pTags;
+  final Value<List<String>> capitalpTags;
+  final Value<List<String>> kTags;
+  final Value<List<String>> eTags;
+  final Value<List<String>> lTags;
+  final Value<List<String>> aTags;
+  final Value<List<String>> cTags;
+  final Value<List<String>> qTags;
   final Value<String?> dTag;
   final Value<String?> root;
   final Value<String?> reply;
@@ -750,7 +777,8 @@ class EventTableCompanion extends UpdateCompanion<EventTableData> {
     this.eTags = const Value.absent(),
     this.lTags = const Value.absent(),
     this.aTags = const Value.absent(),
-    this.other = const Value.absent(),
+    this.cTags = const Value.absent(),
+    this.qTags = const Value.absent(),
     this.dTag = const Value.absent(),
     this.root = const Value.absent(),
     this.reply = const Value.absent(),
@@ -775,7 +803,8 @@ class EventTableCompanion extends UpdateCompanion<EventTableData> {
     this.eTags = const Value.absent(),
     this.lTags = const Value.absent(),
     this.aTags = const Value.absent(),
-    this.other = const Value.absent(),
+    this.cTags = const Value.absent(),
+    this.qTags = const Value.absent(),
     this.dTag = const Value.absent(),
     this.root = const Value.absent(),
     this.reply = const Value.absent(),
@@ -805,7 +834,8 @@ class EventTableCompanion extends UpdateCompanion<EventTableData> {
     Expression<String>? eTags,
     Expression<String>? lTags,
     Expression<String>? aTags,
-    Expression<String>? other,
+    Expression<String>? cTags,
+    Expression<String>? qTags,
     Expression<String>? dTag,
     Expression<String>? root,
     Expression<String>? reply,
@@ -830,7 +860,8 @@ class EventTableCompanion extends UpdateCompanion<EventTableData> {
       if (eTags != null) 'e_tags': eTags,
       if (lTags != null) 'l_tags': lTags,
       if (aTags != null) 'a_tags': aTags,
-      if (other != null) 'other': other,
+      if (cTags != null) 'c_tags': cTags,
+      if (qTags != null) 'q_tags': qTags,
       if (dTag != null) 'd_tag': dTag,
       if (root != null) 'root': root,
       if (reply != null) 'reply': reply,
@@ -850,14 +881,15 @@ class EventTableCompanion extends UpdateCompanion<EventTableData> {
       Value<List<String>>? seenOn,
       Value<int?>? lastUpdated,
       Value<String?>? subscriptionId,
-      Value<List<List<String>>>? tTags,
-      Value<List<List<String>>>? pTags,
-      Value<List<List<String>>>? capitalpTags,
-      Value<List<List<String>>>? kTags,
-      Value<List<List<String>>>? eTags,
-      Value<List<List<String>>>? lTags,
-      Value<List<List<String>>>? aTags,
-      Value<List<List<String>>>? other,
+      Value<List<String>>? tTags,
+      Value<List<String>>? pTags,
+      Value<List<String>>? capitalpTags,
+      Value<List<String>>? kTags,
+      Value<List<String>>? eTags,
+      Value<List<String>>? lTags,
+      Value<List<String>>? aTags,
+      Value<List<String>>? cTags,
+      Value<List<String>>? qTags,
       Value<String?>? dTag,
       Value<String?>? root,
       Value<String?>? reply,
@@ -881,7 +913,8 @@ class EventTableCompanion extends UpdateCompanion<EventTableData> {
       eTags: eTags ?? this.eTags,
       lTags: lTags ?? this.lTags,
       aTags: aTags ?? this.aTags,
-      other: other ?? this.other,
+      cTags: cTags ?? this.cTags,
+      qTags: qTags ?? this.qTags,
       dTag: dTag ?? this.dTag,
       root: root ?? this.root,
       reply: reply ?? this.reply,
@@ -955,9 +988,13 @@ class EventTableCompanion extends UpdateCompanion<EventTableData> {
       map['a_tags'] =
           Variable<String>($EventTableTable.$converteraTags.toSql(aTags.value));
     }
-    if (other.present) {
-      map['other'] =
-          Variable<String>($EventTableTable.$converterother.toSql(other.value));
+    if (cTags.present) {
+      map['c_tags'] =
+          Variable<String>($EventTableTable.$convertercTags.toSql(cTags.value));
+    }
+    if (qTags.present) {
+      map['q_tags'] =
+          Variable<String>($EventTableTable.$converterqTags.toSql(qTags.value));
     }
     if (dTag.present) {
       map['d_tag'] = Variable<String>(dTag.value);
@@ -995,7 +1032,8 @@ class EventTableCompanion extends UpdateCompanion<EventTableData> {
           ..write('eTags: $eTags, ')
           ..write('lTags: $lTags, ')
           ..write('aTags: $aTags, ')
-          ..write('other: $other, ')
+          ..write('cTags: $cTags, ')
+          ..write('qTags: $qTags, ')
           ..write('dTag: $dTag, ')
           ..write('root: $root, ')
           ..write('reply: $reply, ')
@@ -2205,13 +2243,13 @@ class $MuteListTableTable extends MuteListTable
   late final GeneratedColumn<String> pubkey = GeneratedColumn<String>(
       'pubkey', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _mutesMeta = const VerificationMeta('mutes');
   @override
-  late final GeneratedColumn<String> mutes = GeneratedColumn<String>(
-      'mutes', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant('[]'));
+  late final GeneratedColumnWithTypeConverter<List<String>, String> mutes =
+      GeneratedColumn<String>('mutes', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('[]'))
+          .withConverter<List<String>>($MuteListTableTable.$convertermutes);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -2224,17 +2262,9 @@ class $MuteListTableTable extends MuteListTable
   late final GeneratedColumn<int> loadedTimestamp = GeneratedColumn<int>(
       'loaded_timestamp', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
-  static const VerificationMeta _sourcesMeta =
-      const VerificationMeta('sources');
-  @override
-  late final GeneratedColumn<String> sources = GeneratedColumn<String>(
-      'sources', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant('[]'));
   @override
   List<GeneratedColumn> get $columns =>
-      [pubkey, mutes, createdAt, loadedTimestamp, sources];
+      [pubkey, mutes, createdAt, loadedTimestamp];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2251,10 +2281,6 @@ class $MuteListTableTable extends MuteListTable
     } else if (isInserting) {
       context.missing(_pubkeyMeta);
     }
-    if (data.containsKey('mutes')) {
-      context.handle(
-          _mutesMeta, mutes.isAcceptableOrUnknown(data['mutes']!, _mutesMeta));
-    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -2267,10 +2293,6 @@ class $MuteListTableTable extends MuteListTable
           loadedTimestamp.isAcceptableOrUnknown(
               data['loaded_timestamp']!, _loadedTimestampMeta));
     }
-    if (data.containsKey('sources')) {
-      context.handle(_sourcesMeta,
-          sources.isAcceptableOrUnknown(data['sources']!, _sourcesMeta));
-    }
     return context;
   }
 
@@ -2282,14 +2304,13 @@ class $MuteListTableTable extends MuteListTable
     return MuteListTableData(
       pubkey: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}pubkey'])!,
-      mutes: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}mutes'])!,
+      mutes: $MuteListTableTable.$convertermutes.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}mutes'])!),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
       loadedTimestamp: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}loaded_timestamp']),
-      sources: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}sources'])!,
     );
   }
 
@@ -2297,31 +2318,34 @@ class $MuteListTableTable extends MuteListTable
   $MuteListTableTable createAlias(String alias) {
     return $MuteListTableTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<List<String>, String> $convertermutes =
+      const StringListConverter();
 }
 
 class MuteListTableData extends DataClass
     implements Insertable<MuteListTableData> {
   final String pubkey;
-  final String mutes;
+  final List<String> mutes;
   final int createdAt;
   final int? loadedTimestamp;
-  final String sources;
   const MuteListTableData(
       {required this.pubkey,
       required this.mutes,
       required this.createdAt,
-      this.loadedTimestamp,
-      required this.sources});
+      this.loadedTimestamp});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['pubkey'] = Variable<String>(pubkey);
-    map['mutes'] = Variable<String>(mutes);
+    {
+      map['mutes'] =
+          Variable<String>($MuteListTableTable.$convertermutes.toSql(mutes));
+    }
     map['created_at'] = Variable<int>(createdAt);
     if (!nullToAbsent || loadedTimestamp != null) {
       map['loaded_timestamp'] = Variable<int>(loadedTimestamp);
     }
-    map['sources'] = Variable<String>(sources);
     return map;
   }
 
@@ -2333,7 +2357,6 @@ class MuteListTableData extends DataClass
       loadedTimestamp: loadedTimestamp == null && nullToAbsent
           ? const Value.absent()
           : Value(loadedTimestamp),
-      sources: Value(sources),
     );
   }
 
@@ -2342,10 +2365,9 @@ class MuteListTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return MuteListTableData(
       pubkey: serializer.fromJson<String>(json['pubkey']),
-      mutes: serializer.fromJson<String>(json['mutes']),
+      mutes: serializer.fromJson<List<String>>(json['mutes']),
       createdAt: serializer.fromJson<int>(json['createdAt']),
       loadedTimestamp: serializer.fromJson<int?>(json['loadedTimestamp']),
-      sources: serializer.fromJson<String>(json['sources']),
     );
   }
   @override
@@ -2353,19 +2375,17 @@ class MuteListTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'pubkey': serializer.toJson<String>(pubkey),
-      'mutes': serializer.toJson<String>(mutes),
+      'mutes': serializer.toJson<List<String>>(mutes),
       'createdAt': serializer.toJson<int>(createdAt),
       'loadedTimestamp': serializer.toJson<int?>(loadedTimestamp),
-      'sources': serializer.toJson<String>(sources),
     };
   }
 
   MuteListTableData copyWith(
           {String? pubkey,
-          String? mutes,
+          List<String>? mutes,
           int? createdAt,
-          Value<int?> loadedTimestamp = const Value.absent(),
-          String? sources}) =>
+          Value<int?> loadedTimestamp = const Value.absent()}) =>
       MuteListTableData(
         pubkey: pubkey ?? this.pubkey,
         mutes: mutes ?? this.mutes,
@@ -2373,7 +2393,6 @@ class MuteListTableData extends DataClass
         loadedTimestamp: loadedTimestamp.present
             ? loadedTimestamp.value
             : this.loadedTimestamp,
-        sources: sources ?? this.sources,
       );
   MuteListTableData copyWithCompanion(MuteListTableCompanion data) {
     return MuteListTableData(
@@ -2383,7 +2402,6 @@ class MuteListTableData extends DataClass
       loadedTimestamp: data.loadedTimestamp.present
           ? data.loadedTimestamp.value
           : this.loadedTimestamp,
-      sources: data.sources.present ? data.sources.value : this.sources,
     );
   }
 
@@ -2393,15 +2411,13 @@ class MuteListTableData extends DataClass
           ..write('pubkey: $pubkey, ')
           ..write('mutes: $mutes, ')
           ..write('createdAt: $createdAt, ')
-          ..write('loadedTimestamp: $loadedTimestamp, ')
-          ..write('sources: $sources')
+          ..write('loadedTimestamp: $loadedTimestamp')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(pubkey, mutes, createdAt, loadedTimestamp, sources);
+  int get hashCode => Object.hash(pubkey, mutes, createdAt, loadedTimestamp);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2409,23 +2425,20 @@ class MuteListTableData extends DataClass
           other.pubkey == this.pubkey &&
           other.mutes == this.mutes &&
           other.createdAt == this.createdAt &&
-          other.loadedTimestamp == this.loadedTimestamp &&
-          other.sources == this.sources);
+          other.loadedTimestamp == this.loadedTimestamp);
 }
 
 class MuteListTableCompanion extends UpdateCompanion<MuteListTableData> {
   final Value<String> pubkey;
-  final Value<String> mutes;
+  final Value<List<String>> mutes;
   final Value<int> createdAt;
   final Value<int?> loadedTimestamp;
-  final Value<String> sources;
   final Value<int> rowid;
   const MuteListTableCompanion({
     this.pubkey = const Value.absent(),
     this.mutes = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.loadedTimestamp = const Value.absent(),
-    this.sources = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   MuteListTableCompanion.insert({
@@ -2433,7 +2446,6 @@ class MuteListTableCompanion extends UpdateCompanion<MuteListTableData> {
     this.mutes = const Value.absent(),
     required int createdAt,
     this.loadedTimestamp = const Value.absent(),
-    this.sources = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : pubkey = Value(pubkey),
         createdAt = Value(createdAt);
@@ -2442,7 +2454,6 @@ class MuteListTableCompanion extends UpdateCompanion<MuteListTableData> {
     Expression<String>? mutes,
     Expression<int>? createdAt,
     Expression<int>? loadedTimestamp,
-    Expression<String>? sources,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2450,24 +2461,21 @@ class MuteListTableCompanion extends UpdateCompanion<MuteListTableData> {
       if (mutes != null) 'mutes': mutes,
       if (createdAt != null) 'created_at': createdAt,
       if (loadedTimestamp != null) 'loaded_timestamp': loadedTimestamp,
-      if (sources != null) 'sources': sources,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   MuteListTableCompanion copyWith(
       {Value<String>? pubkey,
-      Value<String>? mutes,
+      Value<List<String>>? mutes,
       Value<int>? createdAt,
       Value<int?>? loadedTimestamp,
-      Value<String>? sources,
       Value<int>? rowid}) {
     return MuteListTableCompanion(
       pubkey: pubkey ?? this.pubkey,
       mutes: mutes ?? this.mutes,
       createdAt: createdAt ?? this.createdAt,
       loadedTimestamp: loadedTimestamp ?? this.loadedTimestamp,
-      sources: sources ?? this.sources,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2479,16 +2487,14 @@ class MuteListTableCompanion extends UpdateCompanion<MuteListTableData> {
       map['pubkey'] = Variable<String>(pubkey.value);
     }
     if (mutes.present) {
-      map['mutes'] = Variable<String>(mutes.value);
+      map['mutes'] = Variable<String>(
+          $MuteListTableTable.$convertermutes.toSql(mutes.value));
     }
     if (createdAt.present) {
       map['created_at'] = Variable<int>(createdAt.value);
     }
     if (loadedTimestamp.present) {
       map['loaded_timestamp'] = Variable<int>(loadedTimestamp.value);
-    }
-    if (sources.present) {
-      map['sources'] = Variable<String>(sources.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -2503,7 +2509,6 @@ class MuteListTableCompanion extends UpdateCompanion<MuteListTableData> {
           ..write('mutes: $mutes, ')
           ..write('createdAt: $createdAt, ')
           ..write('loadedTimestamp: $loadedTimestamp, ')
-          ..write('sources: $sources, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2521,45 +2526,26 @@ class $UserRelayListTableTable extends UserRelayListTable
   late final GeneratedColumn<String> pubkey = GeneratedColumn<String>(
       'pubkey', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _readRelaysMeta =
-      const VerificationMeta('readRelays');
-  @override
-  late final GeneratedColumn<String> readRelays = GeneratedColumn<String>(
-      'read_relays', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant('{}'));
-  static const VerificationMeta _writeRelaysMeta =
-      const VerificationMeta('writeRelays');
-  @override
-  late final GeneratedColumn<String> writeRelays = GeneratedColumn<String>(
-      'write_relays', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant('{}'));
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
   late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
       'created_at', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _loadedTimestampMeta =
-      const VerificationMeta('loadedTimestamp');
+  static const VerificationMeta _refreshedTimestampMeta =
+      const VerificationMeta('refreshedTimestamp');
   @override
-  late final GeneratedColumn<int> loadedTimestamp = GeneratedColumn<int>(
-      'loaded_timestamp', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
-  static const VerificationMeta _sourcesMeta =
-      const VerificationMeta('sources');
+  late final GeneratedColumn<int> refreshedTimestamp = GeneratedColumn<int>(
+      'refreshed_timestamp', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _relaysMeta = const VerificationMeta('relays');
   @override
-  late final GeneratedColumn<String> sources = GeneratedColumn<String>(
-      'sources', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant('[]'));
+  late final GeneratedColumn<String> relays = GeneratedColumn<String>(
+      'relays', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [pubkey, readRelays, writeRelays, createdAt, loadedTimestamp, sources];
+      [pubkey, createdAt, refreshedTimestamp, relays];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2577,33 +2563,25 @@ class $UserRelayListTableTable extends UserRelayListTable
     } else if (isInserting) {
       context.missing(_pubkeyMeta);
     }
-    if (data.containsKey('read_relays')) {
-      context.handle(
-          _readRelaysMeta,
-          readRelays.isAcceptableOrUnknown(
-              data['read_relays']!, _readRelaysMeta));
-    }
-    if (data.containsKey('write_relays')) {
-      context.handle(
-          _writeRelaysMeta,
-          writeRelays.isAcceptableOrUnknown(
-              data['write_relays']!, _writeRelaysMeta));
-    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
-    if (data.containsKey('loaded_timestamp')) {
+    if (data.containsKey('refreshed_timestamp')) {
       context.handle(
-          _loadedTimestampMeta,
-          loadedTimestamp.isAcceptableOrUnknown(
-              data['loaded_timestamp']!, _loadedTimestampMeta));
+          _refreshedTimestampMeta,
+          refreshedTimestamp.isAcceptableOrUnknown(
+              data['refreshed_timestamp']!, _refreshedTimestampMeta));
+    } else if (isInserting) {
+      context.missing(_refreshedTimestampMeta);
     }
-    if (data.containsKey('sources')) {
-      context.handle(_sourcesMeta,
-          sources.isAcceptableOrUnknown(data['sources']!, _sourcesMeta));
+    if (data.containsKey('relays')) {
+      context.handle(_relaysMeta,
+          relays.isAcceptableOrUnknown(data['relays']!, _relaysMeta));
+    } else if (isInserting) {
+      context.missing(_relaysMeta);
     }
     return context;
   }
@@ -2616,16 +2594,12 @@ class $UserRelayListTableTable extends UserRelayListTable
     return UserRelayListTableData(
       pubkey: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}pubkey'])!,
-      readRelays: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}read_relays'])!,
-      writeRelays: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}write_relays'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
-      loadedTimestamp: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}loaded_timestamp']),
-      sources: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}sources'])!,
+      refreshedTimestamp: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}refreshed_timestamp'])!,
+      relays: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}relays'])!,
     );
   }
 
@@ -2638,42 +2612,30 @@ class $UserRelayListTableTable extends UserRelayListTable
 class UserRelayListTableData extends DataClass
     implements Insertable<UserRelayListTableData> {
   final String pubkey;
-  final String readRelays;
-  final String writeRelays;
   final int createdAt;
-  final int? loadedTimestamp;
-  final String sources;
+  final int refreshedTimestamp;
+  final String relays;
   const UserRelayListTableData(
       {required this.pubkey,
-      required this.readRelays,
-      required this.writeRelays,
       required this.createdAt,
-      this.loadedTimestamp,
-      required this.sources});
+      required this.refreshedTimestamp,
+      required this.relays});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['pubkey'] = Variable<String>(pubkey);
-    map['read_relays'] = Variable<String>(readRelays);
-    map['write_relays'] = Variable<String>(writeRelays);
     map['created_at'] = Variable<int>(createdAt);
-    if (!nullToAbsent || loadedTimestamp != null) {
-      map['loaded_timestamp'] = Variable<int>(loadedTimestamp);
-    }
-    map['sources'] = Variable<String>(sources);
+    map['refreshed_timestamp'] = Variable<int>(refreshedTimestamp);
+    map['relays'] = Variable<String>(relays);
     return map;
   }
 
   UserRelayListTableCompanion toCompanion(bool nullToAbsent) {
     return UserRelayListTableCompanion(
       pubkey: Value(pubkey),
-      readRelays: Value(readRelays),
-      writeRelays: Value(writeRelays),
       createdAt: Value(createdAt),
-      loadedTimestamp: loadedTimestamp == null && nullToAbsent
-          ? const Value.absent()
-          : Value(loadedTimestamp),
-      sources: Value(sources),
+      refreshedTimestamp: Value(refreshedTimestamp),
+      relays: Value(relays),
     );
   }
 
@@ -2682,11 +2644,9 @@ class UserRelayListTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return UserRelayListTableData(
       pubkey: serializer.fromJson<String>(json['pubkey']),
-      readRelays: serializer.fromJson<String>(json['readRelays']),
-      writeRelays: serializer.fromJson<String>(json['writeRelays']),
       createdAt: serializer.fromJson<int>(json['createdAt']),
-      loadedTimestamp: serializer.fromJson<int?>(json['loadedTimestamp']),
-      sources: serializer.fromJson<String>(json['sources']),
+      refreshedTimestamp: serializer.fromJson<int>(json['refreshedTimestamp']),
+      relays: serializer.fromJson<String>(json['relays']),
     );
   }
   @override
@@ -2694,43 +2654,31 @@ class UserRelayListTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'pubkey': serializer.toJson<String>(pubkey),
-      'readRelays': serializer.toJson<String>(readRelays),
-      'writeRelays': serializer.toJson<String>(writeRelays),
       'createdAt': serializer.toJson<int>(createdAt),
-      'loadedTimestamp': serializer.toJson<int?>(loadedTimestamp),
-      'sources': serializer.toJson<String>(sources),
+      'refreshedTimestamp': serializer.toJson<int>(refreshedTimestamp),
+      'relays': serializer.toJson<String>(relays),
     };
   }
 
   UserRelayListTableData copyWith(
           {String? pubkey,
-          String? readRelays,
-          String? writeRelays,
           int? createdAt,
-          Value<int?> loadedTimestamp = const Value.absent(),
-          String? sources}) =>
+          int? refreshedTimestamp,
+          String? relays}) =>
       UserRelayListTableData(
         pubkey: pubkey ?? this.pubkey,
-        readRelays: readRelays ?? this.readRelays,
-        writeRelays: writeRelays ?? this.writeRelays,
         createdAt: createdAt ?? this.createdAt,
-        loadedTimestamp: loadedTimestamp.present
-            ? loadedTimestamp.value
-            : this.loadedTimestamp,
-        sources: sources ?? this.sources,
+        refreshedTimestamp: refreshedTimestamp ?? this.refreshedTimestamp,
+        relays: relays ?? this.relays,
       );
   UserRelayListTableData copyWithCompanion(UserRelayListTableCompanion data) {
     return UserRelayListTableData(
       pubkey: data.pubkey.present ? data.pubkey.value : this.pubkey,
-      readRelays:
-          data.readRelays.present ? data.readRelays.value : this.readRelays,
-      writeRelays:
-          data.writeRelays.present ? data.writeRelays.value : this.writeRelays,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      loadedTimestamp: data.loadedTimestamp.present
-          ? data.loadedTimestamp.value
-          : this.loadedTimestamp,
-      sources: data.sources.present ? data.sources.value : this.sources,
+      refreshedTimestamp: data.refreshedTimestamp.present
+          ? data.refreshedTimestamp.value
+          : this.refreshedTimestamp,
+      relays: data.relays.present ? data.relays.value : this.relays,
     );
   }
 
@@ -2738,93 +2686,77 @@ class UserRelayListTableData extends DataClass
   String toString() {
     return (StringBuffer('UserRelayListTableData(')
           ..write('pubkey: $pubkey, ')
-          ..write('readRelays: $readRelays, ')
-          ..write('writeRelays: $writeRelays, ')
           ..write('createdAt: $createdAt, ')
-          ..write('loadedTimestamp: $loadedTimestamp, ')
-          ..write('sources: $sources')
+          ..write('refreshedTimestamp: $refreshedTimestamp, ')
+          ..write('relays: $relays')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      pubkey, readRelays, writeRelays, createdAt, loadedTimestamp, sources);
+  int get hashCode =>
+      Object.hash(pubkey, createdAt, refreshedTimestamp, relays);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is UserRelayListTableData &&
           other.pubkey == this.pubkey &&
-          other.readRelays == this.readRelays &&
-          other.writeRelays == this.writeRelays &&
           other.createdAt == this.createdAt &&
-          other.loadedTimestamp == this.loadedTimestamp &&
-          other.sources == this.sources);
+          other.refreshedTimestamp == this.refreshedTimestamp &&
+          other.relays == this.relays);
 }
 
 class UserRelayListTableCompanion
     extends UpdateCompanion<UserRelayListTableData> {
   final Value<String> pubkey;
-  final Value<String> readRelays;
-  final Value<String> writeRelays;
   final Value<int> createdAt;
-  final Value<int?> loadedTimestamp;
-  final Value<String> sources;
+  final Value<int> refreshedTimestamp;
+  final Value<String> relays;
   final Value<int> rowid;
   const UserRelayListTableCompanion({
     this.pubkey = const Value.absent(),
-    this.readRelays = const Value.absent(),
-    this.writeRelays = const Value.absent(),
     this.createdAt = const Value.absent(),
-    this.loadedTimestamp = const Value.absent(),
-    this.sources = const Value.absent(),
+    this.refreshedTimestamp = const Value.absent(),
+    this.relays = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   UserRelayListTableCompanion.insert({
     required String pubkey,
-    this.readRelays = const Value.absent(),
-    this.writeRelays = const Value.absent(),
     required int createdAt,
-    this.loadedTimestamp = const Value.absent(),
-    this.sources = const Value.absent(),
+    required int refreshedTimestamp,
+    required String relays,
     this.rowid = const Value.absent(),
   })  : pubkey = Value(pubkey),
-        createdAt = Value(createdAt);
+        createdAt = Value(createdAt),
+        refreshedTimestamp = Value(refreshedTimestamp),
+        relays = Value(relays);
   static Insertable<UserRelayListTableData> custom({
     Expression<String>? pubkey,
-    Expression<String>? readRelays,
-    Expression<String>? writeRelays,
     Expression<int>? createdAt,
-    Expression<int>? loadedTimestamp,
-    Expression<String>? sources,
+    Expression<int>? refreshedTimestamp,
+    Expression<String>? relays,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (pubkey != null) 'pubkey': pubkey,
-      if (readRelays != null) 'read_relays': readRelays,
-      if (writeRelays != null) 'write_relays': writeRelays,
       if (createdAt != null) 'created_at': createdAt,
-      if (loadedTimestamp != null) 'loaded_timestamp': loadedTimestamp,
-      if (sources != null) 'sources': sources,
+      if (refreshedTimestamp != null) 'refreshed_timestamp': refreshedTimestamp,
+      if (relays != null) 'relays': relays,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   UserRelayListTableCompanion copyWith(
       {Value<String>? pubkey,
-      Value<String>? readRelays,
-      Value<String>? writeRelays,
       Value<int>? createdAt,
-      Value<int?>? loadedTimestamp,
-      Value<String>? sources,
+      Value<int>? refreshedTimestamp,
+      Value<String>? relays,
       Value<int>? rowid}) {
     return UserRelayListTableCompanion(
       pubkey: pubkey ?? this.pubkey,
-      readRelays: readRelays ?? this.readRelays,
-      writeRelays: writeRelays ?? this.writeRelays,
       createdAt: createdAt ?? this.createdAt,
-      loadedTimestamp: loadedTimestamp ?? this.loadedTimestamp,
-      sources: sources ?? this.sources,
+      refreshedTimestamp: refreshedTimestamp ?? this.refreshedTimestamp,
+      relays: relays ?? this.relays,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2835,20 +2767,14 @@ class UserRelayListTableCompanion
     if (pubkey.present) {
       map['pubkey'] = Variable<String>(pubkey.value);
     }
-    if (readRelays.present) {
-      map['read_relays'] = Variable<String>(readRelays.value);
-    }
-    if (writeRelays.present) {
-      map['write_relays'] = Variable<String>(writeRelays.value);
-    }
     if (createdAt.present) {
       map['created_at'] = Variable<int>(createdAt.value);
     }
-    if (loadedTimestamp.present) {
-      map['loaded_timestamp'] = Variable<int>(loadedTimestamp.value);
+    if (refreshedTimestamp.present) {
+      map['refreshed_timestamp'] = Variable<int>(refreshedTimestamp.value);
     }
-    if (sources.present) {
-      map['sources'] = Variable<String>(sources.value);
+    if (relays.present) {
+      map['relays'] = Variable<String>(relays.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -2860,11 +2786,9 @@ class UserRelayListTableCompanion
   String toString() {
     return (StringBuffer('UserRelayListTableCompanion(')
           ..write('pubkey: $pubkey, ')
-          ..write('readRelays: $readRelays, ')
-          ..write('writeRelays: $writeRelays, ')
           ..write('createdAt: $createdAt, ')
-          ..write('loadedTimestamp: $loadedTimestamp, ')
-          ..write('sources: $sources, ')
+          ..write('refreshedTimestamp: $refreshedTimestamp, ')
+          ..write('relays: $relays, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2892,36 +2816,31 @@ class $RelaySetTableTable extends RelaySetTable
   late final GeneratedColumn<String> pubkey = GeneratedColumn<String>(
       'pubkey', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _relaysMeta = const VerificationMeta('relays');
+  static const VerificationMeta _relaysMapMeta =
+      const VerificationMeta('relaysMap');
   @override
-  late final GeneratedColumn<String> relays = GeneratedColumn<String>(
-      'relays', aliasedName, false,
+  late final GeneratedColumn<String> relaysMap = GeneratedColumn<String>(
+      'relays_map', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant('{}'));
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
+  static const VerificationMeta _directionMeta =
+      const VerificationMeta('direction');
   @override
-  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
-      'created_at', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _loadedTimestampMeta =
-      const VerificationMeta('loadedTimestamp');
+  late final GeneratedColumn<String> direction = GeneratedColumn<String>(
+      'direction', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _relayMinCountPerPubkeyMeta =
+      const VerificationMeta('relayMinCountPerPubkey');
   @override
-  late final GeneratedColumn<int> loadedTimestamp = GeneratedColumn<int>(
-      'loaded_timestamp', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
-  static const VerificationMeta _sourcesMeta =
-      const VerificationMeta('sources');
-  @override
-  late final GeneratedColumn<String> sources = GeneratedColumn<String>(
-      'sources', aliasedName, false,
-      type: DriftSqlType.string,
+  late final GeneratedColumn<int> relayMinCountPerPubkey = GeneratedColumn<int>(
+      'relay_min_count_per_pubkey', aliasedName, false,
+      type: DriftSqlType.int,
       requiredDuringInsert: false,
-      defaultValue: const Constant('[]'));
+      defaultValue: const Constant(0));
   @override
   List<GeneratedColumn> get $columns =>
-      [id, name, pubkey, relays, createdAt, loadedTimestamp, sources];
+      [id, name, pubkey, relaysMap, direction, relayMinCountPerPubkey];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2949,25 +2868,22 @@ class $RelaySetTableTable extends RelaySetTable
     } else if (isInserting) {
       context.missing(_pubkeyMeta);
     }
-    if (data.containsKey('relays')) {
-      context.handle(_relaysMeta,
-          relays.isAcceptableOrUnknown(data['relays']!, _relaysMeta));
+    if (data.containsKey('relays_map')) {
+      context.handle(_relaysMapMeta,
+          relaysMap.isAcceptableOrUnknown(data['relays_map']!, _relaysMapMeta));
     }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    if (data.containsKey('direction')) {
+      context.handle(_directionMeta,
+          direction.isAcceptableOrUnknown(data['direction']!, _directionMeta));
     } else if (isInserting) {
-      context.missing(_createdAtMeta);
+      context.missing(_directionMeta);
     }
-    if (data.containsKey('loaded_timestamp')) {
+    if (data.containsKey('relay_min_count_per_pubkey')) {
       context.handle(
-          _loadedTimestampMeta,
-          loadedTimestamp.isAcceptableOrUnknown(
-              data['loaded_timestamp']!, _loadedTimestampMeta));
-    }
-    if (data.containsKey('sources')) {
-      context.handle(_sourcesMeta,
-          sources.isAcceptableOrUnknown(data['sources']!, _sourcesMeta));
+          _relayMinCountPerPubkeyMeta,
+          relayMinCountPerPubkey.isAcceptableOrUnknown(
+              data['relay_min_count_per_pubkey']!,
+              _relayMinCountPerPubkeyMeta));
     }
     return context;
   }
@@ -2984,14 +2900,13 @@ class $RelaySetTableTable extends RelaySetTable
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       pubkey: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}pubkey'])!,
-      relays: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}relays'])!,
-      createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
-      loadedTimestamp: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}loaded_timestamp']),
-      sources: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}sources'])!,
+      relaysMap: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}relays_map'])!,
+      direction: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}direction'])!,
+      relayMinCountPerPubkey: attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}relay_min_count_per_pubkey'])!,
     );
   }
 
@@ -3006,30 +2921,25 @@ class RelaySetTableData extends DataClass
   final String id;
   final String name;
   final String pubkey;
-  final String relays;
-  final int createdAt;
-  final int? loadedTimestamp;
-  final String sources;
+  final String relaysMap;
+  final String direction;
+  final int relayMinCountPerPubkey;
   const RelaySetTableData(
       {required this.id,
       required this.name,
       required this.pubkey,
-      required this.relays,
-      required this.createdAt,
-      this.loadedTimestamp,
-      required this.sources});
+      required this.relaysMap,
+      required this.direction,
+      required this.relayMinCountPerPubkey});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['name'] = Variable<String>(name);
     map['pubkey'] = Variable<String>(pubkey);
-    map['relays'] = Variable<String>(relays);
-    map['created_at'] = Variable<int>(createdAt);
-    if (!nullToAbsent || loadedTimestamp != null) {
-      map['loaded_timestamp'] = Variable<int>(loadedTimestamp);
-    }
-    map['sources'] = Variable<String>(sources);
+    map['relays_map'] = Variable<String>(relaysMap);
+    map['direction'] = Variable<String>(direction);
+    map['relay_min_count_per_pubkey'] = Variable<int>(relayMinCountPerPubkey);
     return map;
   }
 
@@ -3038,12 +2948,9 @@ class RelaySetTableData extends DataClass
       id: Value(id),
       name: Value(name),
       pubkey: Value(pubkey),
-      relays: Value(relays),
-      createdAt: Value(createdAt),
-      loadedTimestamp: loadedTimestamp == null && nullToAbsent
-          ? const Value.absent()
-          : Value(loadedTimestamp),
-      sources: Value(sources),
+      relaysMap: Value(relaysMap),
+      direction: Value(direction),
+      relayMinCountPerPubkey: Value(relayMinCountPerPubkey),
     );
   }
 
@@ -3054,10 +2961,10 @@ class RelaySetTableData extends DataClass
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       pubkey: serializer.fromJson<String>(json['pubkey']),
-      relays: serializer.fromJson<String>(json['relays']),
-      createdAt: serializer.fromJson<int>(json['createdAt']),
-      loadedTimestamp: serializer.fromJson<int?>(json['loadedTimestamp']),
-      sources: serializer.fromJson<String>(json['sources']),
+      relaysMap: serializer.fromJson<String>(json['relaysMap']),
+      direction: serializer.fromJson<String>(json['direction']),
+      relayMinCountPerPubkey:
+          serializer.fromJson<int>(json['relayMinCountPerPubkey']),
     );
   }
   @override
@@ -3067,10 +2974,9 @@ class RelaySetTableData extends DataClass
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
       'pubkey': serializer.toJson<String>(pubkey),
-      'relays': serializer.toJson<String>(relays),
-      'createdAt': serializer.toJson<int>(createdAt),
-      'loadedTimestamp': serializer.toJson<int?>(loadedTimestamp),
-      'sources': serializer.toJson<String>(sources),
+      'relaysMap': serializer.toJson<String>(relaysMap),
+      'direction': serializer.toJson<String>(direction),
+      'relayMinCountPerPubkey': serializer.toJson<int>(relayMinCountPerPubkey),
     };
   }
 
@@ -3078,32 +2984,28 @@ class RelaySetTableData extends DataClass
           {String? id,
           String? name,
           String? pubkey,
-          String? relays,
-          int? createdAt,
-          Value<int?> loadedTimestamp = const Value.absent(),
-          String? sources}) =>
+          String? relaysMap,
+          String? direction,
+          int? relayMinCountPerPubkey}) =>
       RelaySetTableData(
         id: id ?? this.id,
         name: name ?? this.name,
         pubkey: pubkey ?? this.pubkey,
-        relays: relays ?? this.relays,
-        createdAt: createdAt ?? this.createdAt,
-        loadedTimestamp: loadedTimestamp.present
-            ? loadedTimestamp.value
-            : this.loadedTimestamp,
-        sources: sources ?? this.sources,
+        relaysMap: relaysMap ?? this.relaysMap,
+        direction: direction ?? this.direction,
+        relayMinCountPerPubkey:
+            relayMinCountPerPubkey ?? this.relayMinCountPerPubkey,
       );
   RelaySetTableData copyWithCompanion(RelaySetTableCompanion data) {
     return RelaySetTableData(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       pubkey: data.pubkey.present ? data.pubkey.value : this.pubkey,
-      relays: data.relays.present ? data.relays.value : this.relays,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      loadedTimestamp: data.loadedTimestamp.present
-          ? data.loadedTimestamp.value
-          : this.loadedTimestamp,
-      sources: data.sources.present ? data.sources.value : this.sources,
+      relaysMap: data.relaysMap.present ? data.relaysMap.value : this.relaysMap,
+      direction: data.direction.present ? data.direction.value : this.direction,
+      relayMinCountPerPubkey: data.relayMinCountPerPubkey.present
+          ? data.relayMinCountPerPubkey.value
+          : this.relayMinCountPerPubkey,
     );
   }
 
@@ -3113,17 +3015,16 @@ class RelaySetTableData extends DataClass
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('pubkey: $pubkey, ')
-          ..write('relays: $relays, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('loadedTimestamp: $loadedTimestamp, ')
-          ..write('sources: $sources')
+          ..write('relaysMap: $relaysMap, ')
+          ..write('direction: $direction, ')
+          ..write('relayMinCountPerPubkey: $relayMinCountPerPubkey')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(
-      id, name, pubkey, relays, createdAt, loadedTimestamp, sources);
+      id, name, pubkey, relaysMap, direction, relayMinCountPerPubkey);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3131,62 +3032,57 @@ class RelaySetTableData extends DataClass
           other.id == this.id &&
           other.name == this.name &&
           other.pubkey == this.pubkey &&
-          other.relays == this.relays &&
-          other.createdAt == this.createdAt &&
-          other.loadedTimestamp == this.loadedTimestamp &&
-          other.sources == this.sources);
+          other.relaysMap == this.relaysMap &&
+          other.direction == this.direction &&
+          other.relayMinCountPerPubkey == this.relayMinCountPerPubkey);
 }
 
 class RelaySetTableCompanion extends UpdateCompanion<RelaySetTableData> {
   final Value<String> id;
   final Value<String> name;
   final Value<String> pubkey;
-  final Value<String> relays;
-  final Value<int> createdAt;
-  final Value<int?> loadedTimestamp;
-  final Value<String> sources;
+  final Value<String> relaysMap;
+  final Value<String> direction;
+  final Value<int> relayMinCountPerPubkey;
   final Value<int> rowid;
   const RelaySetTableCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.pubkey = const Value.absent(),
-    this.relays = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.loadedTimestamp = const Value.absent(),
-    this.sources = const Value.absent(),
+    this.relaysMap = const Value.absent(),
+    this.direction = const Value.absent(),
+    this.relayMinCountPerPubkey = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   RelaySetTableCompanion.insert({
     required String id,
     required String name,
     required String pubkey,
-    this.relays = const Value.absent(),
-    required int createdAt,
-    this.loadedTimestamp = const Value.absent(),
-    this.sources = const Value.absent(),
+    this.relaysMap = const Value.absent(),
+    required String direction,
+    this.relayMinCountPerPubkey = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         name = Value(name),
         pubkey = Value(pubkey),
-        createdAt = Value(createdAt);
+        direction = Value(direction);
   static Insertable<RelaySetTableData> custom({
     Expression<String>? id,
     Expression<String>? name,
     Expression<String>? pubkey,
-    Expression<String>? relays,
-    Expression<int>? createdAt,
-    Expression<int>? loadedTimestamp,
-    Expression<String>? sources,
+    Expression<String>? relaysMap,
+    Expression<String>? direction,
+    Expression<int>? relayMinCountPerPubkey,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (pubkey != null) 'pubkey': pubkey,
-      if (relays != null) 'relays': relays,
-      if (createdAt != null) 'created_at': createdAt,
-      if (loadedTimestamp != null) 'loaded_timestamp': loadedTimestamp,
-      if (sources != null) 'sources': sources,
+      if (relaysMap != null) 'relays_map': relaysMap,
+      if (direction != null) 'direction': direction,
+      if (relayMinCountPerPubkey != null)
+        'relay_min_count_per_pubkey': relayMinCountPerPubkey,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3195,19 +3091,18 @@ class RelaySetTableCompanion extends UpdateCompanion<RelaySetTableData> {
       {Value<String>? id,
       Value<String>? name,
       Value<String>? pubkey,
-      Value<String>? relays,
-      Value<int>? createdAt,
-      Value<int?>? loadedTimestamp,
-      Value<String>? sources,
+      Value<String>? relaysMap,
+      Value<String>? direction,
+      Value<int>? relayMinCountPerPubkey,
       Value<int>? rowid}) {
     return RelaySetTableCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       pubkey: pubkey ?? this.pubkey,
-      relays: relays ?? this.relays,
-      createdAt: createdAt ?? this.createdAt,
-      loadedTimestamp: loadedTimestamp ?? this.loadedTimestamp,
-      sources: sources ?? this.sources,
+      relaysMap: relaysMap ?? this.relaysMap,
+      direction: direction ?? this.direction,
+      relayMinCountPerPubkey:
+          relayMinCountPerPubkey ?? this.relayMinCountPerPubkey,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3224,17 +3119,15 @@ class RelaySetTableCompanion extends UpdateCompanion<RelaySetTableData> {
     if (pubkey.present) {
       map['pubkey'] = Variable<String>(pubkey.value);
     }
-    if (relays.present) {
-      map['relays'] = Variable<String>(relays.value);
+    if (relaysMap.present) {
+      map['relays_map'] = Variable<String>(relaysMap.value);
     }
-    if (createdAt.present) {
-      map['created_at'] = Variable<int>(createdAt.value);
+    if (direction.present) {
+      map['direction'] = Variable<String>(direction.value);
     }
-    if (loadedTimestamp.present) {
-      map['loaded_timestamp'] = Variable<int>(loadedTimestamp.value);
-    }
-    if (sources.present) {
-      map['sources'] = Variable<String>(sources.value);
+    if (relayMinCountPerPubkey.present) {
+      map['relay_min_count_per_pubkey'] =
+          Variable<int>(relayMinCountPerPubkey.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -3248,10 +3141,9 @@ class RelaySetTableCompanion extends UpdateCompanion<RelaySetTableData> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('pubkey: $pubkey, ')
-          ..write('relays: $relays, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('loadedTimestamp: $loadedTimestamp, ')
-          ..write('sources: $sources, ')
+          ..write('relaysMap: $relaysMap, ')
+          ..write('direction: $direction, ')
+          ..write('relayMinCountPerPubkey: $relayMinCountPerPubkey, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3269,62 +3161,55 @@ class $EventStatsTableTable extends EventStatsTable
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _repliesCountMeta =
-      const VerificationMeta('repliesCount');
   @override
-  late final GeneratedColumn<int> repliesCount = GeneratedColumn<int>(
-      'replies_count', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _repostsCountMeta =
-      const VerificationMeta('repostsCount');
+  late final GeneratedColumnWithTypeConverter<Map<String, String>, String>
+      replies = GeneratedColumn<String>('replies', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('{}'))
+          .withConverter<Map<String, String>>(
+              $EventStatsTableTable.$converterreplies);
   @override
-  late final GeneratedColumn<int> repostsCount = GeneratedColumn<int>(
-      'reposts_count', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _reactionsCountMeta =
-      const VerificationMeta('reactionsCount');
+  late final GeneratedColumnWithTypeConverter<Map<String, String>, String>
+      reposts = GeneratedColumn<String>('reposts', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('{}'))
+          .withConverter<Map<String, String>>(
+              $EventStatsTableTable.$converterreposts);
   @override
-  late final GeneratedColumn<int> reactionsCount = GeneratedColumn<int>(
-      'reactions_count', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _zapsCountMeta =
-      const VerificationMeta('zapsCount');
+  late final GeneratedColumnWithTypeConverter<Map<String, String>, String>
+      reactions = GeneratedColumn<String>('reactions', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('{}'))
+          .withConverter<Map<String, String>>(
+              $EventStatsTableTable.$converterreactions);
   @override
-  late final GeneratedColumn<int> zapsCount = GeneratedColumn<int>(
-      'zaps_count', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _zapAmountMeta =
-      const VerificationMeta('zapAmount');
+  late final GeneratedColumnWithTypeConverter<Map<String, String>, String>
+      quotes = GeneratedColumn<String>('quotes', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('{}'))
+          .withConverter<Map<String, String>>(
+              $EventStatsTableTable.$converterquotes);
   @override
-  late final GeneratedColumn<int> zapAmount = GeneratedColumn<int>(
-      'zap_amount', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _lastUpdatedMeta =
-      const VerificationMeta('lastUpdated');
+  late final GeneratedColumnWithTypeConverter<Map<String, Map<String, int>>,
+      String> zaps = GeneratedColumn<String>('zaps', aliasedName, false,
+          type: DriftSqlType.string,
+          requiredDuringInsert: false,
+          defaultValue: const Constant('{}'))
+      .withConverter<Map<String, Map<String, int>>>(
+          $EventStatsTableTable.$converterzaps);
+  static const VerificationMeta _newestCreatedAtMeta =
+      const VerificationMeta('newestCreatedAt');
   @override
-  late final GeneratedColumn<int> lastUpdated = GeneratedColumn<int>(
-      'last_updated', aliasedName, true,
+  late final GeneratedColumn<int> newestCreatedAt = GeneratedColumn<int>(
+      'newest_created_at', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
   @override
-  List<GeneratedColumn> get $columns => [
-        id,
-        repliesCount,
-        repostsCount,
-        reactionsCount,
-        zapsCount,
-        zapAmount,
-        lastUpdated
-      ];
+  List<GeneratedColumn> get $columns =>
+      [id, replies, reposts, reactions, quotes, zaps, newestCreatedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -3341,37 +3226,11 @@ class $EventStatsTableTable extends EventStatsTable
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    if (data.containsKey('replies_count')) {
+    if (data.containsKey('newest_created_at')) {
       context.handle(
-          _repliesCountMeta,
-          repliesCount.isAcceptableOrUnknown(
-              data['replies_count']!, _repliesCountMeta));
-    }
-    if (data.containsKey('reposts_count')) {
-      context.handle(
-          _repostsCountMeta,
-          repostsCount.isAcceptableOrUnknown(
-              data['reposts_count']!, _repostsCountMeta));
-    }
-    if (data.containsKey('reactions_count')) {
-      context.handle(
-          _reactionsCountMeta,
-          reactionsCount.isAcceptableOrUnknown(
-              data['reactions_count']!, _reactionsCountMeta));
-    }
-    if (data.containsKey('zaps_count')) {
-      context.handle(_zapsCountMeta,
-          zapsCount.isAcceptableOrUnknown(data['zaps_count']!, _zapsCountMeta));
-    }
-    if (data.containsKey('zap_amount')) {
-      context.handle(_zapAmountMeta,
-          zapAmount.isAcceptableOrUnknown(data['zap_amount']!, _zapAmountMeta));
-    }
-    if (data.containsKey('last_updated')) {
-      context.handle(
-          _lastUpdatedMeta,
-          lastUpdated.isAcceptableOrUnknown(
-              data['last_updated']!, _lastUpdatedMeta));
+          _newestCreatedAtMeta,
+          newestCreatedAt.isAcceptableOrUnknown(
+              data['newest_created_at']!, _newestCreatedAtMeta));
     }
     return context;
   }
@@ -3384,18 +3243,23 @@ class $EventStatsTableTable extends EventStatsTable
     return EventStatsTableData(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      repliesCount: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}replies_count'])!,
-      repostsCount: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}reposts_count'])!,
-      reactionsCount: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}reactions_count'])!,
-      zapsCount: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}zaps_count'])!,
-      zapAmount: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}zap_amount'])!,
-      lastUpdated: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}last_updated']),
+      replies: $EventStatsTableTable.$converterreplies.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}replies'])!),
+      reposts: $EventStatsTableTable.$converterreposts.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}reposts'])!),
+      reactions: $EventStatsTableTable.$converterreactions.fromSql(
+          attachedDatabase.typeMapping
+              .read(DriftSqlType.string, data['${effectivePrefix}reactions'])!),
+      quotes: $EventStatsTableTable.$converterquotes.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}quotes'])!),
+      zaps: $EventStatsTableTable.$converterzaps.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}zaps'])!),
+      newestCreatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}newest_created_at']),
     );
   }
 
@@ -3403,36 +3267,62 @@ class $EventStatsTableTable extends EventStatsTable
   $EventStatsTableTable createAlias(String alias) {
     return $EventStatsTableTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<Map<String, String>, String> $converterreplies =
+      const StringMapConverter();
+  static TypeConverter<Map<String, String>, String> $converterreposts =
+      const StringMapConverter();
+  static TypeConverter<Map<String, String>, String> $converterreactions =
+      const StringMapConverter();
+  static TypeConverter<Map<String, String>, String> $converterquotes =
+      const StringMapConverter();
+  static TypeConverter<Map<String, Map<String, int>>, String> $converterzaps =
+      const NestedMapIntConverter();
 }
 
 class EventStatsTableData extends DataClass
     implements Insertable<EventStatsTableData> {
   final String id;
-  final int repliesCount;
-  final int repostsCount;
-  final int reactionsCount;
-  final int zapsCount;
-  final int zapAmount;
-  final int? lastUpdated;
+  final Map<String, String> replies;
+  final Map<String, String> reposts;
+  final Map<String, String> reactions;
+  final Map<String, String> quotes;
+  final Map<String, Map<String, int>> zaps;
+  final int? newestCreatedAt;
   const EventStatsTableData(
       {required this.id,
-      required this.repliesCount,
-      required this.repostsCount,
-      required this.reactionsCount,
-      required this.zapsCount,
-      required this.zapAmount,
-      this.lastUpdated});
+      required this.replies,
+      required this.reposts,
+      required this.reactions,
+      required this.quotes,
+      required this.zaps,
+      this.newestCreatedAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['replies_count'] = Variable<int>(repliesCount);
-    map['reposts_count'] = Variable<int>(repostsCount);
-    map['reactions_count'] = Variable<int>(reactionsCount);
-    map['zaps_count'] = Variable<int>(zapsCount);
-    map['zap_amount'] = Variable<int>(zapAmount);
-    if (!nullToAbsent || lastUpdated != null) {
-      map['last_updated'] = Variable<int>(lastUpdated);
+    {
+      map['replies'] = Variable<String>(
+          $EventStatsTableTable.$converterreplies.toSql(replies));
+    }
+    {
+      map['reposts'] = Variable<String>(
+          $EventStatsTableTable.$converterreposts.toSql(reposts));
+    }
+    {
+      map['reactions'] = Variable<String>(
+          $EventStatsTableTable.$converterreactions.toSql(reactions));
+    }
+    {
+      map['quotes'] = Variable<String>(
+          $EventStatsTableTable.$converterquotes.toSql(quotes));
+    }
+    {
+      map['zaps'] =
+          Variable<String>($EventStatsTableTable.$converterzaps.toSql(zaps));
+    }
+    if (!nullToAbsent || newestCreatedAt != null) {
+      map['newest_created_at'] = Variable<int>(newestCreatedAt);
     }
     return map;
   }
@@ -3440,14 +3330,14 @@ class EventStatsTableData extends DataClass
   EventStatsTableCompanion toCompanion(bool nullToAbsent) {
     return EventStatsTableCompanion(
       id: Value(id),
-      repliesCount: Value(repliesCount),
-      repostsCount: Value(repostsCount),
-      reactionsCount: Value(reactionsCount),
-      zapsCount: Value(zapsCount),
-      zapAmount: Value(zapAmount),
-      lastUpdated: lastUpdated == null && nullToAbsent
+      replies: Value(replies),
+      reposts: Value(reposts),
+      reactions: Value(reactions),
+      quotes: Value(quotes),
+      zaps: Value(zaps),
+      newestCreatedAt: newestCreatedAt == null && nullToAbsent
           ? const Value.absent()
-          : Value(lastUpdated),
+          : Value(newestCreatedAt),
     );
   }
 
@@ -3456,12 +3346,12 @@ class EventStatsTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return EventStatsTableData(
       id: serializer.fromJson<String>(json['id']),
-      repliesCount: serializer.fromJson<int>(json['repliesCount']),
-      repostsCount: serializer.fromJson<int>(json['repostsCount']),
-      reactionsCount: serializer.fromJson<int>(json['reactionsCount']),
-      zapsCount: serializer.fromJson<int>(json['zapsCount']),
-      zapAmount: serializer.fromJson<int>(json['zapAmount']),
-      lastUpdated: serializer.fromJson<int?>(json['lastUpdated']),
+      replies: serializer.fromJson<Map<String, String>>(json['replies']),
+      reposts: serializer.fromJson<Map<String, String>>(json['reposts']),
+      reactions: serializer.fromJson<Map<String, String>>(json['reactions']),
+      quotes: serializer.fromJson<Map<String, String>>(json['quotes']),
+      zaps: serializer.fromJson<Map<String, Map<String, int>>>(json['zaps']),
+      newestCreatedAt: serializer.fromJson<int?>(json['newestCreatedAt']),
     );
   }
   @override
@@ -3469,48 +3359,45 @@ class EventStatsTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'repliesCount': serializer.toJson<int>(repliesCount),
-      'repostsCount': serializer.toJson<int>(repostsCount),
-      'reactionsCount': serializer.toJson<int>(reactionsCount),
-      'zapsCount': serializer.toJson<int>(zapsCount),
-      'zapAmount': serializer.toJson<int>(zapAmount),
-      'lastUpdated': serializer.toJson<int?>(lastUpdated),
+      'replies': serializer.toJson<Map<String, String>>(replies),
+      'reposts': serializer.toJson<Map<String, String>>(reposts),
+      'reactions': serializer.toJson<Map<String, String>>(reactions),
+      'quotes': serializer.toJson<Map<String, String>>(quotes),
+      'zaps': serializer.toJson<Map<String, Map<String, int>>>(zaps),
+      'newestCreatedAt': serializer.toJson<int?>(newestCreatedAt),
     };
   }
 
   EventStatsTableData copyWith(
           {String? id,
-          int? repliesCount,
-          int? repostsCount,
-          int? reactionsCount,
-          int? zapsCount,
-          int? zapAmount,
-          Value<int?> lastUpdated = const Value.absent()}) =>
+          Map<String, String>? replies,
+          Map<String, String>? reposts,
+          Map<String, String>? reactions,
+          Map<String, String>? quotes,
+          Map<String, Map<String, int>>? zaps,
+          Value<int?> newestCreatedAt = const Value.absent()}) =>
       EventStatsTableData(
         id: id ?? this.id,
-        repliesCount: repliesCount ?? this.repliesCount,
-        repostsCount: repostsCount ?? this.repostsCount,
-        reactionsCount: reactionsCount ?? this.reactionsCount,
-        zapsCount: zapsCount ?? this.zapsCount,
-        zapAmount: zapAmount ?? this.zapAmount,
-        lastUpdated: lastUpdated.present ? lastUpdated.value : this.lastUpdated,
+        replies: replies ?? this.replies,
+        reposts: reposts ?? this.reposts,
+        reactions: reactions ?? this.reactions,
+        quotes: quotes ?? this.quotes,
+        zaps: zaps ?? this.zaps,
+        newestCreatedAt: newestCreatedAt.present
+            ? newestCreatedAt.value
+            : this.newestCreatedAt,
       );
   EventStatsTableData copyWithCompanion(EventStatsTableCompanion data) {
     return EventStatsTableData(
       id: data.id.present ? data.id.value : this.id,
-      repliesCount: data.repliesCount.present
-          ? data.repliesCount.value
-          : this.repliesCount,
-      repostsCount: data.repostsCount.present
-          ? data.repostsCount.value
-          : this.repostsCount,
-      reactionsCount: data.reactionsCount.present
-          ? data.reactionsCount.value
-          : this.reactionsCount,
-      zapsCount: data.zapsCount.present ? data.zapsCount.value : this.zapsCount,
-      zapAmount: data.zapAmount.present ? data.zapAmount.value : this.zapAmount,
-      lastUpdated:
-          data.lastUpdated.present ? data.lastUpdated.value : this.lastUpdated,
+      replies: data.replies.present ? data.replies.value : this.replies,
+      reposts: data.reposts.present ? data.reposts.value : this.reposts,
+      reactions: data.reactions.present ? data.reactions.value : this.reactions,
+      quotes: data.quotes.present ? data.quotes.value : this.quotes,
+      zaps: data.zaps.present ? data.zaps.value : this.zaps,
+      newestCreatedAt: data.newestCreatedAt.present
+          ? data.newestCreatedAt.value
+          : this.newestCreatedAt,
     );
   }
 
@@ -3518,100 +3405,100 @@ class EventStatsTableData extends DataClass
   String toString() {
     return (StringBuffer('EventStatsTableData(')
           ..write('id: $id, ')
-          ..write('repliesCount: $repliesCount, ')
-          ..write('repostsCount: $repostsCount, ')
-          ..write('reactionsCount: $reactionsCount, ')
-          ..write('zapsCount: $zapsCount, ')
-          ..write('zapAmount: $zapAmount, ')
-          ..write('lastUpdated: $lastUpdated')
+          ..write('replies: $replies, ')
+          ..write('reposts: $reposts, ')
+          ..write('reactions: $reactions, ')
+          ..write('quotes: $quotes, ')
+          ..write('zaps: $zaps, ')
+          ..write('newestCreatedAt: $newestCreatedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, repliesCount, repostsCount,
-      reactionsCount, zapsCount, zapAmount, lastUpdated);
+  int get hashCode => Object.hash(
+      id, replies, reposts, reactions, quotes, zaps, newestCreatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is EventStatsTableData &&
           other.id == this.id &&
-          other.repliesCount == this.repliesCount &&
-          other.repostsCount == this.repostsCount &&
-          other.reactionsCount == this.reactionsCount &&
-          other.zapsCount == this.zapsCount &&
-          other.zapAmount == this.zapAmount &&
-          other.lastUpdated == this.lastUpdated);
+          other.replies == this.replies &&
+          other.reposts == this.reposts &&
+          other.reactions == this.reactions &&
+          other.quotes == this.quotes &&
+          other.zaps == this.zaps &&
+          other.newestCreatedAt == this.newestCreatedAt);
 }
 
 class EventStatsTableCompanion extends UpdateCompanion<EventStatsTableData> {
   final Value<String> id;
-  final Value<int> repliesCount;
-  final Value<int> repostsCount;
-  final Value<int> reactionsCount;
-  final Value<int> zapsCount;
-  final Value<int> zapAmount;
-  final Value<int?> lastUpdated;
+  final Value<Map<String, String>> replies;
+  final Value<Map<String, String>> reposts;
+  final Value<Map<String, String>> reactions;
+  final Value<Map<String, String>> quotes;
+  final Value<Map<String, Map<String, int>>> zaps;
+  final Value<int?> newestCreatedAt;
   final Value<int> rowid;
   const EventStatsTableCompanion({
     this.id = const Value.absent(),
-    this.repliesCount = const Value.absent(),
-    this.repostsCount = const Value.absent(),
-    this.reactionsCount = const Value.absent(),
-    this.zapsCount = const Value.absent(),
-    this.zapAmount = const Value.absent(),
-    this.lastUpdated = const Value.absent(),
+    this.replies = const Value.absent(),
+    this.reposts = const Value.absent(),
+    this.reactions = const Value.absent(),
+    this.quotes = const Value.absent(),
+    this.zaps = const Value.absent(),
+    this.newestCreatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   EventStatsTableCompanion.insert({
     required String id,
-    this.repliesCount = const Value.absent(),
-    this.repostsCount = const Value.absent(),
-    this.reactionsCount = const Value.absent(),
-    this.zapsCount = const Value.absent(),
-    this.zapAmount = const Value.absent(),
-    this.lastUpdated = const Value.absent(),
+    this.replies = const Value.absent(),
+    this.reposts = const Value.absent(),
+    this.reactions = const Value.absent(),
+    this.quotes = const Value.absent(),
+    this.zaps = const Value.absent(),
+    this.newestCreatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id);
   static Insertable<EventStatsTableData> custom({
     Expression<String>? id,
-    Expression<int>? repliesCount,
-    Expression<int>? repostsCount,
-    Expression<int>? reactionsCount,
-    Expression<int>? zapsCount,
-    Expression<int>? zapAmount,
-    Expression<int>? lastUpdated,
+    Expression<String>? replies,
+    Expression<String>? reposts,
+    Expression<String>? reactions,
+    Expression<String>? quotes,
+    Expression<String>? zaps,
+    Expression<int>? newestCreatedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (repliesCount != null) 'replies_count': repliesCount,
-      if (repostsCount != null) 'reposts_count': repostsCount,
-      if (reactionsCount != null) 'reactions_count': reactionsCount,
-      if (zapsCount != null) 'zaps_count': zapsCount,
-      if (zapAmount != null) 'zap_amount': zapAmount,
-      if (lastUpdated != null) 'last_updated': lastUpdated,
+      if (replies != null) 'replies': replies,
+      if (reposts != null) 'reposts': reposts,
+      if (reactions != null) 'reactions': reactions,
+      if (quotes != null) 'quotes': quotes,
+      if (zaps != null) 'zaps': zaps,
+      if (newestCreatedAt != null) 'newest_created_at': newestCreatedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   EventStatsTableCompanion copyWith(
       {Value<String>? id,
-      Value<int>? repliesCount,
-      Value<int>? repostsCount,
-      Value<int>? reactionsCount,
-      Value<int>? zapsCount,
-      Value<int>? zapAmount,
-      Value<int?>? lastUpdated,
+      Value<Map<String, String>>? replies,
+      Value<Map<String, String>>? reposts,
+      Value<Map<String, String>>? reactions,
+      Value<Map<String, String>>? quotes,
+      Value<Map<String, Map<String, int>>>? zaps,
+      Value<int?>? newestCreatedAt,
       Value<int>? rowid}) {
     return EventStatsTableCompanion(
       id: id ?? this.id,
-      repliesCount: repliesCount ?? this.repliesCount,
-      repostsCount: repostsCount ?? this.repostsCount,
-      reactionsCount: reactionsCount ?? this.reactionsCount,
-      zapsCount: zapsCount ?? this.zapsCount,
-      zapAmount: zapAmount ?? this.zapAmount,
-      lastUpdated: lastUpdated ?? this.lastUpdated,
+      replies: replies ?? this.replies,
+      reposts: reposts ?? this.reposts,
+      reactions: reactions ?? this.reactions,
+      quotes: quotes ?? this.quotes,
+      zaps: zaps ?? this.zaps,
+      newestCreatedAt: newestCreatedAt ?? this.newestCreatedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3622,23 +3509,28 @@ class EventStatsTableCompanion extends UpdateCompanion<EventStatsTableData> {
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
-    if (repliesCount.present) {
-      map['replies_count'] = Variable<int>(repliesCount.value);
+    if (replies.present) {
+      map['replies'] = Variable<String>(
+          $EventStatsTableTable.$converterreplies.toSql(replies.value));
     }
-    if (repostsCount.present) {
-      map['reposts_count'] = Variable<int>(repostsCount.value);
+    if (reposts.present) {
+      map['reposts'] = Variable<String>(
+          $EventStatsTableTable.$converterreposts.toSql(reposts.value));
     }
-    if (reactionsCount.present) {
-      map['reactions_count'] = Variable<int>(reactionsCount.value);
+    if (reactions.present) {
+      map['reactions'] = Variable<String>(
+          $EventStatsTableTable.$converterreactions.toSql(reactions.value));
     }
-    if (zapsCount.present) {
-      map['zaps_count'] = Variable<int>(zapsCount.value);
+    if (quotes.present) {
+      map['quotes'] = Variable<String>(
+          $EventStatsTableTable.$converterquotes.toSql(quotes.value));
     }
-    if (zapAmount.present) {
-      map['zap_amount'] = Variable<int>(zapAmount.value);
+    if (zaps.present) {
+      map['zaps'] = Variable<String>(
+          $EventStatsTableTable.$converterzaps.toSql(zaps.value));
     }
-    if (lastUpdated.present) {
-      map['last_updated'] = Variable<int>(lastUpdated.value);
+    if (newestCreatedAt.present) {
+      map['newest_created_at'] = Variable<int>(newestCreatedAt.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -3650,12 +3542,12 @@ class EventStatsTableCompanion extends UpdateCompanion<EventStatsTableData> {
   String toString() {
     return (StringBuffer('EventStatsTableCompanion(')
           ..write('id: $id, ')
-          ..write('repliesCount: $repliesCount, ')
-          ..write('repostsCount: $repostsCount, ')
-          ..write('reactionsCount: $reactionsCount, ')
-          ..write('zapsCount: $zapsCount, ')
-          ..write('zapAmount: $zapAmount, ')
-          ..write('lastUpdated: $lastUpdated, ')
+          ..write('replies: $replies, ')
+          ..write('reposts: $reposts, ')
+          ..write('reactions: $reactions, ')
+          ..write('quotes: $quotes, ')
+          ..write('zaps: $zaps, ')
+          ..write('newestCreatedAt: $newestCreatedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3687,21 +3579,14 @@ class $Nip05TableTable extends Nip05Table
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("valid" IN (0, 1))'),
       defaultValue: const Constant(false));
-  static const VerificationMeta _lastCheckMeta =
-      const VerificationMeta('lastCheck');
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
   @override
-  late final GeneratedColumn<int> lastCheck = GeneratedColumn<int>(
-      'last_check', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
-  static const VerificationMeta _networkFetchMeta =
-      const VerificationMeta('networkFetch');
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
   @override
-  late final GeneratedColumn<int> networkFetch = GeneratedColumn<int>(
-      'network_fetch', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
-  @override
-  List<GeneratedColumn> get $columns =>
-      [nip05, pubkey, valid, lastCheck, networkFetch];
+  List<GeneratedColumn> get $columns => [nip05, pubkey, valid, updatedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -3728,21 +3613,17 @@ class $Nip05TableTable extends Nip05Table
       context.handle(
           _validMeta, valid.isAcceptableOrUnknown(data['valid']!, _validMeta));
     }
-    if (data.containsKey('last_check')) {
-      context.handle(_lastCheckMeta,
-          lastCheck.isAcceptableOrUnknown(data['last_check']!, _lastCheckMeta));
-    }
-    if (data.containsKey('network_fetch')) {
-      context.handle(
-          _networkFetchMeta,
-          networkFetch.isAcceptableOrUnknown(
-              data['network_fetch']!, _networkFetchMeta));
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
     }
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {nip05};
+  Set<GeneratedColumn> get $primaryKey => {pubkey};
   @override
   Nip05TableData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -3753,10 +3634,8 @@ class $Nip05TableTable extends Nip05Table
           .read(DriftSqlType.string, data['${effectivePrefix}pubkey'])!,
       valid: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}valid'])!,
-      lastCheck: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}last_check']),
-      networkFetch: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}network_fetch']),
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}updated_at'])!,
     );
   }
 
@@ -3770,26 +3649,19 @@ class Nip05TableData extends DataClass implements Insertable<Nip05TableData> {
   final String nip05;
   final String pubkey;
   final bool valid;
-  final int? lastCheck;
-  final int? networkFetch;
+  final int updatedAt;
   const Nip05TableData(
       {required this.nip05,
       required this.pubkey,
       required this.valid,
-      this.lastCheck,
-      this.networkFetch});
+      required this.updatedAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['nip05'] = Variable<String>(nip05);
     map['pubkey'] = Variable<String>(pubkey);
     map['valid'] = Variable<bool>(valid);
-    if (!nullToAbsent || lastCheck != null) {
-      map['last_check'] = Variable<int>(lastCheck);
-    }
-    if (!nullToAbsent || networkFetch != null) {
-      map['network_fetch'] = Variable<int>(networkFetch);
-    }
+    map['updated_at'] = Variable<int>(updatedAt);
     return map;
   }
 
@@ -3798,12 +3670,7 @@ class Nip05TableData extends DataClass implements Insertable<Nip05TableData> {
       nip05: Value(nip05),
       pubkey: Value(pubkey),
       valid: Value(valid),
-      lastCheck: lastCheck == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastCheck),
-      networkFetch: networkFetch == null && nullToAbsent
-          ? const Value.absent()
-          : Value(networkFetch),
+      updatedAt: Value(updatedAt),
     );
   }
 
@@ -3814,8 +3681,7 @@ class Nip05TableData extends DataClass implements Insertable<Nip05TableData> {
       nip05: serializer.fromJson<String>(json['nip05']),
       pubkey: serializer.fromJson<String>(json['pubkey']),
       valid: serializer.fromJson<bool>(json['valid']),
-      lastCheck: serializer.fromJson<int?>(json['lastCheck']),
-      networkFetch: serializer.fromJson<int?>(json['networkFetch']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
     );
   }
   @override
@@ -3825,34 +3691,24 @@ class Nip05TableData extends DataClass implements Insertable<Nip05TableData> {
       'nip05': serializer.toJson<String>(nip05),
       'pubkey': serializer.toJson<String>(pubkey),
       'valid': serializer.toJson<bool>(valid),
-      'lastCheck': serializer.toJson<int?>(lastCheck),
-      'networkFetch': serializer.toJson<int?>(networkFetch),
+      'updatedAt': serializer.toJson<int>(updatedAt),
     };
   }
 
   Nip05TableData copyWith(
-          {String? nip05,
-          String? pubkey,
-          bool? valid,
-          Value<int?> lastCheck = const Value.absent(),
-          Value<int?> networkFetch = const Value.absent()}) =>
+          {String? nip05, String? pubkey, bool? valid, int? updatedAt}) =>
       Nip05TableData(
         nip05: nip05 ?? this.nip05,
         pubkey: pubkey ?? this.pubkey,
         valid: valid ?? this.valid,
-        lastCheck: lastCheck.present ? lastCheck.value : this.lastCheck,
-        networkFetch:
-            networkFetch.present ? networkFetch.value : this.networkFetch,
+        updatedAt: updatedAt ?? this.updatedAt,
       );
   Nip05TableData copyWithCompanion(Nip05TableCompanion data) {
     return Nip05TableData(
       nip05: data.nip05.present ? data.nip05.value : this.nip05,
       pubkey: data.pubkey.present ? data.pubkey.value : this.pubkey,
       valid: data.valid.present ? data.valid.value : this.valid,
-      lastCheck: data.lastCheck.present ? data.lastCheck.value : this.lastCheck,
-      networkFetch: data.networkFetch.present
-          ? data.networkFetch.value
-          : this.networkFetch,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
 
@@ -3862,15 +3718,13 @@ class Nip05TableData extends DataClass implements Insertable<Nip05TableData> {
           ..write('nip05: $nip05, ')
           ..write('pubkey: $pubkey, ')
           ..write('valid: $valid, ')
-          ..write('lastCheck: $lastCheck, ')
-          ..write('networkFetch: $networkFetch')
+          ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(nip05, pubkey, valid, lastCheck, networkFetch);
+  int get hashCode => Object.hash(nip05, pubkey, valid, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3878,48 +3732,43 @@ class Nip05TableData extends DataClass implements Insertable<Nip05TableData> {
           other.nip05 == this.nip05 &&
           other.pubkey == this.pubkey &&
           other.valid == this.valid &&
-          other.lastCheck == this.lastCheck &&
-          other.networkFetch == this.networkFetch);
+          other.updatedAt == this.updatedAt);
 }
 
 class Nip05TableCompanion extends UpdateCompanion<Nip05TableData> {
   final Value<String> nip05;
   final Value<String> pubkey;
   final Value<bool> valid;
-  final Value<int?> lastCheck;
-  final Value<int?> networkFetch;
+  final Value<int> updatedAt;
   final Value<int> rowid;
   const Nip05TableCompanion({
     this.nip05 = const Value.absent(),
     this.pubkey = const Value.absent(),
     this.valid = const Value.absent(),
-    this.lastCheck = const Value.absent(),
-    this.networkFetch = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   Nip05TableCompanion.insert({
     required String nip05,
     required String pubkey,
     this.valid = const Value.absent(),
-    this.lastCheck = const Value.absent(),
-    this.networkFetch = const Value.absent(),
+    required int updatedAt,
     this.rowid = const Value.absent(),
   })  : nip05 = Value(nip05),
-        pubkey = Value(pubkey);
+        pubkey = Value(pubkey),
+        updatedAt = Value(updatedAt);
   static Insertable<Nip05TableData> custom({
     Expression<String>? nip05,
     Expression<String>? pubkey,
     Expression<bool>? valid,
-    Expression<int>? lastCheck,
-    Expression<int>? networkFetch,
+    Expression<int>? updatedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (nip05 != null) 'nip05': nip05,
       if (pubkey != null) 'pubkey': pubkey,
       if (valid != null) 'valid': valid,
-      if (lastCheck != null) 'last_check': lastCheck,
-      if (networkFetch != null) 'network_fetch': networkFetch,
+      if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3928,15 +3777,13 @@ class Nip05TableCompanion extends UpdateCompanion<Nip05TableData> {
       {Value<String>? nip05,
       Value<String>? pubkey,
       Value<bool>? valid,
-      Value<int?>? lastCheck,
-      Value<int?>? networkFetch,
+      Value<int>? updatedAt,
       Value<int>? rowid}) {
     return Nip05TableCompanion(
       nip05: nip05 ?? this.nip05,
       pubkey: pubkey ?? this.pubkey,
       valid: valid ?? this.valid,
-      lastCheck: lastCheck ?? this.lastCheck,
-      networkFetch: networkFetch ?? this.networkFetch,
+      updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3953,11 +3800,8 @@ class Nip05TableCompanion extends UpdateCompanion<Nip05TableData> {
     if (valid.present) {
       map['valid'] = Variable<bool>(valid.value);
     }
-    if (lastCheck.present) {
-      map['last_check'] = Variable<int>(lastCheck.value);
-    }
-    if (networkFetch.present) {
-      map['network_fetch'] = Variable<int>(networkFetch.value);
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -3971,8 +3815,7 @@ class Nip05TableCompanion extends UpdateCompanion<Nip05TableData> {
           ..write('nip05: $nip05, ')
           ..write('pubkey: $pubkey, ')
           ..write('valid: $valid, ')
-          ..write('lastCheck: $lastCheck, ')
-          ..write('networkFetch: $networkFetch, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4316,32 +4159,27 @@ class $UserFollowersTableTable extends UserFollowersTable
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $UserFollowersTableTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-      'id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _pubkeyMeta = const VerificationMeta('pubkey');
   @override
   late final GeneratedColumn<String> pubkey = GeneratedColumn<String>(
       'pubkey', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _followersMeta =
-      const VerificationMeta('followers');
   @override
-  late final GeneratedColumn<String> followers = GeneratedColumn<String>(
-      'followers', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant('[]'));
-  static const VerificationMeta _lastUpdatedMeta =
-      const VerificationMeta('lastUpdated');
+  late final GeneratedColumnWithTypeConverter<List<String>, String> followers =
+      GeneratedColumn<String>('followers', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('[]'))
+          .withConverter<List<String>>(
+              $UserFollowersTableTable.$converterfollowers);
+  static const VerificationMeta _lastRefreshedMeta =
+      const VerificationMeta('lastRefreshed');
   @override
-  late final GeneratedColumn<int> lastUpdated = GeneratedColumn<int>(
-      'last_updated', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+  late final GeneratedColumn<int> lastRefreshed = GeneratedColumn<int>(
+      'last_refreshed', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [id, pubkey, followers, lastUpdated];
+  List<GeneratedColumn> get $columns => [pubkey, followers, lastRefreshed];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -4353,26 +4191,19 @@ class $UserFollowersTableTable extends UserFollowersTable
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
-    }
     if (data.containsKey('pubkey')) {
       context.handle(_pubkeyMeta,
           pubkey.isAcceptableOrUnknown(data['pubkey']!, _pubkeyMeta));
     } else if (isInserting) {
       context.missing(_pubkeyMeta);
     }
-    if (data.containsKey('followers')) {
-      context.handle(_followersMeta,
-          followers.isAcceptableOrUnknown(data['followers']!, _followersMeta));
-    }
-    if (data.containsKey('last_updated')) {
+    if (data.containsKey('last_refreshed')) {
       context.handle(
-          _lastUpdatedMeta,
-          lastUpdated.isAcceptableOrUnknown(
-              data['last_updated']!, _lastUpdatedMeta));
+          _lastRefreshedMeta,
+          lastRefreshed.isAcceptableOrUnknown(
+              data['last_refreshed']!, _lastRefreshedMeta));
+    } else if (isInserting) {
+      context.missing(_lastRefreshedMeta);
     }
     return context;
   }
@@ -4383,14 +4214,13 @@ class $UserFollowersTableTable extends UserFollowersTable
   UserFollowersTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return UserFollowersTableData(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       pubkey: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}pubkey'])!,
-      followers: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}followers'])!,
-      lastUpdated: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}last_updated']),
+      followers: $UserFollowersTableTable.$converterfollowers.fromSql(
+          attachedDatabase.typeMapping
+              .read(DriftSqlType.string, data['${effectivePrefix}followers'])!),
+      lastRefreshed: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}last_refreshed'])!,
     );
   }
 
@@ -4398,39 +4228,37 @@ class $UserFollowersTableTable extends UserFollowersTable
   $UserFollowersTableTable createAlias(String alias) {
     return $UserFollowersTableTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<List<String>, String> $converterfollowers =
+      const StringListConverter();
 }
 
 class UserFollowersTableData extends DataClass
     implements Insertable<UserFollowersTableData> {
-  final String id;
   final String pubkey;
-  final String followers;
-  final int? lastUpdated;
+  final List<String> followers;
+  final int lastRefreshed;
   const UserFollowersTableData(
-      {required this.id,
-      required this.pubkey,
+      {required this.pubkey,
       required this.followers,
-      this.lastUpdated});
+      required this.lastRefreshed});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
     map['pubkey'] = Variable<String>(pubkey);
-    map['followers'] = Variable<String>(followers);
-    if (!nullToAbsent || lastUpdated != null) {
-      map['last_updated'] = Variable<int>(lastUpdated);
+    {
+      map['followers'] = Variable<String>(
+          $UserFollowersTableTable.$converterfollowers.toSql(followers));
     }
+    map['last_refreshed'] = Variable<int>(lastRefreshed);
     return map;
   }
 
   UserFollowersTableCompanion toCompanion(bool nullToAbsent) {
     return UserFollowersTableCompanion(
-      id: Value(id),
       pubkey: Value(pubkey),
       followers: Value(followers),
-      lastUpdated: lastUpdated == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastUpdated),
+      lastRefreshed: Value(lastRefreshed),
     );
   }
 
@@ -4438,116 +4266,101 @@ class UserFollowersTableData extends DataClass
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return UserFollowersTableData(
-      id: serializer.fromJson<String>(json['id']),
       pubkey: serializer.fromJson<String>(json['pubkey']),
-      followers: serializer.fromJson<String>(json['followers']),
-      lastUpdated: serializer.fromJson<int?>(json['lastUpdated']),
+      followers: serializer.fromJson<List<String>>(json['followers']),
+      lastRefreshed: serializer.fromJson<int>(json['lastRefreshed']),
     );
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
       'pubkey': serializer.toJson<String>(pubkey),
-      'followers': serializer.toJson<String>(followers),
-      'lastUpdated': serializer.toJson<int?>(lastUpdated),
+      'followers': serializer.toJson<List<String>>(followers),
+      'lastRefreshed': serializer.toJson<int>(lastRefreshed),
     };
   }
 
   UserFollowersTableData copyWith(
-          {String? id,
-          String? pubkey,
-          String? followers,
-          Value<int?> lastUpdated = const Value.absent()}) =>
+          {String? pubkey, List<String>? followers, int? lastRefreshed}) =>
       UserFollowersTableData(
-        id: id ?? this.id,
         pubkey: pubkey ?? this.pubkey,
         followers: followers ?? this.followers,
-        lastUpdated: lastUpdated.present ? lastUpdated.value : this.lastUpdated,
+        lastRefreshed: lastRefreshed ?? this.lastRefreshed,
       );
   UserFollowersTableData copyWithCompanion(UserFollowersTableCompanion data) {
     return UserFollowersTableData(
-      id: data.id.present ? data.id.value : this.id,
       pubkey: data.pubkey.present ? data.pubkey.value : this.pubkey,
       followers: data.followers.present ? data.followers.value : this.followers,
-      lastUpdated:
-          data.lastUpdated.present ? data.lastUpdated.value : this.lastUpdated,
+      lastRefreshed: data.lastRefreshed.present
+          ? data.lastRefreshed.value
+          : this.lastRefreshed,
     );
   }
 
   @override
   String toString() {
     return (StringBuffer('UserFollowersTableData(')
-          ..write('id: $id, ')
           ..write('pubkey: $pubkey, ')
           ..write('followers: $followers, ')
-          ..write('lastUpdated: $lastUpdated')
+          ..write('lastRefreshed: $lastRefreshed')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, pubkey, followers, lastUpdated);
+  int get hashCode => Object.hash(pubkey, followers, lastRefreshed);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is UserFollowersTableData &&
-          other.id == this.id &&
           other.pubkey == this.pubkey &&
           other.followers == this.followers &&
-          other.lastUpdated == this.lastUpdated);
+          other.lastRefreshed == this.lastRefreshed);
 }
 
 class UserFollowersTableCompanion
     extends UpdateCompanion<UserFollowersTableData> {
-  final Value<String> id;
   final Value<String> pubkey;
-  final Value<String> followers;
-  final Value<int?> lastUpdated;
+  final Value<List<String>> followers;
+  final Value<int> lastRefreshed;
   final Value<int> rowid;
   const UserFollowersTableCompanion({
-    this.id = const Value.absent(),
     this.pubkey = const Value.absent(),
     this.followers = const Value.absent(),
-    this.lastUpdated = const Value.absent(),
+    this.lastRefreshed = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   UserFollowersTableCompanion.insert({
-    required String id,
     required String pubkey,
     this.followers = const Value.absent(),
-    this.lastUpdated = const Value.absent(),
+    required int lastRefreshed,
     this.rowid = const Value.absent(),
-  })  : id = Value(id),
-        pubkey = Value(pubkey);
+  })  : pubkey = Value(pubkey),
+        lastRefreshed = Value(lastRefreshed);
   static Insertable<UserFollowersTableData> custom({
-    Expression<String>? id,
     Expression<String>? pubkey,
     Expression<String>? followers,
-    Expression<int>? lastUpdated,
+    Expression<int>? lastRefreshed,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (id != null) 'id': id,
       if (pubkey != null) 'pubkey': pubkey,
       if (followers != null) 'followers': followers,
-      if (lastUpdated != null) 'last_updated': lastUpdated,
+      if (lastRefreshed != null) 'last_refreshed': lastRefreshed,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   UserFollowersTableCompanion copyWith(
-      {Value<String>? id,
-      Value<String>? pubkey,
-      Value<String>? followers,
-      Value<int?>? lastUpdated,
+      {Value<String>? pubkey,
+      Value<List<String>>? followers,
+      Value<int>? lastRefreshed,
       Value<int>? rowid}) {
     return UserFollowersTableCompanion(
-      id: id ?? this.id,
       pubkey: pubkey ?? this.pubkey,
       followers: followers ?? this.followers,
-      lastUpdated: lastUpdated ?? this.lastUpdated,
+      lastRefreshed: lastRefreshed ?? this.lastRefreshed,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -4555,17 +4368,15 @@ class UserFollowersTableCompanion
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<String>(id.value);
-    }
     if (pubkey.present) {
       map['pubkey'] = Variable<String>(pubkey.value);
     }
     if (followers.present) {
-      map['followers'] = Variable<String>(followers.value);
+      map['followers'] = Variable<String>(
+          $UserFollowersTableTable.$converterfollowers.toSql(followers.value));
     }
-    if (lastUpdated.present) {
-      map['last_updated'] = Variable<int>(lastUpdated.value);
+    if (lastRefreshed.present) {
+      map['last_refreshed'] = Variable<int>(lastRefreshed.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -4576,10 +4387,9 @@ class UserFollowersTableCompanion
   @override
   String toString() {
     return (StringBuffer('UserFollowersTableCompanion(')
-          ..write('id: $id, ')
           ..write('pubkey: $pubkey, ')
           ..write('followers: $followers, ')
-          ..write('lastUpdated: $lastUpdated, ')
+          ..write('lastRefreshed: $lastRefreshed, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4592,49 +4402,43 @@ class $UserDraftTableTable extends UserDraftTable
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $UserDraftTableTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-      'id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _pubkeyMeta = const VerificationMeta('pubkey');
   @override
   late final GeneratedColumn<String> pubkey = GeneratedColumn<String>(
       'pubkey', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _contentMeta =
-      const VerificationMeta('content');
+  static const VerificationMeta _noteDraftMeta =
+      const VerificationMeta('noteDraft');
   @override
-  late final GeneratedColumn<String> content = GeneratedColumn<String>(
-      'content', aliasedName, false,
+  late final GeneratedColumn<String> noteDraft = GeneratedColumn<String>(
+      'note_draft', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  static const VerificationMeta _articleDraftMeta =
+      const VerificationMeta('articleDraft');
   @override
-  late final GeneratedColumn<int> kind = GeneratedColumn<int>(
-      'kind', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _tagsMeta = const VerificationMeta('tags');
+  late final GeneratedColumn<String> articleDraft = GeneratedColumn<String>(
+      'article_draft', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   @override
-  late final GeneratedColumn<String> tags = GeneratedColumn<String>(
-      'tags', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant('[]'));
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<Map<String, String>, String>
+      replies = GeneratedColumn<String>('replies', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('{}'))
+          .withConverter<Map<String, String>>(
+              $UserDraftTableTable.$converterreplies);
   @override
-  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
-      'created_at', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _lastUpdatedMeta =
-      const VerificationMeta('lastUpdated');
-  @override
-  late final GeneratedColumn<int> lastUpdated = GeneratedColumn<int>(
-      'last_updated', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+  late final GeneratedColumnWithTypeConverter<Map<String, String>, String>
+      smartWidgetsDraft = GeneratedColumn<String>(
+              'smart_widgets_draft', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('{}'))
+          .withConverter<Map<String, String>>(
+              $UserDraftTableTable.$convertersmartWidgetsDraft);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, pubkey, content, kind, tags, createdAt, lastUpdated];
+      [pubkey, noteDraft, articleDraft, replies, smartWidgetsDraft];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -4645,44 +4449,25 @@ class $UserDraftTableTable extends UserDraftTable
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
-    }
     if (data.containsKey('pubkey')) {
       context.handle(_pubkeyMeta,
           pubkey.isAcceptableOrUnknown(data['pubkey']!, _pubkeyMeta));
     } else if (isInserting) {
       context.missing(_pubkeyMeta);
     }
-    if (data.containsKey('content')) {
-      context.handle(_contentMeta,
-          content.isAcceptableOrUnknown(data['content']!, _contentMeta));
+    if (data.containsKey('note_draft')) {
+      context.handle(_noteDraftMeta,
+          noteDraft.isAcceptableOrUnknown(data['note_draft']!, _noteDraftMeta));
     } else if (isInserting) {
-      context.missing(_contentMeta);
+      context.missing(_noteDraftMeta);
     }
-    if (data.containsKey('kind')) {
+    if (data.containsKey('article_draft')) {
       context.handle(
-          _kindMeta, kind.isAcceptableOrUnknown(data['kind']!, _kindMeta));
+          _articleDraftMeta,
+          articleDraft.isAcceptableOrUnknown(
+              data['article_draft']!, _articleDraftMeta));
     } else if (isInserting) {
-      context.missing(_kindMeta);
-    }
-    if (data.containsKey('tags')) {
-      context.handle(
-          _tagsMeta, tags.isAcceptableOrUnknown(data['tags']!, _tagsMeta));
-    }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
-    }
-    if (data.containsKey('last_updated')) {
-      context.handle(
-          _lastUpdatedMeta,
-          lastUpdated.isAcceptableOrUnknown(
-              data['last_updated']!, _lastUpdatedMeta));
+      context.missing(_articleDraftMeta);
     }
     return context;
   }
@@ -4693,20 +4478,18 @@ class $UserDraftTableTable extends UserDraftTable
   UserDraftTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return UserDraftTableData(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       pubkey: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}pubkey'])!,
-      content: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
-      kind: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}kind'])!,
-      tags: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}tags'])!,
-      createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
-      lastUpdated: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}last_updated']),
+      noteDraft: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}note_draft'])!,
+      articleDraft: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}article_draft'])!,
+      replies: $UserDraftTableTable.$converterreplies.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}replies'])!),
+      smartWidgetsDraft: $UserDraftTableTable.$convertersmartWidgetsDraft
+          .fromSql(attachedDatabase.typeMapping.read(DriftSqlType.string,
+              data['${effectivePrefix}smart_widgets_draft'])!),
     );
   }
 
@@ -4714,51 +4497,51 @@ class $UserDraftTableTable extends UserDraftTable
   $UserDraftTableTable createAlias(String alias) {
     return $UserDraftTableTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<Map<String, String>, String> $converterreplies =
+      const StringMapConverter();
+  static TypeConverter<Map<String, String>, String>
+      $convertersmartWidgetsDraft = const StringMapConverter();
 }
 
 class UserDraftTableData extends DataClass
     implements Insertable<UserDraftTableData> {
-  final String id;
   final String pubkey;
-  final String content;
-  final int kind;
-  final String tags;
-  final int createdAt;
-  final int? lastUpdated;
+  final String noteDraft;
+  final String articleDraft;
+  final Map<String, String> replies;
+  final Map<String, String> smartWidgetsDraft;
   const UserDraftTableData(
-      {required this.id,
-      required this.pubkey,
-      required this.content,
-      required this.kind,
-      required this.tags,
-      required this.createdAt,
-      this.lastUpdated});
+      {required this.pubkey,
+      required this.noteDraft,
+      required this.articleDraft,
+      required this.replies,
+      required this.smartWidgetsDraft});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
     map['pubkey'] = Variable<String>(pubkey);
-    map['content'] = Variable<String>(content);
-    map['kind'] = Variable<int>(kind);
-    map['tags'] = Variable<String>(tags);
-    map['created_at'] = Variable<int>(createdAt);
-    if (!nullToAbsent || lastUpdated != null) {
-      map['last_updated'] = Variable<int>(lastUpdated);
+    map['note_draft'] = Variable<String>(noteDraft);
+    map['article_draft'] = Variable<String>(articleDraft);
+    {
+      map['replies'] = Variable<String>(
+          $UserDraftTableTable.$converterreplies.toSql(replies));
+    }
+    {
+      map['smart_widgets_draft'] = Variable<String>($UserDraftTableTable
+          .$convertersmartWidgetsDraft
+          .toSql(smartWidgetsDraft));
     }
     return map;
   }
 
   UserDraftTableCompanion toCompanion(bool nullToAbsent) {
     return UserDraftTableCompanion(
-      id: Value(id),
       pubkey: Value(pubkey),
-      content: Value(content),
-      kind: Value(kind),
-      tags: Value(tags),
-      createdAt: Value(createdAt),
-      lastUpdated: lastUpdated == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastUpdated),
+      noteDraft: Value(noteDraft),
+      articleDraft: Value(articleDraft),
+      replies: Value(replies),
+      smartWidgetsDraft: Value(smartWidgetsDraft),
     );
   }
 
@@ -4766,161 +4549,136 @@ class UserDraftTableData extends DataClass
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return UserDraftTableData(
-      id: serializer.fromJson<String>(json['id']),
       pubkey: serializer.fromJson<String>(json['pubkey']),
-      content: serializer.fromJson<String>(json['content']),
-      kind: serializer.fromJson<int>(json['kind']),
-      tags: serializer.fromJson<String>(json['tags']),
-      createdAt: serializer.fromJson<int>(json['createdAt']),
-      lastUpdated: serializer.fromJson<int?>(json['lastUpdated']),
+      noteDraft: serializer.fromJson<String>(json['noteDraft']),
+      articleDraft: serializer.fromJson<String>(json['articleDraft']),
+      replies: serializer.fromJson<Map<String, String>>(json['replies']),
+      smartWidgetsDraft:
+          serializer.fromJson<Map<String, String>>(json['smartWidgetsDraft']),
     );
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
       'pubkey': serializer.toJson<String>(pubkey),
-      'content': serializer.toJson<String>(content),
-      'kind': serializer.toJson<int>(kind),
-      'tags': serializer.toJson<String>(tags),
-      'createdAt': serializer.toJson<int>(createdAt),
-      'lastUpdated': serializer.toJson<int?>(lastUpdated),
+      'noteDraft': serializer.toJson<String>(noteDraft),
+      'articleDraft': serializer.toJson<String>(articleDraft),
+      'replies': serializer.toJson<Map<String, String>>(replies),
+      'smartWidgetsDraft':
+          serializer.toJson<Map<String, String>>(smartWidgetsDraft),
     };
   }
 
   UserDraftTableData copyWith(
-          {String? id,
-          String? pubkey,
-          String? content,
-          int? kind,
-          String? tags,
-          int? createdAt,
-          Value<int?> lastUpdated = const Value.absent()}) =>
+          {String? pubkey,
+          String? noteDraft,
+          String? articleDraft,
+          Map<String, String>? replies,
+          Map<String, String>? smartWidgetsDraft}) =>
       UserDraftTableData(
-        id: id ?? this.id,
         pubkey: pubkey ?? this.pubkey,
-        content: content ?? this.content,
-        kind: kind ?? this.kind,
-        tags: tags ?? this.tags,
-        createdAt: createdAt ?? this.createdAt,
-        lastUpdated: lastUpdated.present ? lastUpdated.value : this.lastUpdated,
+        noteDraft: noteDraft ?? this.noteDraft,
+        articleDraft: articleDraft ?? this.articleDraft,
+        replies: replies ?? this.replies,
+        smartWidgetsDraft: smartWidgetsDraft ?? this.smartWidgetsDraft,
       );
   UserDraftTableData copyWithCompanion(UserDraftTableCompanion data) {
     return UserDraftTableData(
-      id: data.id.present ? data.id.value : this.id,
       pubkey: data.pubkey.present ? data.pubkey.value : this.pubkey,
-      content: data.content.present ? data.content.value : this.content,
-      kind: data.kind.present ? data.kind.value : this.kind,
-      tags: data.tags.present ? data.tags.value : this.tags,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      lastUpdated:
-          data.lastUpdated.present ? data.lastUpdated.value : this.lastUpdated,
+      noteDraft: data.noteDraft.present ? data.noteDraft.value : this.noteDraft,
+      articleDraft: data.articleDraft.present
+          ? data.articleDraft.value
+          : this.articleDraft,
+      replies: data.replies.present ? data.replies.value : this.replies,
+      smartWidgetsDraft: data.smartWidgetsDraft.present
+          ? data.smartWidgetsDraft.value
+          : this.smartWidgetsDraft,
     );
   }
 
   @override
   String toString() {
     return (StringBuffer('UserDraftTableData(')
-          ..write('id: $id, ')
           ..write('pubkey: $pubkey, ')
-          ..write('content: $content, ')
-          ..write('kind: $kind, ')
-          ..write('tags: $tags, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('lastUpdated: $lastUpdated')
+          ..write('noteDraft: $noteDraft, ')
+          ..write('articleDraft: $articleDraft, ')
+          ..write('replies: $replies, ')
+          ..write('smartWidgetsDraft: $smartWidgetsDraft')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode =>
-      Object.hash(id, pubkey, content, kind, tags, createdAt, lastUpdated);
+      Object.hash(pubkey, noteDraft, articleDraft, replies, smartWidgetsDraft);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is UserDraftTableData &&
-          other.id == this.id &&
           other.pubkey == this.pubkey &&
-          other.content == this.content &&
-          other.kind == this.kind &&
-          other.tags == this.tags &&
-          other.createdAt == this.createdAt &&
-          other.lastUpdated == this.lastUpdated);
+          other.noteDraft == this.noteDraft &&
+          other.articleDraft == this.articleDraft &&
+          other.replies == this.replies &&
+          other.smartWidgetsDraft == this.smartWidgetsDraft);
 }
 
 class UserDraftTableCompanion extends UpdateCompanion<UserDraftTableData> {
-  final Value<String> id;
   final Value<String> pubkey;
-  final Value<String> content;
-  final Value<int> kind;
-  final Value<String> tags;
-  final Value<int> createdAt;
-  final Value<int?> lastUpdated;
+  final Value<String> noteDraft;
+  final Value<String> articleDraft;
+  final Value<Map<String, String>> replies;
+  final Value<Map<String, String>> smartWidgetsDraft;
   final Value<int> rowid;
   const UserDraftTableCompanion({
-    this.id = const Value.absent(),
     this.pubkey = const Value.absent(),
-    this.content = const Value.absent(),
-    this.kind = const Value.absent(),
-    this.tags = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.lastUpdated = const Value.absent(),
+    this.noteDraft = const Value.absent(),
+    this.articleDraft = const Value.absent(),
+    this.replies = const Value.absent(),
+    this.smartWidgetsDraft = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   UserDraftTableCompanion.insert({
-    required String id,
     required String pubkey,
-    required String content,
-    required int kind,
-    this.tags = const Value.absent(),
-    required int createdAt,
-    this.lastUpdated = const Value.absent(),
+    required String noteDraft,
+    required String articleDraft,
+    this.replies = const Value.absent(),
+    this.smartWidgetsDraft = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : id = Value(id),
-        pubkey = Value(pubkey),
-        content = Value(content),
-        kind = Value(kind),
-        createdAt = Value(createdAt);
+  })  : pubkey = Value(pubkey),
+        noteDraft = Value(noteDraft),
+        articleDraft = Value(articleDraft);
   static Insertable<UserDraftTableData> custom({
-    Expression<String>? id,
     Expression<String>? pubkey,
-    Expression<String>? content,
-    Expression<int>? kind,
-    Expression<String>? tags,
-    Expression<int>? createdAt,
-    Expression<int>? lastUpdated,
+    Expression<String>? noteDraft,
+    Expression<String>? articleDraft,
+    Expression<String>? replies,
+    Expression<String>? smartWidgetsDraft,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (id != null) 'id': id,
       if (pubkey != null) 'pubkey': pubkey,
-      if (content != null) 'content': content,
-      if (kind != null) 'kind': kind,
-      if (tags != null) 'tags': tags,
-      if (createdAt != null) 'created_at': createdAt,
-      if (lastUpdated != null) 'last_updated': lastUpdated,
+      if (noteDraft != null) 'note_draft': noteDraft,
+      if (articleDraft != null) 'article_draft': articleDraft,
+      if (replies != null) 'replies': replies,
+      if (smartWidgetsDraft != null) 'smart_widgets_draft': smartWidgetsDraft,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   UserDraftTableCompanion copyWith(
-      {Value<String>? id,
-      Value<String>? pubkey,
-      Value<String>? content,
-      Value<int>? kind,
-      Value<String>? tags,
-      Value<int>? createdAt,
-      Value<int?>? lastUpdated,
+      {Value<String>? pubkey,
+      Value<String>? noteDraft,
+      Value<String>? articleDraft,
+      Value<Map<String, String>>? replies,
+      Value<Map<String, String>>? smartWidgetsDraft,
       Value<int>? rowid}) {
     return UserDraftTableCompanion(
-      id: id ?? this.id,
       pubkey: pubkey ?? this.pubkey,
-      content: content ?? this.content,
-      kind: kind ?? this.kind,
-      tags: tags ?? this.tags,
-      createdAt: createdAt ?? this.createdAt,
-      lastUpdated: lastUpdated ?? this.lastUpdated,
+      noteDraft: noteDraft ?? this.noteDraft,
+      articleDraft: articleDraft ?? this.articleDraft,
+      replies: replies ?? this.replies,
+      smartWidgetsDraft: smartWidgetsDraft ?? this.smartWidgetsDraft,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -4928,26 +4686,23 @@ class UserDraftTableCompanion extends UpdateCompanion<UserDraftTableData> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<String>(id.value);
-    }
     if (pubkey.present) {
       map['pubkey'] = Variable<String>(pubkey.value);
     }
-    if (content.present) {
-      map['content'] = Variable<String>(content.value);
+    if (noteDraft.present) {
+      map['note_draft'] = Variable<String>(noteDraft.value);
     }
-    if (kind.present) {
-      map['kind'] = Variable<int>(kind.value);
+    if (articleDraft.present) {
+      map['article_draft'] = Variable<String>(articleDraft.value);
     }
-    if (tags.present) {
-      map['tags'] = Variable<String>(tags.value);
+    if (replies.present) {
+      map['replies'] = Variable<String>(
+          $UserDraftTableTable.$converterreplies.toSql(replies.value));
     }
-    if (createdAt.present) {
-      map['created_at'] = Variable<int>(createdAt.value);
-    }
-    if (lastUpdated.present) {
-      map['last_updated'] = Variable<int>(lastUpdated.value);
+    if (smartWidgetsDraft.present) {
+      map['smart_widgets_draft'] = Variable<String>($UserDraftTableTable
+          .$convertersmartWidgetsDraft
+          .toSql(smartWidgetsDraft.value));
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -4958,13 +4713,11 @@ class UserDraftTableCompanion extends UpdateCompanion<UserDraftTableData> {
   @override
   String toString() {
     return (StringBuffer('UserDraftTableCompanion(')
-          ..write('id: $id, ')
           ..write('pubkey: $pubkey, ')
-          ..write('content: $content, ')
-          ..write('kind: $kind, ')
-          ..write('tags: $tags, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('lastUpdated: $lastUpdated, ')
+          ..write('noteDraft: $noteDraft, ')
+          ..write('articleDraft: $articleDraft, ')
+          ..write('replies: $replies, ')
+          ..write('smartWidgetsDraft: $smartWidgetsDraft, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4982,22 +4735,24 @@ class $UserAppSettingsTableTable extends UserAppSettingsTable
   late final GeneratedColumn<String> pubkey = GeneratedColumn<String>(
       'pubkey', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _settingsMeta =
-      const VerificationMeta('settings');
+  static const VerificationMeta _filtersMeta =
+      const VerificationMeta('filters');
   @override
-  late final GeneratedColumn<String> settings = GeneratedColumn<String>(
-      'settings', aliasedName, false,
+  late final GeneratedColumn<String> filters = GeneratedColumn<String>(
+      'filters', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant('{}'));
-  static const VerificationMeta _lastUpdatedMeta =
-      const VerificationMeta('lastUpdated');
+  static const VerificationMeta _contentSourcesMeta =
+      const VerificationMeta('contentSources');
   @override
-  late final GeneratedColumn<int> lastUpdated = GeneratedColumn<int>(
-      'last_updated', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+  late final GeneratedColumn<String> contentSources = GeneratedColumn<String>(
+      'content_sources', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('{}'));
   @override
-  List<GeneratedColumn> get $columns => [pubkey, settings, lastUpdated];
+  List<GeneratedColumn> get $columns => [pubkey, filters, contentSources];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -5015,15 +4770,15 @@ class $UserAppSettingsTableTable extends UserAppSettingsTable
     } else if (isInserting) {
       context.missing(_pubkeyMeta);
     }
-    if (data.containsKey('settings')) {
-      context.handle(_settingsMeta,
-          settings.isAcceptableOrUnknown(data['settings']!, _settingsMeta));
+    if (data.containsKey('filters')) {
+      context.handle(_filtersMeta,
+          filters.isAcceptableOrUnknown(data['filters']!, _filtersMeta));
     }
-    if (data.containsKey('last_updated')) {
+    if (data.containsKey('content_sources')) {
       context.handle(
-          _lastUpdatedMeta,
-          lastUpdated.isAcceptableOrUnknown(
-              data['last_updated']!, _lastUpdatedMeta));
+          _contentSourcesMeta,
+          contentSources.isAcceptableOrUnknown(
+              data['content_sources']!, _contentSourcesMeta));
     }
     return context;
   }
@@ -5037,10 +4792,10 @@ class $UserAppSettingsTableTable extends UserAppSettingsTable
     return UserAppSettingsTableData(
       pubkey: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}pubkey'])!,
-      settings: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}settings'])!,
-      lastUpdated: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}last_updated']),
+      filters: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}filters'])!,
+      contentSources: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}content_sources'])!,
     );
   }
 
@@ -5053,28 +4808,26 @@ class $UserAppSettingsTableTable extends UserAppSettingsTable
 class UserAppSettingsTableData extends DataClass
     implements Insertable<UserAppSettingsTableData> {
   final String pubkey;
-  final String settings;
-  final int? lastUpdated;
+  final String filters;
+  final String contentSources;
   const UserAppSettingsTableData(
-      {required this.pubkey, required this.settings, this.lastUpdated});
+      {required this.pubkey,
+      required this.filters,
+      required this.contentSources});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['pubkey'] = Variable<String>(pubkey);
-    map['settings'] = Variable<String>(settings);
-    if (!nullToAbsent || lastUpdated != null) {
-      map['last_updated'] = Variable<int>(lastUpdated);
-    }
+    map['filters'] = Variable<String>(filters);
+    map['content_sources'] = Variable<String>(contentSources);
     return map;
   }
 
   UserAppSettingsTableCompanion toCompanion(bool nullToAbsent) {
     return UserAppSettingsTableCompanion(
       pubkey: Value(pubkey),
-      settings: Value(settings),
-      lastUpdated: lastUpdated == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastUpdated),
+      filters: Value(filters),
+      contentSources: Value(contentSources),
     );
   }
 
@@ -5083,8 +4836,8 @@ class UserAppSettingsTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return UserAppSettingsTableData(
       pubkey: serializer.fromJson<String>(json['pubkey']),
-      settings: serializer.fromJson<String>(json['settings']),
-      lastUpdated: serializer.fromJson<int?>(json['lastUpdated']),
+      filters: serializer.fromJson<String>(json['filters']),
+      contentSources: serializer.fromJson<String>(json['contentSources']),
     );
   }
   @override
@@ -5092,27 +4845,26 @@ class UserAppSettingsTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'pubkey': serializer.toJson<String>(pubkey),
-      'settings': serializer.toJson<String>(settings),
-      'lastUpdated': serializer.toJson<int?>(lastUpdated),
+      'filters': serializer.toJson<String>(filters),
+      'contentSources': serializer.toJson<String>(contentSources),
     };
   }
 
   UserAppSettingsTableData copyWith(
-          {String? pubkey,
-          String? settings,
-          Value<int?> lastUpdated = const Value.absent()}) =>
+          {String? pubkey, String? filters, String? contentSources}) =>
       UserAppSettingsTableData(
         pubkey: pubkey ?? this.pubkey,
-        settings: settings ?? this.settings,
-        lastUpdated: lastUpdated.present ? lastUpdated.value : this.lastUpdated,
+        filters: filters ?? this.filters,
+        contentSources: contentSources ?? this.contentSources,
       );
   UserAppSettingsTableData copyWithCompanion(
       UserAppSettingsTableCompanion data) {
     return UserAppSettingsTableData(
       pubkey: data.pubkey.present ? data.pubkey.value : this.pubkey,
-      settings: data.settings.present ? data.settings.value : this.settings,
-      lastUpdated:
-          data.lastUpdated.present ? data.lastUpdated.value : this.lastUpdated,
+      filters: data.filters.present ? data.filters.value : this.filters,
+      contentSources: data.contentSources.present
+          ? data.contentSources.value
+          : this.contentSources,
     );
   }
 
@@ -5120,64 +4872,64 @@ class UserAppSettingsTableData extends DataClass
   String toString() {
     return (StringBuffer('UserAppSettingsTableData(')
           ..write('pubkey: $pubkey, ')
-          ..write('settings: $settings, ')
-          ..write('lastUpdated: $lastUpdated')
+          ..write('filters: $filters, ')
+          ..write('contentSources: $contentSources')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(pubkey, settings, lastUpdated);
+  int get hashCode => Object.hash(pubkey, filters, contentSources);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is UserAppSettingsTableData &&
           other.pubkey == this.pubkey &&
-          other.settings == this.settings &&
-          other.lastUpdated == this.lastUpdated);
+          other.filters == this.filters &&
+          other.contentSources == this.contentSources);
 }
 
 class UserAppSettingsTableCompanion
     extends UpdateCompanion<UserAppSettingsTableData> {
   final Value<String> pubkey;
-  final Value<String> settings;
-  final Value<int?> lastUpdated;
+  final Value<String> filters;
+  final Value<String> contentSources;
   final Value<int> rowid;
   const UserAppSettingsTableCompanion({
     this.pubkey = const Value.absent(),
-    this.settings = const Value.absent(),
-    this.lastUpdated = const Value.absent(),
+    this.filters = const Value.absent(),
+    this.contentSources = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   UserAppSettingsTableCompanion.insert({
     required String pubkey,
-    this.settings = const Value.absent(),
-    this.lastUpdated = const Value.absent(),
+    this.filters = const Value.absent(),
+    this.contentSources = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : pubkey = Value(pubkey);
   static Insertable<UserAppSettingsTableData> custom({
     Expression<String>? pubkey,
-    Expression<String>? settings,
-    Expression<int>? lastUpdated,
+    Expression<String>? filters,
+    Expression<String>? contentSources,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (pubkey != null) 'pubkey': pubkey,
-      if (settings != null) 'settings': settings,
-      if (lastUpdated != null) 'last_updated': lastUpdated,
+      if (filters != null) 'filters': filters,
+      if (contentSources != null) 'content_sources': contentSources,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   UserAppSettingsTableCompanion copyWith(
       {Value<String>? pubkey,
-      Value<String>? settings,
-      Value<int?>? lastUpdated,
+      Value<String>? filters,
+      Value<String>? contentSources,
       Value<int>? rowid}) {
     return UserAppSettingsTableCompanion(
       pubkey: pubkey ?? this.pubkey,
-      settings: settings ?? this.settings,
-      lastUpdated: lastUpdated ?? this.lastUpdated,
+      filters: filters ?? this.filters,
+      contentSources: contentSources ?? this.contentSources,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -5188,11 +4940,11 @@ class UserAppSettingsTableCompanion
     if (pubkey.present) {
       map['pubkey'] = Variable<String>(pubkey.value);
     }
-    if (settings.present) {
-      map['settings'] = Variable<String>(settings.value);
+    if (filters.present) {
+      map['filters'] = Variable<String>(filters.value);
     }
-    if (lastUpdated.present) {
-      map['last_updated'] = Variable<int>(lastUpdated.value);
+    if (contentSources.present) {
+      map['content_sources'] = Variable<String>(contentSources.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -5204,8 +4956,8 @@ class UserAppSettingsTableCompanion
   String toString() {
     return (StringBuffer('UserAppSettingsTableCompanion(')
           ..write('pubkey: $pubkey, ')
-          ..write('settings: $settings, ')
-          ..write('lastUpdated: $lastUpdated, ')
+          ..write('filters: $filters, ')
+          ..write('contentSources: $contentSources, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -5218,32 +4970,26 @@ class $UserWotTableTable extends UserWotTable
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $UserWotTableTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-      'id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _pubkeyMeta = const VerificationMeta('pubkey');
   @override
   late final GeneratedColumn<String> pubkey = GeneratedColumn<String>(
       'pubkey', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _wotDataMeta =
-      const VerificationMeta('wotData');
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<String> wotData = GeneratedColumn<String>(
-      'wot_data', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant('{}'));
-  static const VerificationMeta _lastUpdatedMeta =
-      const VerificationMeta('lastUpdated');
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
   @override
-  late final GeneratedColumn<int> lastUpdated = GeneratedColumn<int>(
-      'last_updated', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+  late final GeneratedColumnWithTypeConverter<Map<String, double>, String> wot =
+      GeneratedColumn<String>('wot', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('{}'))
+          .withConverter<Map<String, double>>($UserWotTableTable.$converterwot);
   @override
-  List<GeneratedColumn> get $columns => [id, pubkey, wotData, lastUpdated];
+  List<GeneratedColumn> get $columns => [pubkey, createdAt, wot];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -5254,26 +5000,17 @@ class $UserWotTableTable extends UserWotTable
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
-    }
     if (data.containsKey('pubkey')) {
       context.handle(_pubkeyMeta,
           pubkey.isAcceptableOrUnknown(data['pubkey']!, _pubkeyMeta));
     } else if (isInserting) {
       context.missing(_pubkeyMeta);
     }
-    if (data.containsKey('wot_data')) {
-      context.handle(_wotDataMeta,
-          wotData.isAcceptableOrUnknown(data['wot_data']!, _wotDataMeta));
-    }
-    if (data.containsKey('last_updated')) {
-      context.handle(
-          _lastUpdatedMeta,
-          lastUpdated.isAcceptableOrUnknown(
-              data['last_updated']!, _lastUpdatedMeta));
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
     }
     return context;
   }
@@ -5284,14 +5021,12 @@ class $UserWotTableTable extends UserWotTable
   UserWotTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return UserWotTableData(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       pubkey: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}pubkey'])!,
-      wotData: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}wot_data'])!,
-      lastUpdated: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}last_updated']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
+      wot: $UserWotTableTable.$converterwot.fromSql(attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}wot'])!),
     );
   }
 
@@ -5299,39 +5034,35 @@ class $UserWotTableTable extends UserWotTable
   $UserWotTableTable createAlias(String alias) {
     return $UserWotTableTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<Map<String, double>, String> $converterwot =
+      const DoubleMapConverter();
 }
 
 class UserWotTableData extends DataClass
     implements Insertable<UserWotTableData> {
-  final String id;
   final String pubkey;
-  final String wotData;
-  final int? lastUpdated;
+  final int createdAt;
+  final Map<String, double> wot;
   const UserWotTableData(
-      {required this.id,
-      required this.pubkey,
-      required this.wotData,
-      this.lastUpdated});
+      {required this.pubkey, required this.createdAt, required this.wot});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
     map['pubkey'] = Variable<String>(pubkey);
-    map['wot_data'] = Variable<String>(wotData);
-    if (!nullToAbsent || lastUpdated != null) {
-      map['last_updated'] = Variable<int>(lastUpdated);
+    map['created_at'] = Variable<int>(createdAt);
+    {
+      map['wot'] =
+          Variable<String>($UserWotTableTable.$converterwot.toSql(wot));
     }
     return map;
   }
 
   UserWotTableCompanion toCompanion(bool nullToAbsent) {
     return UserWotTableCompanion(
-      id: Value(id),
       pubkey: Value(pubkey),
-      wotData: Value(wotData),
-      lastUpdated: lastUpdated == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastUpdated),
+      createdAt: Value(createdAt),
+      wot: Value(wot),
     );
   }
 
@@ -5339,115 +5070,98 @@ class UserWotTableData extends DataClass
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return UserWotTableData(
-      id: serializer.fromJson<String>(json['id']),
       pubkey: serializer.fromJson<String>(json['pubkey']),
-      wotData: serializer.fromJson<String>(json['wotData']),
-      lastUpdated: serializer.fromJson<int?>(json['lastUpdated']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      wot: serializer.fromJson<Map<String, double>>(json['wot']),
     );
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
       'pubkey': serializer.toJson<String>(pubkey),
-      'wotData': serializer.toJson<String>(wotData),
-      'lastUpdated': serializer.toJson<int?>(lastUpdated),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'wot': serializer.toJson<Map<String, double>>(wot),
     };
   }
 
   UserWotTableData copyWith(
-          {String? id,
-          String? pubkey,
-          String? wotData,
-          Value<int?> lastUpdated = const Value.absent()}) =>
+          {String? pubkey, int? createdAt, Map<String, double>? wot}) =>
       UserWotTableData(
-        id: id ?? this.id,
         pubkey: pubkey ?? this.pubkey,
-        wotData: wotData ?? this.wotData,
-        lastUpdated: lastUpdated.present ? lastUpdated.value : this.lastUpdated,
+        createdAt: createdAt ?? this.createdAt,
+        wot: wot ?? this.wot,
       );
   UserWotTableData copyWithCompanion(UserWotTableCompanion data) {
     return UserWotTableData(
-      id: data.id.present ? data.id.value : this.id,
       pubkey: data.pubkey.present ? data.pubkey.value : this.pubkey,
-      wotData: data.wotData.present ? data.wotData.value : this.wotData,
-      lastUpdated:
-          data.lastUpdated.present ? data.lastUpdated.value : this.lastUpdated,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      wot: data.wot.present ? data.wot.value : this.wot,
     );
   }
 
   @override
   String toString() {
     return (StringBuffer('UserWotTableData(')
-          ..write('id: $id, ')
           ..write('pubkey: $pubkey, ')
-          ..write('wotData: $wotData, ')
-          ..write('lastUpdated: $lastUpdated')
+          ..write('createdAt: $createdAt, ')
+          ..write('wot: $wot')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, pubkey, wotData, lastUpdated);
+  int get hashCode => Object.hash(pubkey, createdAt, wot);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is UserWotTableData &&
-          other.id == this.id &&
           other.pubkey == this.pubkey &&
-          other.wotData == this.wotData &&
-          other.lastUpdated == this.lastUpdated);
+          other.createdAt == this.createdAt &&
+          other.wot == this.wot);
 }
 
 class UserWotTableCompanion extends UpdateCompanion<UserWotTableData> {
-  final Value<String> id;
   final Value<String> pubkey;
-  final Value<String> wotData;
-  final Value<int?> lastUpdated;
+  final Value<int> createdAt;
+  final Value<Map<String, double>> wot;
   final Value<int> rowid;
   const UserWotTableCompanion({
-    this.id = const Value.absent(),
     this.pubkey = const Value.absent(),
-    this.wotData = const Value.absent(),
-    this.lastUpdated = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.wot = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   UserWotTableCompanion.insert({
-    required String id,
     required String pubkey,
-    this.wotData = const Value.absent(),
-    this.lastUpdated = const Value.absent(),
+    required int createdAt,
+    this.wot = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : id = Value(id),
-        pubkey = Value(pubkey);
+  })  : pubkey = Value(pubkey),
+        createdAt = Value(createdAt);
   static Insertable<UserWotTableData> custom({
-    Expression<String>? id,
     Expression<String>? pubkey,
-    Expression<String>? wotData,
-    Expression<int>? lastUpdated,
+    Expression<int>? createdAt,
+    Expression<String>? wot,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (id != null) 'id': id,
       if (pubkey != null) 'pubkey': pubkey,
-      if (wotData != null) 'wot_data': wotData,
-      if (lastUpdated != null) 'last_updated': lastUpdated,
+      if (createdAt != null) 'created_at': createdAt,
+      if (wot != null) 'wot': wot,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   UserWotTableCompanion copyWith(
-      {Value<String>? id,
-      Value<String>? pubkey,
-      Value<String>? wotData,
-      Value<int?>? lastUpdated,
+      {Value<String>? pubkey,
+      Value<int>? createdAt,
+      Value<Map<String, double>>? wot,
       Value<int>? rowid}) {
     return UserWotTableCompanion(
-      id: id ?? this.id,
       pubkey: pubkey ?? this.pubkey,
-      wotData: wotData ?? this.wotData,
-      lastUpdated: lastUpdated ?? this.lastUpdated,
+      createdAt: createdAt ?? this.createdAt,
+      wot: wot ?? this.wot,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -5455,17 +5169,15 @@ class UserWotTableCompanion extends UpdateCompanion<UserWotTableData> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<String>(id.value);
-    }
     if (pubkey.present) {
       map['pubkey'] = Variable<String>(pubkey.value);
     }
-    if (wotData.present) {
-      map['wot_data'] = Variable<String>(wotData.value);
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
     }
-    if (lastUpdated.present) {
-      map['last_updated'] = Variable<int>(lastUpdated.value);
+    if (wot.present) {
+      map['wot'] =
+          Variable<String>($UserWotTableTable.$converterwot.toSql(wot.value));
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -5476,10 +5188,9 @@ class UserWotTableCompanion extends UpdateCompanion<UserWotTableData> {
   @override
   String toString() {
     return (StringBuffer('UserWotTableCompanion(')
-          ..write('id: $id, ')
           ..write('pubkey: $pubkey, ')
-          ..write('wotData: $wotData, ')
-          ..write('lastUpdated: $lastUpdated, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('wot: $wot, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -5515,22 +5226,15 @@ class $WotScoreTableTable extends WotScoreTable
       type: DriftSqlType.double,
       requiredDuringInsert: false,
       defaultValue: const Constant(0.0));
-  static const VerificationMeta _depthMeta = const VerificationMeta('depth');
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<int> depth = GeneratedColumn<int>(
-      'depth', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _lastUpdatedMeta =
-      const VerificationMeta('lastUpdated');
-  @override
-  late final GeneratedColumn<int> lastUpdated = GeneratedColumn<int>(
-      'last_updated', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, pubkey, originPubkey, score, depth, lastUpdated];
+      [id, pubkey, originPubkey, score, createdAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -5564,15 +5268,11 @@ class $WotScoreTableTable extends WotScoreTable
       context.handle(
           _scoreMeta, score.isAcceptableOrUnknown(data['score']!, _scoreMeta));
     }
-    if (data.containsKey('depth')) {
-      context.handle(
-          _depthMeta, depth.isAcceptableOrUnknown(data['depth']!, _depthMeta));
-    }
-    if (data.containsKey('last_updated')) {
-      context.handle(
-          _lastUpdatedMeta,
-          lastUpdated.isAcceptableOrUnknown(
-              data['last_updated']!, _lastUpdatedMeta));
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
     }
     return context;
   }
@@ -5591,10 +5291,8 @@ class $WotScoreTableTable extends WotScoreTable
           .read(DriftSqlType.string, data['${effectivePrefix}origin_pubkey'])!,
       score: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}score'])!,
-      depth: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}depth'])!,
-      lastUpdated: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}last_updated']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
     );
   }
 
@@ -5610,15 +5308,13 @@ class WotScoreTableData extends DataClass
   final String pubkey;
   final String originPubkey;
   final double score;
-  final int depth;
-  final int? lastUpdated;
+  final int createdAt;
   const WotScoreTableData(
       {required this.id,
       required this.pubkey,
       required this.originPubkey,
       required this.score,
-      required this.depth,
-      this.lastUpdated});
+      required this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -5626,10 +5322,7 @@ class WotScoreTableData extends DataClass
     map['pubkey'] = Variable<String>(pubkey);
     map['origin_pubkey'] = Variable<String>(originPubkey);
     map['score'] = Variable<double>(score);
-    map['depth'] = Variable<int>(depth);
-    if (!nullToAbsent || lastUpdated != null) {
-      map['last_updated'] = Variable<int>(lastUpdated);
-    }
+    map['created_at'] = Variable<int>(createdAt);
     return map;
   }
 
@@ -5639,10 +5332,7 @@ class WotScoreTableData extends DataClass
       pubkey: Value(pubkey),
       originPubkey: Value(originPubkey),
       score: Value(score),
-      depth: Value(depth),
-      lastUpdated: lastUpdated == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastUpdated),
+      createdAt: Value(createdAt),
     );
   }
 
@@ -5654,8 +5344,7 @@ class WotScoreTableData extends DataClass
       pubkey: serializer.fromJson<String>(json['pubkey']),
       originPubkey: serializer.fromJson<String>(json['originPubkey']),
       score: serializer.fromJson<double>(json['score']),
-      depth: serializer.fromJson<int>(json['depth']),
-      lastUpdated: serializer.fromJson<int?>(json['lastUpdated']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
     );
   }
   @override
@@ -5666,8 +5355,7 @@ class WotScoreTableData extends DataClass
       'pubkey': serializer.toJson<String>(pubkey),
       'originPubkey': serializer.toJson<String>(originPubkey),
       'score': serializer.toJson<double>(score),
-      'depth': serializer.toJson<int>(depth),
-      'lastUpdated': serializer.toJson<int?>(lastUpdated),
+      'createdAt': serializer.toJson<int>(createdAt),
     };
   }
 
@@ -5676,15 +5364,13 @@ class WotScoreTableData extends DataClass
           String? pubkey,
           String? originPubkey,
           double? score,
-          int? depth,
-          Value<int?> lastUpdated = const Value.absent()}) =>
+          int? createdAt}) =>
       WotScoreTableData(
         id: id ?? this.id,
         pubkey: pubkey ?? this.pubkey,
         originPubkey: originPubkey ?? this.originPubkey,
         score: score ?? this.score,
-        depth: depth ?? this.depth,
-        lastUpdated: lastUpdated.present ? lastUpdated.value : this.lastUpdated,
+        createdAt: createdAt ?? this.createdAt,
       );
   WotScoreTableData copyWithCompanion(WotScoreTableCompanion data) {
     return WotScoreTableData(
@@ -5694,9 +5380,7 @@ class WotScoreTableData extends DataClass
           ? data.originPubkey.value
           : this.originPubkey,
       score: data.score.present ? data.score.value : this.score,
-      depth: data.depth.present ? data.depth.value : this.depth,
-      lastUpdated:
-          data.lastUpdated.present ? data.lastUpdated.value : this.lastUpdated,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
 
@@ -5707,15 +5391,13 @@ class WotScoreTableData extends DataClass
           ..write('pubkey: $pubkey, ')
           ..write('originPubkey: $originPubkey, ')
           ..write('score: $score, ')
-          ..write('depth: $depth, ')
-          ..write('lastUpdated: $lastUpdated')
+          ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, pubkey, originPubkey, score, depth, lastUpdated);
+  int get hashCode => Object.hash(id, pubkey, originPubkey, score, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -5724,8 +5406,7 @@ class WotScoreTableData extends DataClass
           other.pubkey == this.pubkey &&
           other.originPubkey == this.originPubkey &&
           other.score == this.score &&
-          other.depth == this.depth &&
-          other.lastUpdated == this.lastUpdated);
+          other.createdAt == this.createdAt);
 }
 
 class WotScoreTableCompanion extends UpdateCompanion<WotScoreTableData> {
@@ -5733,16 +5414,14 @@ class WotScoreTableCompanion extends UpdateCompanion<WotScoreTableData> {
   final Value<String> pubkey;
   final Value<String> originPubkey;
   final Value<double> score;
-  final Value<int> depth;
-  final Value<int?> lastUpdated;
+  final Value<int> createdAt;
   final Value<int> rowid;
   const WotScoreTableCompanion({
     this.id = const Value.absent(),
     this.pubkey = const Value.absent(),
     this.originPubkey = const Value.absent(),
     this.score = const Value.absent(),
-    this.depth = const Value.absent(),
-    this.lastUpdated = const Value.absent(),
+    this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   WotScoreTableCompanion.insert({
@@ -5750,19 +5429,18 @@ class WotScoreTableCompanion extends UpdateCompanion<WotScoreTableData> {
     required String pubkey,
     required String originPubkey,
     this.score = const Value.absent(),
-    this.depth = const Value.absent(),
-    this.lastUpdated = const Value.absent(),
+    required int createdAt,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         pubkey = Value(pubkey),
-        originPubkey = Value(originPubkey);
+        originPubkey = Value(originPubkey),
+        createdAt = Value(createdAt);
   static Insertable<WotScoreTableData> custom({
     Expression<String>? id,
     Expression<String>? pubkey,
     Expression<String>? originPubkey,
     Expression<double>? score,
-    Expression<int>? depth,
-    Expression<int>? lastUpdated,
+    Expression<int>? createdAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -5770,8 +5448,7 @@ class WotScoreTableCompanion extends UpdateCompanion<WotScoreTableData> {
       if (pubkey != null) 'pubkey': pubkey,
       if (originPubkey != null) 'origin_pubkey': originPubkey,
       if (score != null) 'score': score,
-      if (depth != null) 'depth': depth,
-      if (lastUpdated != null) 'last_updated': lastUpdated,
+      if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -5781,16 +5458,14 @@ class WotScoreTableCompanion extends UpdateCompanion<WotScoreTableData> {
       Value<String>? pubkey,
       Value<String>? originPubkey,
       Value<double>? score,
-      Value<int>? depth,
-      Value<int?>? lastUpdated,
+      Value<int>? createdAt,
       Value<int>? rowid}) {
     return WotScoreTableCompanion(
       id: id ?? this.id,
       pubkey: pubkey ?? this.pubkey,
       originPubkey: originPubkey ?? this.originPubkey,
       score: score ?? this.score,
-      depth: depth ?? this.depth,
-      lastUpdated: lastUpdated ?? this.lastUpdated,
+      createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -5810,11 +5485,8 @@ class WotScoreTableCompanion extends UpdateCompanion<WotScoreTableData> {
     if (score.present) {
       map['score'] = Variable<double>(score.value);
     }
-    if (depth.present) {
-      map['depth'] = Variable<int>(depth.value);
-    }
-    if (lastUpdated.present) {
-      map['last_updated'] = Variable<int>(lastUpdated.value);
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -5829,7 +5501,689 @@ class WotScoreTableCompanion extends UpdateCompanion<WotScoreTableData> {
           ..write('pubkey: $pubkey, ')
           ..write('originPubkey: $originPubkey, ')
           ..write('score: $score, ')
-          ..write('depth: $depth, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $RelayInfoListTableTable extends RelayInfoListTable
+    with TableInfo<$RelayInfoListTableTable, RelayInfoListTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RelayInfoListTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _pubkeyMeta = const VerificationMeta('pubkey');
+  @override
+  late final GeneratedColumn<String> pubkey = GeneratedColumn<String>(
+      'pubkey', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _contactMeta =
+      const VerificationMeta('contact');
+  @override
+  late final GeneratedColumn<String> contact = GeneratedColumn<String>(
+      'contact', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String> nips =
+      GeneratedColumn<String>('nips', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('[]'))
+          .withConverter<List<String>>($RelayInfoListTableTable.$converternips);
+  static const VerificationMeta _softwareMeta =
+      const VerificationMeta('software');
+  @override
+  late final GeneratedColumn<String> software = GeneratedColumn<String>(
+      'software', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _iconMeta = const VerificationMeta('icon');
+  @override
+  late final GeneratedColumn<String> icon = GeneratedColumn<String>(
+      'icon', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _versionMeta =
+      const VerificationMeta('version');
+  @override
+  late final GeneratedColumn<String> version = GeneratedColumn<String>(
+      'version', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _urlMeta = const VerificationMeta('url');
+  @override
+  late final GeneratedColumn<String> url = GeneratedColumn<String>(
+      'url', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _locationMeta =
+      const VerificationMeta('location');
+  @override
+  late final GeneratedColumn<String> location = GeneratedColumn<String>(
+      'location', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _latencyMeta =
+      const VerificationMeta('latency');
+  @override
+  late final GeneratedColumn<String> latency = GeneratedColumn<String>(
+      'latency', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _isPaidMeta = const VerificationMeta('isPaid');
+  @override
+  late final GeneratedColumn<bool> isPaid = GeneratedColumn<bool>(
+      'is_paid', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_paid" IN (0, 1))'));
+  static const VerificationMeta _isAuthMeta = const VerificationMeta('isAuth');
+  @override
+  late final GeneratedColumn<bool> isAuth = GeneratedColumn<bool>(
+      'is_auth', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_auth" IN (0, 1))'));
+  static const VerificationMeta _lastUpdatedMeta =
+      const VerificationMeta('lastUpdated');
+  @override
+  late final GeneratedColumn<int> lastUpdated = GeneratedColumn<int>(
+      'last_updated', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        name,
+        description,
+        pubkey,
+        contact,
+        nips,
+        software,
+        icon,
+        version,
+        url,
+        location,
+        latency,
+        isPaid,
+        isAuth,
+        lastUpdated
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'relay_info_list_table';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<RelayInfoListTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
+    }
+    if (data.containsKey('pubkey')) {
+      context.handle(_pubkeyMeta,
+          pubkey.isAcceptableOrUnknown(data['pubkey']!, _pubkeyMeta));
+    } else if (isInserting) {
+      context.missing(_pubkeyMeta);
+    }
+    if (data.containsKey('contact')) {
+      context.handle(_contactMeta,
+          contact.isAcceptableOrUnknown(data['contact']!, _contactMeta));
+    } else if (isInserting) {
+      context.missing(_contactMeta);
+    }
+    if (data.containsKey('software')) {
+      context.handle(_softwareMeta,
+          software.isAcceptableOrUnknown(data['software']!, _softwareMeta));
+    } else if (isInserting) {
+      context.missing(_softwareMeta);
+    }
+    if (data.containsKey('icon')) {
+      context.handle(
+          _iconMeta, icon.isAcceptableOrUnknown(data['icon']!, _iconMeta));
+    } else if (isInserting) {
+      context.missing(_iconMeta);
+    }
+    if (data.containsKey('version')) {
+      context.handle(_versionMeta,
+          version.isAcceptableOrUnknown(data['version']!, _versionMeta));
+    } else if (isInserting) {
+      context.missing(_versionMeta);
+    }
+    if (data.containsKey('url')) {
+      context.handle(
+          _urlMeta, url.isAcceptableOrUnknown(data['url']!, _urlMeta));
+    } else if (isInserting) {
+      context.missing(_urlMeta);
+    }
+    if (data.containsKey('location')) {
+      context.handle(_locationMeta,
+          location.isAcceptableOrUnknown(data['location']!, _locationMeta));
+    } else if (isInserting) {
+      context.missing(_locationMeta);
+    }
+    if (data.containsKey('latency')) {
+      context.handle(_latencyMeta,
+          latency.isAcceptableOrUnknown(data['latency']!, _latencyMeta));
+    } else if (isInserting) {
+      context.missing(_latencyMeta);
+    }
+    if (data.containsKey('is_paid')) {
+      context.handle(_isPaidMeta,
+          isPaid.isAcceptableOrUnknown(data['is_paid']!, _isPaidMeta));
+    } else if (isInserting) {
+      context.missing(_isPaidMeta);
+    }
+    if (data.containsKey('is_auth')) {
+      context.handle(_isAuthMeta,
+          isAuth.isAcceptableOrUnknown(data['is_auth']!, _isAuthMeta));
+    } else if (isInserting) {
+      context.missing(_isAuthMeta);
+    }
+    if (data.containsKey('last_updated')) {
+      context.handle(
+          _lastUpdatedMeta,
+          lastUpdated.isAcceptableOrUnknown(
+              data['last_updated']!, _lastUpdatedMeta));
+    } else if (isInserting) {
+      context.missing(_lastUpdatedMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {name};
+  @override
+  RelayInfoListTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RelayInfoListTableData(
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
+      pubkey: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}pubkey'])!,
+      contact: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}contact'])!,
+      nips: $RelayInfoListTableTable.$converternips.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}nips'])!),
+      software: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}software'])!,
+      icon: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}icon'])!,
+      version: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}version'])!,
+      url: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}url'])!,
+      location: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}location'])!,
+      latency: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}latency'])!,
+      isPaid: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_paid'])!,
+      isAuth: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_auth'])!,
+      lastUpdated: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}last_updated'])!,
+    );
+  }
+
+  @override
+  $RelayInfoListTableTable createAlias(String alias) {
+    return $RelayInfoListTableTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<List<String>, String> $converternips =
+      const StringListConverter();
+}
+
+class RelayInfoListTableData extends DataClass
+    implements Insertable<RelayInfoListTableData> {
+  final String name;
+  final String description;
+  final String pubkey;
+  final String contact;
+  final List<String> nips;
+  final String software;
+  final String icon;
+  final String version;
+  final String url;
+  final String location;
+  final String latency;
+  final bool isPaid;
+  final bool isAuth;
+  final int lastUpdated;
+  const RelayInfoListTableData(
+      {required this.name,
+      required this.description,
+      required this.pubkey,
+      required this.contact,
+      required this.nips,
+      required this.software,
+      required this.icon,
+      required this.version,
+      required this.url,
+      required this.location,
+      required this.latency,
+      required this.isPaid,
+      required this.isAuth,
+      required this.lastUpdated});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['name'] = Variable<String>(name);
+    map['description'] = Variable<String>(description);
+    map['pubkey'] = Variable<String>(pubkey);
+    map['contact'] = Variable<String>(contact);
+    {
+      map['nips'] =
+          Variable<String>($RelayInfoListTableTable.$converternips.toSql(nips));
+    }
+    map['software'] = Variable<String>(software);
+    map['icon'] = Variable<String>(icon);
+    map['version'] = Variable<String>(version);
+    map['url'] = Variable<String>(url);
+    map['location'] = Variable<String>(location);
+    map['latency'] = Variable<String>(latency);
+    map['is_paid'] = Variable<bool>(isPaid);
+    map['is_auth'] = Variable<bool>(isAuth);
+    map['last_updated'] = Variable<int>(lastUpdated);
+    return map;
+  }
+
+  RelayInfoListTableCompanion toCompanion(bool nullToAbsent) {
+    return RelayInfoListTableCompanion(
+      name: Value(name),
+      description: Value(description),
+      pubkey: Value(pubkey),
+      contact: Value(contact),
+      nips: Value(nips),
+      software: Value(software),
+      icon: Value(icon),
+      version: Value(version),
+      url: Value(url),
+      location: Value(location),
+      latency: Value(latency),
+      isPaid: Value(isPaid),
+      isAuth: Value(isAuth),
+      lastUpdated: Value(lastUpdated),
+    );
+  }
+
+  factory RelayInfoListTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RelayInfoListTableData(
+      name: serializer.fromJson<String>(json['name']),
+      description: serializer.fromJson<String>(json['description']),
+      pubkey: serializer.fromJson<String>(json['pubkey']),
+      contact: serializer.fromJson<String>(json['contact']),
+      nips: serializer.fromJson<List<String>>(json['nips']),
+      software: serializer.fromJson<String>(json['software']),
+      icon: serializer.fromJson<String>(json['icon']),
+      version: serializer.fromJson<String>(json['version']),
+      url: serializer.fromJson<String>(json['url']),
+      location: serializer.fromJson<String>(json['location']),
+      latency: serializer.fromJson<String>(json['latency']),
+      isPaid: serializer.fromJson<bool>(json['isPaid']),
+      isAuth: serializer.fromJson<bool>(json['isAuth']),
+      lastUpdated: serializer.fromJson<int>(json['lastUpdated']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'name': serializer.toJson<String>(name),
+      'description': serializer.toJson<String>(description),
+      'pubkey': serializer.toJson<String>(pubkey),
+      'contact': serializer.toJson<String>(contact),
+      'nips': serializer.toJson<List<String>>(nips),
+      'software': serializer.toJson<String>(software),
+      'icon': serializer.toJson<String>(icon),
+      'version': serializer.toJson<String>(version),
+      'url': serializer.toJson<String>(url),
+      'location': serializer.toJson<String>(location),
+      'latency': serializer.toJson<String>(latency),
+      'isPaid': serializer.toJson<bool>(isPaid),
+      'isAuth': serializer.toJson<bool>(isAuth),
+      'lastUpdated': serializer.toJson<int>(lastUpdated),
+    };
+  }
+
+  RelayInfoListTableData copyWith(
+          {String? name,
+          String? description,
+          String? pubkey,
+          String? contact,
+          List<String>? nips,
+          String? software,
+          String? icon,
+          String? version,
+          String? url,
+          String? location,
+          String? latency,
+          bool? isPaid,
+          bool? isAuth,
+          int? lastUpdated}) =>
+      RelayInfoListTableData(
+        name: name ?? this.name,
+        description: description ?? this.description,
+        pubkey: pubkey ?? this.pubkey,
+        contact: contact ?? this.contact,
+        nips: nips ?? this.nips,
+        software: software ?? this.software,
+        icon: icon ?? this.icon,
+        version: version ?? this.version,
+        url: url ?? this.url,
+        location: location ?? this.location,
+        latency: latency ?? this.latency,
+        isPaid: isPaid ?? this.isPaid,
+        isAuth: isAuth ?? this.isAuth,
+        lastUpdated: lastUpdated ?? this.lastUpdated,
+      );
+  RelayInfoListTableData copyWithCompanion(RelayInfoListTableCompanion data) {
+    return RelayInfoListTableData(
+      name: data.name.present ? data.name.value : this.name,
+      description:
+          data.description.present ? data.description.value : this.description,
+      pubkey: data.pubkey.present ? data.pubkey.value : this.pubkey,
+      contact: data.contact.present ? data.contact.value : this.contact,
+      nips: data.nips.present ? data.nips.value : this.nips,
+      software: data.software.present ? data.software.value : this.software,
+      icon: data.icon.present ? data.icon.value : this.icon,
+      version: data.version.present ? data.version.value : this.version,
+      url: data.url.present ? data.url.value : this.url,
+      location: data.location.present ? data.location.value : this.location,
+      latency: data.latency.present ? data.latency.value : this.latency,
+      isPaid: data.isPaid.present ? data.isPaid.value : this.isPaid,
+      isAuth: data.isAuth.present ? data.isAuth.value : this.isAuth,
+      lastUpdated:
+          data.lastUpdated.present ? data.lastUpdated.value : this.lastUpdated,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RelayInfoListTableData(')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('pubkey: $pubkey, ')
+          ..write('contact: $contact, ')
+          ..write('nips: $nips, ')
+          ..write('software: $software, ')
+          ..write('icon: $icon, ')
+          ..write('version: $version, ')
+          ..write('url: $url, ')
+          ..write('location: $location, ')
+          ..write('latency: $latency, ')
+          ..write('isPaid: $isPaid, ')
+          ..write('isAuth: $isAuth, ')
+          ..write('lastUpdated: $lastUpdated')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      name,
+      description,
+      pubkey,
+      contact,
+      nips,
+      software,
+      icon,
+      version,
+      url,
+      location,
+      latency,
+      isPaid,
+      isAuth,
+      lastUpdated);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RelayInfoListTableData &&
+          other.name == this.name &&
+          other.description == this.description &&
+          other.pubkey == this.pubkey &&
+          other.contact == this.contact &&
+          other.nips == this.nips &&
+          other.software == this.software &&
+          other.icon == this.icon &&
+          other.version == this.version &&
+          other.url == this.url &&
+          other.location == this.location &&
+          other.latency == this.latency &&
+          other.isPaid == this.isPaid &&
+          other.isAuth == this.isAuth &&
+          other.lastUpdated == this.lastUpdated);
+}
+
+class RelayInfoListTableCompanion
+    extends UpdateCompanion<RelayInfoListTableData> {
+  final Value<String> name;
+  final Value<String> description;
+  final Value<String> pubkey;
+  final Value<String> contact;
+  final Value<List<String>> nips;
+  final Value<String> software;
+  final Value<String> icon;
+  final Value<String> version;
+  final Value<String> url;
+  final Value<String> location;
+  final Value<String> latency;
+  final Value<bool> isPaid;
+  final Value<bool> isAuth;
+  final Value<int> lastUpdated;
+  final Value<int> rowid;
+  const RelayInfoListTableCompanion({
+    this.name = const Value.absent(),
+    this.description = const Value.absent(),
+    this.pubkey = const Value.absent(),
+    this.contact = const Value.absent(),
+    this.nips = const Value.absent(),
+    this.software = const Value.absent(),
+    this.icon = const Value.absent(),
+    this.version = const Value.absent(),
+    this.url = const Value.absent(),
+    this.location = const Value.absent(),
+    this.latency = const Value.absent(),
+    this.isPaid = const Value.absent(),
+    this.isAuth = const Value.absent(),
+    this.lastUpdated = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RelayInfoListTableCompanion.insert({
+    required String name,
+    required String description,
+    required String pubkey,
+    required String contact,
+    this.nips = const Value.absent(),
+    required String software,
+    required String icon,
+    required String version,
+    required String url,
+    required String location,
+    required String latency,
+    required bool isPaid,
+    required bool isAuth,
+    required int lastUpdated,
+    this.rowid = const Value.absent(),
+  })  : name = Value(name),
+        description = Value(description),
+        pubkey = Value(pubkey),
+        contact = Value(contact),
+        software = Value(software),
+        icon = Value(icon),
+        version = Value(version),
+        url = Value(url),
+        location = Value(location),
+        latency = Value(latency),
+        isPaid = Value(isPaid),
+        isAuth = Value(isAuth),
+        lastUpdated = Value(lastUpdated);
+  static Insertable<RelayInfoListTableData> custom({
+    Expression<String>? name,
+    Expression<String>? description,
+    Expression<String>? pubkey,
+    Expression<String>? contact,
+    Expression<String>? nips,
+    Expression<String>? software,
+    Expression<String>? icon,
+    Expression<String>? version,
+    Expression<String>? url,
+    Expression<String>? location,
+    Expression<String>? latency,
+    Expression<bool>? isPaid,
+    Expression<bool>? isAuth,
+    Expression<int>? lastUpdated,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (name != null) 'name': name,
+      if (description != null) 'description': description,
+      if (pubkey != null) 'pubkey': pubkey,
+      if (contact != null) 'contact': contact,
+      if (nips != null) 'nips': nips,
+      if (software != null) 'software': software,
+      if (icon != null) 'icon': icon,
+      if (version != null) 'version': version,
+      if (url != null) 'url': url,
+      if (location != null) 'location': location,
+      if (latency != null) 'latency': latency,
+      if (isPaid != null) 'is_paid': isPaid,
+      if (isAuth != null) 'is_auth': isAuth,
+      if (lastUpdated != null) 'last_updated': lastUpdated,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RelayInfoListTableCompanion copyWith(
+      {Value<String>? name,
+      Value<String>? description,
+      Value<String>? pubkey,
+      Value<String>? contact,
+      Value<List<String>>? nips,
+      Value<String>? software,
+      Value<String>? icon,
+      Value<String>? version,
+      Value<String>? url,
+      Value<String>? location,
+      Value<String>? latency,
+      Value<bool>? isPaid,
+      Value<bool>? isAuth,
+      Value<int>? lastUpdated,
+      Value<int>? rowid}) {
+    return RelayInfoListTableCompanion(
+      name: name ?? this.name,
+      description: description ?? this.description,
+      pubkey: pubkey ?? this.pubkey,
+      contact: contact ?? this.contact,
+      nips: nips ?? this.nips,
+      software: software ?? this.software,
+      icon: icon ?? this.icon,
+      version: version ?? this.version,
+      url: url ?? this.url,
+      location: location ?? this.location,
+      latency: latency ?? this.latency,
+      isPaid: isPaid ?? this.isPaid,
+      isAuth: isAuth ?? this.isAuth,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (pubkey.present) {
+      map['pubkey'] = Variable<String>(pubkey.value);
+    }
+    if (contact.present) {
+      map['contact'] = Variable<String>(contact.value);
+    }
+    if (nips.present) {
+      map['nips'] = Variable<String>(
+          $RelayInfoListTableTable.$converternips.toSql(nips.value));
+    }
+    if (software.present) {
+      map['software'] = Variable<String>(software.value);
+    }
+    if (icon.present) {
+      map['icon'] = Variable<String>(icon.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<String>(version.value);
+    }
+    if (url.present) {
+      map['url'] = Variable<String>(url.value);
+    }
+    if (location.present) {
+      map['location'] = Variable<String>(location.value);
+    }
+    if (latency.present) {
+      map['latency'] = Variable<String>(latency.value);
+    }
+    if (isPaid.present) {
+      map['is_paid'] = Variable<bool>(isPaid.value);
+    }
+    if (isAuth.present) {
+      map['is_auth'] = Variable<bool>(isAuth.value);
+    }
+    if (lastUpdated.present) {
+      map['last_updated'] = Variable<int>(lastUpdated.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RelayInfoListTableCompanion(')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('pubkey: $pubkey, ')
+          ..write('contact: $contact, ')
+          ..write('nips: $nips, ')
+          ..write('software: $software, ')
+          ..write('icon: $icon, ')
+          ..write('version: $version, ')
+          ..write('url: $url, ')
+          ..write('location: $location, ')
+          ..write('latency: $latency, ')
+          ..write('isPaid: $isPaid, ')
+          ..write('isAuth: $isAuth, ')
           ..write('lastUpdated: $lastUpdated, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -5860,6 +6214,8 @@ abstract class _$NostrDatabase extends GeneratedDatabase {
       $UserAppSettingsTableTable(this);
   late final $UserWotTableTable userWotTable = $UserWotTableTable(this);
   late final $WotScoreTableTable wotScoreTable = $WotScoreTableTable(this);
+  late final $RelayInfoListTableTable relayInfoListTable =
+      $RelayInfoListTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5878,7 +6234,8 @@ abstract class _$NostrDatabase extends GeneratedDatabase {
         userDraftTable,
         userAppSettingsTable,
         userWotTable,
-        wotScoreTable
+        wotScoreTable,
+        relayInfoListTable
       ];
 }
 
@@ -5894,14 +6251,15 @@ typedef $$EventTableTableCreateCompanionBuilder = EventTableCompanion Function({
   Value<List<String>> seenOn,
   Value<int?> lastUpdated,
   Value<String?> subscriptionId,
-  Value<List<List<String>>> tTags,
-  Value<List<List<String>>> pTags,
-  Value<List<List<String>>> capitalpTags,
-  Value<List<List<String>>> kTags,
-  Value<List<List<String>>> eTags,
-  Value<List<List<String>>> lTags,
-  Value<List<List<String>>> aTags,
-  Value<List<List<String>>> other,
+  Value<List<String>> tTags,
+  Value<List<String>> pTags,
+  Value<List<String>> capitalpTags,
+  Value<List<String>> kTags,
+  Value<List<String>> eTags,
+  Value<List<String>> lTags,
+  Value<List<String>> aTags,
+  Value<List<String>> cTags,
+  Value<List<String>> qTags,
   Value<String?> dTag,
   Value<String?> root,
   Value<String?> reply,
@@ -5919,14 +6277,15 @@ typedef $$EventTableTableUpdateCompanionBuilder = EventTableCompanion Function({
   Value<List<String>> seenOn,
   Value<int?> lastUpdated,
   Value<String?> subscriptionId,
-  Value<List<List<String>>> tTags,
-  Value<List<List<String>>> pTags,
-  Value<List<List<String>>> capitalpTags,
-  Value<List<List<String>>> kTags,
-  Value<List<List<String>>> eTags,
-  Value<List<List<String>>> lTags,
-  Value<List<List<String>>> aTags,
-  Value<List<List<String>>> other,
+  Value<List<String>> tTags,
+  Value<List<String>> pTags,
+  Value<List<String>> capitalpTags,
+  Value<List<String>> kTags,
+  Value<List<String>> eTags,
+  Value<List<String>> lTags,
+  Value<List<String>> aTags,
+  Value<List<String>> cTags,
+  Value<List<String>> qTags,
   Value<String?> dTag,
   Value<String?> root,
   Value<String?> reply,
@@ -5980,44 +6339,49 @@ class $$EventTableTableFilterComposer
       column: $table.subscriptionId,
       builder: (column) => ColumnFilters(column));
 
-  ColumnWithTypeConverterFilters<List<List<String>>, List<List<String>>, String>
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
       get tTags => $composableBuilder(
           column: $table.tTags,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
-  ColumnWithTypeConverterFilters<List<List<String>>, List<List<String>>, String>
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
       get pTags => $composableBuilder(
           column: $table.pTags,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
-  ColumnWithTypeConverterFilters<List<List<String>>, List<List<String>>, String>
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
       get capitalpTags => $composableBuilder(
           column: $table.capitalpTags,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
-  ColumnWithTypeConverterFilters<List<List<String>>, List<List<String>>, String>
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
       get kTags => $composableBuilder(
           column: $table.kTags,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
-  ColumnWithTypeConverterFilters<List<List<String>>, List<List<String>>, String>
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
       get eTags => $composableBuilder(
           column: $table.eTags,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
-  ColumnWithTypeConverterFilters<List<List<String>>, List<List<String>>, String>
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
       get lTags => $composableBuilder(
           column: $table.lTags,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
-  ColumnWithTypeConverterFilters<List<List<String>>, List<List<String>>, String>
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
       get aTags => $composableBuilder(
           column: $table.aTags,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
-  ColumnWithTypeConverterFilters<List<List<String>>, List<List<String>>, String>
-      get other => $composableBuilder(
-          column: $table.other,
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+      get cTags => $composableBuilder(
+          column: $table.cTags,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+      get qTags => $composableBuilder(
+          column: $table.qTags,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
   ColumnFilters<String> get dTag => $composableBuilder(
@@ -6095,8 +6459,11 @@ class $$EventTableTableOrderingComposer
   ColumnOrderings<String> get aTags => $composableBuilder(
       column: $table.aTags, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get other => $composableBuilder(
-      column: $table.other, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get cTags => $composableBuilder(
+      column: $table.cTags, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get qTags => $composableBuilder(
+      column: $table.qTags, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get dTag => $composableBuilder(
       column: $table.dTag, builder: (column) => ColumnOrderings(column));
@@ -6150,30 +6517,33 @@ class $$EventTableTableAnnotationComposer
   GeneratedColumn<String> get subscriptionId => $composableBuilder(
       column: $table.subscriptionId, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<List<List<String>>, String> get tTags =>
+  GeneratedColumnWithTypeConverter<List<String>, String> get tTags =>
       $composableBuilder(column: $table.tTags, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<List<List<String>>, String> get pTags =>
+  GeneratedColumnWithTypeConverter<List<String>, String> get pTags =>
       $composableBuilder(column: $table.pTags, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<List<List<String>>, String>
-      get capitalpTags => $composableBuilder(
+  GeneratedColumnWithTypeConverter<List<String>, String> get capitalpTags =>
+      $composableBuilder(
           column: $table.capitalpTags, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<List<List<String>>, String> get kTags =>
+  GeneratedColumnWithTypeConverter<List<String>, String> get kTags =>
       $composableBuilder(column: $table.kTags, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<List<List<String>>, String> get eTags =>
+  GeneratedColumnWithTypeConverter<List<String>, String> get eTags =>
       $composableBuilder(column: $table.eTags, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<List<List<String>>, String> get lTags =>
+  GeneratedColumnWithTypeConverter<List<String>, String> get lTags =>
       $composableBuilder(column: $table.lTags, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<List<List<String>>, String> get aTags =>
+  GeneratedColumnWithTypeConverter<List<String>, String> get aTags =>
       $composableBuilder(column: $table.aTags, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<List<List<String>>, String> get other =>
-      $composableBuilder(column: $table.other, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<List<String>, String> get cTags =>
+      $composableBuilder(column: $table.cTags, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>, String> get qTags =>
+      $composableBuilder(column: $table.qTags, builder: (column) => column);
 
   GeneratedColumn<String> get dTag =>
       $composableBuilder(column: $table.dTag, builder: (column) => column);
@@ -6222,14 +6592,15 @@ class $$EventTableTableTableManager extends RootTableManager<
             Value<List<String>> seenOn = const Value.absent(),
             Value<int?> lastUpdated = const Value.absent(),
             Value<String?> subscriptionId = const Value.absent(),
-            Value<List<List<String>>> tTags = const Value.absent(),
-            Value<List<List<String>>> pTags = const Value.absent(),
-            Value<List<List<String>>> capitalpTags = const Value.absent(),
-            Value<List<List<String>>> kTags = const Value.absent(),
-            Value<List<List<String>>> eTags = const Value.absent(),
-            Value<List<List<String>>> lTags = const Value.absent(),
-            Value<List<List<String>>> aTags = const Value.absent(),
-            Value<List<List<String>>> other = const Value.absent(),
+            Value<List<String>> tTags = const Value.absent(),
+            Value<List<String>> pTags = const Value.absent(),
+            Value<List<String>> capitalpTags = const Value.absent(),
+            Value<List<String>> kTags = const Value.absent(),
+            Value<List<String>> eTags = const Value.absent(),
+            Value<List<String>> lTags = const Value.absent(),
+            Value<List<String>> aTags = const Value.absent(),
+            Value<List<String>> cTags = const Value.absent(),
+            Value<List<String>> qTags = const Value.absent(),
             Value<String?> dTag = const Value.absent(),
             Value<String?> root = const Value.absent(),
             Value<String?> reply = const Value.absent(),
@@ -6254,7 +6625,8 @@ class $$EventTableTableTableManager extends RootTableManager<
             eTags: eTags,
             lTags: lTags,
             aTags: aTags,
-            other: other,
+            cTags: cTags,
+            qTags: qTags,
             dTag: dTag,
             root: root,
             reply: reply,
@@ -6272,14 +6644,15 @@ class $$EventTableTableTableManager extends RootTableManager<
             Value<List<String>> seenOn = const Value.absent(),
             Value<int?> lastUpdated = const Value.absent(),
             Value<String?> subscriptionId = const Value.absent(),
-            Value<List<List<String>>> tTags = const Value.absent(),
-            Value<List<List<String>>> pTags = const Value.absent(),
-            Value<List<List<String>>> capitalpTags = const Value.absent(),
-            Value<List<List<String>>> kTags = const Value.absent(),
-            Value<List<List<String>>> eTags = const Value.absent(),
-            Value<List<List<String>>> lTags = const Value.absent(),
-            Value<List<List<String>>> aTags = const Value.absent(),
-            Value<List<List<String>>> other = const Value.absent(),
+            Value<List<String>> tTags = const Value.absent(),
+            Value<List<String>> pTags = const Value.absent(),
+            Value<List<String>> capitalpTags = const Value.absent(),
+            Value<List<String>> kTags = const Value.absent(),
+            Value<List<String>> eTags = const Value.absent(),
+            Value<List<String>> lTags = const Value.absent(),
+            Value<List<String>> aTags = const Value.absent(),
+            Value<List<String>> cTags = const Value.absent(),
+            Value<List<String>> qTags = const Value.absent(),
             Value<String?> dTag = const Value.absent(),
             Value<String?> root = const Value.absent(),
             Value<String?> reply = const Value.absent(),
@@ -6304,7 +6677,8 @@ class $$EventTableTableTableManager extends RootTableManager<
             eTags: eTags,
             lTags: lTags,
             aTags: aTags,
-            other: other,
+            cTags: cTags,
+            qTags: qTags,
             dTag: dTag,
             root: root,
             reply: reply,
@@ -6906,19 +7280,17 @@ typedef $$ContactListTableTableProcessedTableManager = ProcessedTableManager<
 typedef $$MuteListTableTableCreateCompanionBuilder = MuteListTableCompanion
     Function({
   required String pubkey,
-  Value<String> mutes,
+  Value<List<String>> mutes,
   required int createdAt,
   Value<int?> loadedTimestamp,
-  Value<String> sources,
   Value<int> rowid,
 });
 typedef $$MuteListTableTableUpdateCompanionBuilder = MuteListTableCompanion
     Function({
   Value<String> pubkey,
-  Value<String> mutes,
+  Value<List<String>> mutes,
   Value<int> createdAt,
   Value<int?> loadedTimestamp,
-  Value<String> sources,
   Value<int> rowid,
 });
 
@@ -6934,8 +7306,10 @@ class $$MuteListTableTableFilterComposer
   ColumnFilters<String> get pubkey => $composableBuilder(
       column: $table.pubkey, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get mutes => $composableBuilder(
-      column: $table.mutes, builder: (column) => ColumnFilters(column));
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+      get mutes => $composableBuilder(
+          column: $table.mutes,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
 
   ColumnFilters<int> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -6943,9 +7317,6 @@ class $$MuteListTableTableFilterComposer
   ColumnFilters<int> get loadedTimestamp => $composableBuilder(
       column: $table.loadedTimestamp,
       builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get sources => $composableBuilder(
-      column: $table.sources, builder: (column) => ColumnFilters(column));
 }
 
 class $$MuteListTableTableOrderingComposer
@@ -6969,9 +7340,6 @@ class $$MuteListTableTableOrderingComposer
   ColumnOrderings<int> get loadedTimestamp => $composableBuilder(
       column: $table.loadedTimestamp,
       builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get sources => $composableBuilder(
-      column: $table.sources, builder: (column) => ColumnOrderings(column));
 }
 
 class $$MuteListTableTableAnnotationComposer
@@ -6986,7 +7354,7 @@ class $$MuteListTableTableAnnotationComposer
   GeneratedColumn<String> get pubkey =>
       $composableBuilder(column: $table.pubkey, builder: (column) => column);
 
-  GeneratedColumn<String> get mutes =>
+  GeneratedColumnWithTypeConverter<List<String>, String> get mutes =>
       $composableBuilder(column: $table.mutes, builder: (column) => column);
 
   GeneratedColumn<int> get createdAt =>
@@ -6994,9 +7362,6 @@ class $$MuteListTableTableAnnotationComposer
 
   GeneratedColumn<int> get loadedTimestamp => $composableBuilder(
       column: $table.loadedTimestamp, builder: (column) => column);
-
-  GeneratedColumn<String> get sources =>
-      $composableBuilder(column: $table.sources, builder: (column) => column);
 }
 
 class $$MuteListTableTableTableManager extends RootTableManager<
@@ -7027,10 +7392,9 @@ class $$MuteListTableTableTableManager extends RootTableManager<
               $$MuteListTableTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> pubkey = const Value.absent(),
-            Value<String> mutes = const Value.absent(),
+            Value<List<String>> mutes = const Value.absent(),
             Value<int> createdAt = const Value.absent(),
             Value<int?> loadedTimestamp = const Value.absent(),
-            Value<String> sources = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               MuteListTableCompanion(
@@ -7038,15 +7402,13 @@ class $$MuteListTableTableTableManager extends RootTableManager<
             mutes: mutes,
             createdAt: createdAt,
             loadedTimestamp: loadedTimestamp,
-            sources: sources,
             rowid: rowid,
           ),
           createCompanionCallback: ({
             required String pubkey,
-            Value<String> mutes = const Value.absent(),
+            Value<List<String>> mutes = const Value.absent(),
             required int createdAt,
             Value<int?> loadedTimestamp = const Value.absent(),
-            Value<String> sources = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               MuteListTableCompanion.insert(
@@ -7054,7 +7416,6 @@ class $$MuteListTableTableTableManager extends RootTableManager<
             mutes: mutes,
             createdAt: createdAt,
             loadedTimestamp: loadedTimestamp,
-            sources: sources,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -7082,21 +7443,17 @@ typedef $$MuteListTableTableProcessedTableManager = ProcessedTableManager<
 typedef $$UserRelayListTableTableCreateCompanionBuilder
     = UserRelayListTableCompanion Function({
   required String pubkey,
-  Value<String> readRelays,
-  Value<String> writeRelays,
   required int createdAt,
-  Value<int?> loadedTimestamp,
-  Value<String> sources,
+  required int refreshedTimestamp,
+  required String relays,
   Value<int> rowid,
 });
 typedef $$UserRelayListTableTableUpdateCompanionBuilder
     = UserRelayListTableCompanion Function({
   Value<String> pubkey,
-  Value<String> readRelays,
-  Value<String> writeRelays,
   Value<int> createdAt,
-  Value<int?> loadedTimestamp,
-  Value<String> sources,
+  Value<int> refreshedTimestamp,
+  Value<String> relays,
   Value<int> rowid,
 });
 
@@ -7112,21 +7469,15 @@ class $$UserRelayListTableTableFilterComposer
   ColumnFilters<String> get pubkey => $composableBuilder(
       column: $table.pubkey, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get readRelays => $composableBuilder(
-      column: $table.readRelays, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get writeRelays => $composableBuilder(
-      column: $table.writeRelays, builder: (column) => ColumnFilters(column));
-
   ColumnFilters<int> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<int> get loadedTimestamp => $composableBuilder(
-      column: $table.loadedTimestamp,
+  ColumnFilters<int> get refreshedTimestamp => $composableBuilder(
+      column: $table.refreshedTimestamp,
       builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get sources => $composableBuilder(
-      column: $table.sources, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get relays => $composableBuilder(
+      column: $table.relays, builder: (column) => ColumnFilters(column));
 }
 
 class $$UserRelayListTableTableOrderingComposer
@@ -7141,21 +7492,15 @@ class $$UserRelayListTableTableOrderingComposer
   ColumnOrderings<String> get pubkey => $composableBuilder(
       column: $table.pubkey, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get readRelays => $composableBuilder(
-      column: $table.readRelays, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get writeRelays => $composableBuilder(
-      column: $table.writeRelays, builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<int> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get loadedTimestamp => $composableBuilder(
-      column: $table.loadedTimestamp,
+  ColumnOrderings<int> get refreshedTimestamp => $composableBuilder(
+      column: $table.refreshedTimestamp,
       builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get sources => $composableBuilder(
-      column: $table.sources, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get relays => $composableBuilder(
+      column: $table.relays, builder: (column) => ColumnOrderings(column));
 }
 
 class $$UserRelayListTableTableAnnotationComposer
@@ -7170,20 +7515,14 @@ class $$UserRelayListTableTableAnnotationComposer
   GeneratedColumn<String> get pubkey =>
       $composableBuilder(column: $table.pubkey, builder: (column) => column);
 
-  GeneratedColumn<String> get readRelays => $composableBuilder(
-      column: $table.readRelays, builder: (column) => column);
-
-  GeneratedColumn<String> get writeRelays => $composableBuilder(
-      column: $table.writeRelays, builder: (column) => column);
-
   GeneratedColumn<int> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumn<int> get loadedTimestamp => $composableBuilder(
-      column: $table.loadedTimestamp, builder: (column) => column);
+  GeneratedColumn<int> get refreshedTimestamp => $composableBuilder(
+      column: $table.refreshedTimestamp, builder: (column) => column);
 
-  GeneratedColumn<String> get sources =>
-      $composableBuilder(column: $table.sources, builder: (column) => column);
+  GeneratedColumn<String> get relays =>
+      $composableBuilder(column: $table.relays, builder: (column) => column);
 }
 
 class $$UserRelayListTableTableTableManager extends RootTableManager<
@@ -7216,38 +7555,30 @@ class $$UserRelayListTableTableTableManager extends RootTableManager<
                   $db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> pubkey = const Value.absent(),
-            Value<String> readRelays = const Value.absent(),
-            Value<String> writeRelays = const Value.absent(),
             Value<int> createdAt = const Value.absent(),
-            Value<int?> loadedTimestamp = const Value.absent(),
-            Value<String> sources = const Value.absent(),
+            Value<int> refreshedTimestamp = const Value.absent(),
+            Value<String> relays = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               UserRelayListTableCompanion(
             pubkey: pubkey,
-            readRelays: readRelays,
-            writeRelays: writeRelays,
             createdAt: createdAt,
-            loadedTimestamp: loadedTimestamp,
-            sources: sources,
+            refreshedTimestamp: refreshedTimestamp,
+            relays: relays,
             rowid: rowid,
           ),
           createCompanionCallback: ({
             required String pubkey,
-            Value<String> readRelays = const Value.absent(),
-            Value<String> writeRelays = const Value.absent(),
             required int createdAt,
-            Value<int?> loadedTimestamp = const Value.absent(),
-            Value<String> sources = const Value.absent(),
+            required int refreshedTimestamp,
+            required String relays,
             Value<int> rowid = const Value.absent(),
           }) =>
               UserRelayListTableCompanion.insert(
             pubkey: pubkey,
-            readRelays: readRelays,
-            writeRelays: writeRelays,
             createdAt: createdAt,
-            loadedTimestamp: loadedTimestamp,
-            sources: sources,
+            refreshedTimestamp: refreshedTimestamp,
+            relays: relays,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -7278,10 +7609,9 @@ typedef $$RelaySetTableTableCreateCompanionBuilder = RelaySetTableCompanion
   required String id,
   required String name,
   required String pubkey,
-  Value<String> relays,
-  required int createdAt,
-  Value<int?> loadedTimestamp,
-  Value<String> sources,
+  Value<String> relaysMap,
+  required String direction,
+  Value<int> relayMinCountPerPubkey,
   Value<int> rowid,
 });
 typedef $$RelaySetTableTableUpdateCompanionBuilder = RelaySetTableCompanion
@@ -7289,10 +7619,9 @@ typedef $$RelaySetTableTableUpdateCompanionBuilder = RelaySetTableCompanion
   Value<String> id,
   Value<String> name,
   Value<String> pubkey,
-  Value<String> relays,
-  Value<int> createdAt,
-  Value<int?> loadedTimestamp,
-  Value<String> sources,
+  Value<String> relaysMap,
+  Value<String> direction,
+  Value<int> relayMinCountPerPubkey,
   Value<int> rowid,
 });
 
@@ -7314,18 +7643,15 @@ class $$RelaySetTableTableFilterComposer
   ColumnFilters<String> get pubkey => $composableBuilder(
       column: $table.pubkey, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get relays => $composableBuilder(
-      column: $table.relays, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get relaysMap => $composableBuilder(
+      column: $table.relaysMap, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<int> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get direction => $composableBuilder(
+      column: $table.direction, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<int> get loadedTimestamp => $composableBuilder(
-      column: $table.loadedTimestamp,
+  ColumnFilters<int> get relayMinCountPerPubkey => $composableBuilder(
+      column: $table.relayMinCountPerPubkey,
       builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get sources => $composableBuilder(
-      column: $table.sources, builder: (column) => ColumnFilters(column));
 }
 
 class $$RelaySetTableTableOrderingComposer
@@ -7346,18 +7672,15 @@ class $$RelaySetTableTableOrderingComposer
   ColumnOrderings<String> get pubkey => $composableBuilder(
       column: $table.pubkey, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get relays => $composableBuilder(
-      column: $table.relays, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get relaysMap => $composableBuilder(
+      column: $table.relaysMap, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get direction => $composableBuilder(
+      column: $table.direction, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get loadedTimestamp => $composableBuilder(
-      column: $table.loadedTimestamp,
+  ColumnOrderings<int> get relayMinCountPerPubkey => $composableBuilder(
+      column: $table.relayMinCountPerPubkey,
       builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get sources => $composableBuilder(
-      column: $table.sources, builder: (column) => ColumnOrderings(column));
 }
 
 class $$RelaySetTableTableAnnotationComposer
@@ -7378,17 +7701,14 @@ class $$RelaySetTableTableAnnotationComposer
   GeneratedColumn<String> get pubkey =>
       $composableBuilder(column: $table.pubkey, builder: (column) => column);
 
-  GeneratedColumn<String> get relays =>
-      $composableBuilder(column: $table.relays, builder: (column) => column);
+  GeneratedColumn<String> get relaysMap =>
+      $composableBuilder(column: $table.relaysMap, builder: (column) => column);
 
-  GeneratedColumn<int> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<String> get direction =>
+      $composableBuilder(column: $table.direction, builder: (column) => column);
 
-  GeneratedColumn<int> get loadedTimestamp => $composableBuilder(
-      column: $table.loadedTimestamp, builder: (column) => column);
-
-  GeneratedColumn<String> get sources =>
-      $composableBuilder(column: $table.sources, builder: (column) => column);
+  GeneratedColumn<int> get relayMinCountPerPubkey => $composableBuilder(
+      column: $table.relayMinCountPerPubkey, builder: (column) => column);
 }
 
 class $$RelaySetTableTableTableManager extends RootTableManager<
@@ -7421,40 +7741,36 @@ class $$RelaySetTableTableTableManager extends RootTableManager<
             Value<String> id = const Value.absent(),
             Value<String> name = const Value.absent(),
             Value<String> pubkey = const Value.absent(),
-            Value<String> relays = const Value.absent(),
-            Value<int> createdAt = const Value.absent(),
-            Value<int?> loadedTimestamp = const Value.absent(),
-            Value<String> sources = const Value.absent(),
+            Value<String> relaysMap = const Value.absent(),
+            Value<String> direction = const Value.absent(),
+            Value<int> relayMinCountPerPubkey = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               RelaySetTableCompanion(
             id: id,
             name: name,
             pubkey: pubkey,
-            relays: relays,
-            createdAt: createdAt,
-            loadedTimestamp: loadedTimestamp,
-            sources: sources,
+            relaysMap: relaysMap,
+            direction: direction,
+            relayMinCountPerPubkey: relayMinCountPerPubkey,
             rowid: rowid,
           ),
           createCompanionCallback: ({
             required String id,
             required String name,
             required String pubkey,
-            Value<String> relays = const Value.absent(),
-            required int createdAt,
-            Value<int?> loadedTimestamp = const Value.absent(),
-            Value<String> sources = const Value.absent(),
+            Value<String> relaysMap = const Value.absent(),
+            required String direction,
+            Value<int> relayMinCountPerPubkey = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               RelaySetTableCompanion.insert(
             id: id,
             name: name,
             pubkey: pubkey,
-            relays: relays,
-            createdAt: createdAt,
-            loadedTimestamp: loadedTimestamp,
-            sources: sources,
+            relaysMap: relaysMap,
+            direction: direction,
+            relayMinCountPerPubkey: relayMinCountPerPubkey,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -7482,23 +7798,23 @@ typedef $$RelaySetTableTableProcessedTableManager = ProcessedTableManager<
 typedef $$EventStatsTableTableCreateCompanionBuilder = EventStatsTableCompanion
     Function({
   required String id,
-  Value<int> repliesCount,
-  Value<int> repostsCount,
-  Value<int> reactionsCount,
-  Value<int> zapsCount,
-  Value<int> zapAmount,
-  Value<int?> lastUpdated,
+  Value<Map<String, String>> replies,
+  Value<Map<String, String>> reposts,
+  Value<Map<String, String>> reactions,
+  Value<Map<String, String>> quotes,
+  Value<Map<String, Map<String, int>>> zaps,
+  Value<int?> newestCreatedAt,
   Value<int> rowid,
 });
 typedef $$EventStatsTableTableUpdateCompanionBuilder = EventStatsTableCompanion
     Function({
   Value<String> id,
-  Value<int> repliesCount,
-  Value<int> repostsCount,
-  Value<int> reactionsCount,
-  Value<int> zapsCount,
-  Value<int> zapAmount,
-  Value<int?> lastUpdated,
+  Value<Map<String, String>> replies,
+  Value<Map<String, String>> reposts,
+  Value<Map<String, String>> reactions,
+  Value<Map<String, String>> quotes,
+  Value<Map<String, Map<String, int>>> zaps,
+  Value<int?> newestCreatedAt,
   Value<int> rowid,
 });
 
@@ -7514,24 +7830,39 @@ class $$EventStatsTableTableFilterComposer
   ColumnFilters<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<int> get repliesCount => $composableBuilder(
-      column: $table.repliesCount, builder: (column) => ColumnFilters(column));
+  ColumnWithTypeConverterFilters<Map<String, String>, Map<String, String>,
+          String>
+      get replies => $composableBuilder(
+          column: $table.replies,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
 
-  ColumnFilters<int> get repostsCount => $composableBuilder(
-      column: $table.repostsCount, builder: (column) => ColumnFilters(column));
+  ColumnWithTypeConverterFilters<Map<String, String>, Map<String, String>,
+          String>
+      get reposts => $composableBuilder(
+          column: $table.reposts,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
 
-  ColumnFilters<int> get reactionsCount => $composableBuilder(
-      column: $table.reactionsCount,
+  ColumnWithTypeConverterFilters<Map<String, String>, Map<String, String>,
+          String>
+      get reactions => $composableBuilder(
+          column: $table.reactions,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<Map<String, String>, Map<String, String>,
+          String>
+      get quotes => $composableBuilder(
+          column: $table.quotes,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<Map<String, Map<String, int>>,
+          Map<String, Map<String, int>>, String>
+      get zaps => $composableBuilder(
+          column: $table.zaps,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<int> get newestCreatedAt => $composableBuilder(
+      column: $table.newestCreatedAt,
       builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<int> get zapsCount => $composableBuilder(
-      column: $table.zapsCount, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<int> get zapAmount => $composableBuilder(
-      column: $table.zapAmount, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<int> get lastUpdated => $composableBuilder(
-      column: $table.lastUpdated, builder: (column) => ColumnFilters(column));
 }
 
 class $$EventStatsTableTableOrderingComposer
@@ -7546,26 +7877,24 @@ class $$EventStatsTableTableOrderingComposer
   ColumnOrderings<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get repliesCount => $composableBuilder(
-      column: $table.repliesCount,
+  ColumnOrderings<String> get replies => $composableBuilder(
+      column: $table.replies, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get reposts => $composableBuilder(
+      column: $table.reposts, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get reactions => $composableBuilder(
+      column: $table.reactions, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get quotes => $composableBuilder(
+      column: $table.quotes, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get zaps => $composableBuilder(
+      column: $table.zaps, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get newestCreatedAt => $composableBuilder(
+      column: $table.newestCreatedAt,
       builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<int> get repostsCount => $composableBuilder(
-      column: $table.repostsCount,
-      builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<int> get reactionsCount => $composableBuilder(
-      column: $table.reactionsCount,
-      builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<int> get zapsCount => $composableBuilder(
-      column: $table.zapsCount, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<int> get zapAmount => $composableBuilder(
-      column: $table.zapAmount, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<int> get lastUpdated => $composableBuilder(
-      column: $table.lastUpdated, builder: (column) => ColumnOrderings(column));
 }
 
 class $$EventStatsTableTableAnnotationComposer
@@ -7580,23 +7909,24 @@ class $$EventStatsTableTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<int> get repliesCount => $composableBuilder(
-      column: $table.repliesCount, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<Map<String, String>, String> get replies =>
+      $composableBuilder(column: $table.replies, builder: (column) => column);
 
-  GeneratedColumn<int> get repostsCount => $composableBuilder(
-      column: $table.repostsCount, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<Map<String, String>, String> get reposts =>
+      $composableBuilder(column: $table.reposts, builder: (column) => column);
 
-  GeneratedColumn<int> get reactionsCount => $composableBuilder(
-      column: $table.reactionsCount, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<Map<String, String>, String> get reactions =>
+      $composableBuilder(column: $table.reactions, builder: (column) => column);
 
-  GeneratedColumn<int> get zapsCount =>
-      $composableBuilder(column: $table.zapsCount, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<Map<String, String>, String> get quotes =>
+      $composableBuilder(column: $table.quotes, builder: (column) => column);
 
-  GeneratedColumn<int> get zapAmount =>
-      $composableBuilder(column: $table.zapAmount, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<Map<String, Map<String, int>>, String>
+      get zaps =>
+          $composableBuilder(column: $table.zaps, builder: (column) => column);
 
-  GeneratedColumn<int> get lastUpdated => $composableBuilder(
-      column: $table.lastUpdated, builder: (column) => column);
+  GeneratedColumn<int> get newestCreatedAt => $composableBuilder(
+      column: $table.newestCreatedAt, builder: (column) => column);
 }
 
 class $$EventStatsTableTableTableManager extends RootTableManager<
@@ -7628,42 +7958,42 @@ class $$EventStatsTableTableTableManager extends RootTableManager<
               $$EventStatsTableTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
-            Value<int> repliesCount = const Value.absent(),
-            Value<int> repostsCount = const Value.absent(),
-            Value<int> reactionsCount = const Value.absent(),
-            Value<int> zapsCount = const Value.absent(),
-            Value<int> zapAmount = const Value.absent(),
-            Value<int?> lastUpdated = const Value.absent(),
+            Value<Map<String, String>> replies = const Value.absent(),
+            Value<Map<String, String>> reposts = const Value.absent(),
+            Value<Map<String, String>> reactions = const Value.absent(),
+            Value<Map<String, String>> quotes = const Value.absent(),
+            Value<Map<String, Map<String, int>>> zaps = const Value.absent(),
+            Value<int?> newestCreatedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               EventStatsTableCompanion(
             id: id,
-            repliesCount: repliesCount,
-            repostsCount: repostsCount,
-            reactionsCount: reactionsCount,
-            zapsCount: zapsCount,
-            zapAmount: zapAmount,
-            lastUpdated: lastUpdated,
+            replies: replies,
+            reposts: reposts,
+            reactions: reactions,
+            quotes: quotes,
+            zaps: zaps,
+            newestCreatedAt: newestCreatedAt,
             rowid: rowid,
           ),
           createCompanionCallback: ({
             required String id,
-            Value<int> repliesCount = const Value.absent(),
-            Value<int> repostsCount = const Value.absent(),
-            Value<int> reactionsCount = const Value.absent(),
-            Value<int> zapsCount = const Value.absent(),
-            Value<int> zapAmount = const Value.absent(),
-            Value<int?> lastUpdated = const Value.absent(),
+            Value<Map<String, String>> replies = const Value.absent(),
+            Value<Map<String, String>> reposts = const Value.absent(),
+            Value<Map<String, String>> reactions = const Value.absent(),
+            Value<Map<String, String>> quotes = const Value.absent(),
+            Value<Map<String, Map<String, int>>> zaps = const Value.absent(),
+            Value<int?> newestCreatedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               EventStatsTableCompanion.insert(
             id: id,
-            repliesCount: repliesCount,
-            repostsCount: repostsCount,
-            reactionsCount: reactionsCount,
-            zapsCount: zapsCount,
-            zapAmount: zapAmount,
-            lastUpdated: lastUpdated,
+            replies: replies,
+            reposts: reposts,
+            reactions: reactions,
+            quotes: quotes,
+            zaps: zaps,
+            newestCreatedAt: newestCreatedAt,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -7693,16 +8023,14 @@ typedef $$Nip05TableTableCreateCompanionBuilder = Nip05TableCompanion Function({
   required String nip05,
   required String pubkey,
   Value<bool> valid,
-  Value<int?> lastCheck,
-  Value<int?> networkFetch,
+  required int updatedAt,
   Value<int> rowid,
 });
 typedef $$Nip05TableTableUpdateCompanionBuilder = Nip05TableCompanion Function({
   Value<String> nip05,
   Value<String> pubkey,
   Value<bool> valid,
-  Value<int?> lastCheck,
-  Value<int?> networkFetch,
+  Value<int> updatedAt,
   Value<int> rowid,
 });
 
@@ -7724,11 +8052,8 @@ class $$Nip05TableTableFilterComposer
   ColumnFilters<bool> get valid => $composableBuilder(
       column: $table.valid, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<int> get lastCheck => $composableBuilder(
-      column: $table.lastCheck, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<int> get networkFetch => $composableBuilder(
-      column: $table.networkFetch, builder: (column) => ColumnFilters(column));
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
 }
 
 class $$Nip05TableTableOrderingComposer
@@ -7749,12 +8074,8 @@ class $$Nip05TableTableOrderingComposer
   ColumnOrderings<bool> get valid => $composableBuilder(
       column: $table.valid, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get lastCheck => $composableBuilder(
-      column: $table.lastCheck, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<int> get networkFetch => $composableBuilder(
-      column: $table.networkFetch,
-      builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
 }
 
 class $$Nip05TableTableAnnotationComposer
@@ -7775,11 +8096,8 @@ class $$Nip05TableTableAnnotationComposer
   GeneratedColumn<bool> get valid =>
       $composableBuilder(column: $table.valid, builder: (column) => column);
 
-  GeneratedColumn<int> get lastCheck =>
-      $composableBuilder(column: $table.lastCheck, builder: (column) => column);
-
-  GeneratedColumn<int> get networkFetch => $composableBuilder(
-      column: $table.networkFetch, builder: (column) => column);
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 }
 
 class $$Nip05TableTableTableManager extends RootTableManager<
@@ -7811,32 +8129,28 @@ class $$Nip05TableTableTableManager extends RootTableManager<
             Value<String> nip05 = const Value.absent(),
             Value<String> pubkey = const Value.absent(),
             Value<bool> valid = const Value.absent(),
-            Value<int?> lastCheck = const Value.absent(),
-            Value<int?> networkFetch = const Value.absent(),
+            Value<int> updatedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               Nip05TableCompanion(
             nip05: nip05,
             pubkey: pubkey,
             valid: valid,
-            lastCheck: lastCheck,
-            networkFetch: networkFetch,
+            updatedAt: updatedAt,
             rowid: rowid,
           ),
           createCompanionCallback: ({
             required String nip05,
             required String pubkey,
             Value<bool> valid = const Value.absent(),
-            Value<int?> lastCheck = const Value.absent(),
-            Value<int?> networkFetch = const Value.absent(),
+            required int updatedAt,
             Value<int> rowid = const Value.absent(),
           }) =>
               Nip05TableCompanion.insert(
             nip05: nip05,
             pubkey: pubkey,
             valid: valid,
-            lastCheck: lastCheck,
-            networkFetch: networkFetch,
+            updatedAt: updatedAt,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -8045,18 +8359,16 @@ typedef $$DmSessionInfosTableTableProcessedTableManager = ProcessedTableManager<
     PrefetchHooks Function()>;
 typedef $$UserFollowersTableTableCreateCompanionBuilder
     = UserFollowersTableCompanion Function({
-  required String id,
   required String pubkey,
-  Value<String> followers,
-  Value<int?> lastUpdated,
+  Value<List<String>> followers,
+  required int lastRefreshed,
   Value<int> rowid,
 });
 typedef $$UserFollowersTableTableUpdateCompanionBuilder
     = UserFollowersTableCompanion Function({
-  Value<String> id,
   Value<String> pubkey,
-  Value<String> followers,
-  Value<int?> lastUpdated,
+  Value<List<String>> followers,
+  Value<int> lastRefreshed,
   Value<int> rowid,
 });
 
@@ -8069,17 +8381,16 @@ class $$UserFollowersTableTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<String> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
-
   ColumnFilters<String> get pubkey => $composableBuilder(
       column: $table.pubkey, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get followers => $composableBuilder(
-      column: $table.followers, builder: (column) => ColumnFilters(column));
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+      get followers => $composableBuilder(
+          column: $table.followers,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
 
-  ColumnFilters<int> get lastUpdated => $composableBuilder(
-      column: $table.lastUpdated, builder: (column) => ColumnFilters(column));
+  ColumnFilters<int> get lastRefreshed => $composableBuilder(
+      column: $table.lastRefreshed, builder: (column) => ColumnFilters(column));
 }
 
 class $$UserFollowersTableTableOrderingComposer
@@ -8091,17 +8402,15 @@ class $$UserFollowersTableTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<String> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<String> get pubkey => $composableBuilder(
       column: $table.pubkey, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get followers => $composableBuilder(
       column: $table.followers, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get lastUpdated => $composableBuilder(
-      column: $table.lastUpdated, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<int> get lastRefreshed => $composableBuilder(
+      column: $table.lastRefreshed,
+      builder: (column) => ColumnOrderings(column));
 }
 
 class $$UserFollowersTableTableAnnotationComposer
@@ -8113,17 +8422,14 @@ class $$UserFollowersTableTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
   GeneratedColumn<String> get pubkey =>
       $composableBuilder(column: $table.pubkey, builder: (column) => column);
 
-  GeneratedColumn<String> get followers =>
+  GeneratedColumnWithTypeConverter<List<String>, String> get followers =>
       $composableBuilder(column: $table.followers, builder: (column) => column);
 
-  GeneratedColumn<int> get lastUpdated => $composableBuilder(
-      column: $table.lastUpdated, builder: (column) => column);
+  GeneratedColumn<int> get lastRefreshed => $composableBuilder(
+      column: $table.lastRefreshed, builder: (column) => column);
 }
 
 class $$UserFollowersTableTableTableManager extends RootTableManager<
@@ -8155,31 +8461,27 @@ class $$UserFollowersTableTableTableManager extends RootTableManager<
               $$UserFollowersTableTableAnnotationComposer(
                   $db: db, $table: table),
           updateCompanionCallback: ({
-            Value<String> id = const Value.absent(),
             Value<String> pubkey = const Value.absent(),
-            Value<String> followers = const Value.absent(),
-            Value<int?> lastUpdated = const Value.absent(),
+            Value<List<String>> followers = const Value.absent(),
+            Value<int> lastRefreshed = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               UserFollowersTableCompanion(
-            id: id,
             pubkey: pubkey,
             followers: followers,
-            lastUpdated: lastUpdated,
+            lastRefreshed: lastRefreshed,
             rowid: rowid,
           ),
           createCompanionCallback: ({
-            required String id,
             required String pubkey,
-            Value<String> followers = const Value.absent(),
-            Value<int?> lastUpdated = const Value.absent(),
+            Value<List<String>> followers = const Value.absent(),
+            required int lastRefreshed,
             Value<int> rowid = const Value.absent(),
           }) =>
               UserFollowersTableCompanion.insert(
-            id: id,
             pubkey: pubkey,
             followers: followers,
-            lastUpdated: lastUpdated,
+            lastRefreshed: lastRefreshed,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -8207,24 +8509,20 @@ typedef $$UserFollowersTableTableProcessedTableManager = ProcessedTableManager<
     PrefetchHooks Function()>;
 typedef $$UserDraftTableTableCreateCompanionBuilder = UserDraftTableCompanion
     Function({
-  required String id,
   required String pubkey,
-  required String content,
-  required int kind,
-  Value<String> tags,
-  required int createdAt,
-  Value<int?> lastUpdated,
+  required String noteDraft,
+  required String articleDraft,
+  Value<Map<String, String>> replies,
+  Value<Map<String, String>> smartWidgetsDraft,
   Value<int> rowid,
 });
 typedef $$UserDraftTableTableUpdateCompanionBuilder = UserDraftTableCompanion
     Function({
-  Value<String> id,
   Value<String> pubkey,
-  Value<String> content,
-  Value<int> kind,
-  Value<String> tags,
-  Value<int> createdAt,
-  Value<int?> lastUpdated,
+  Value<String> noteDraft,
+  Value<String> articleDraft,
+  Value<Map<String, String>> replies,
+  Value<Map<String, String>> smartWidgetsDraft,
   Value<int> rowid,
 });
 
@@ -8237,26 +8535,26 @@ class $$UserDraftTableTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<String> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
-
   ColumnFilters<String> get pubkey => $composableBuilder(
       column: $table.pubkey, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get content => $composableBuilder(
-      column: $table.content, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get noteDraft => $composableBuilder(
+      column: $table.noteDraft, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<int> get kind => $composableBuilder(
-      column: $table.kind, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get articleDraft => $composableBuilder(
+      column: $table.articleDraft, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get tags => $composableBuilder(
-      column: $table.tags, builder: (column) => ColumnFilters(column));
+  ColumnWithTypeConverterFilters<Map<String, String>, Map<String, String>,
+          String>
+      get replies => $composableBuilder(
+          column: $table.replies,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
 
-  ColumnFilters<int> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<int> get lastUpdated => $composableBuilder(
-      column: $table.lastUpdated, builder: (column) => ColumnFilters(column));
+  ColumnWithTypeConverterFilters<Map<String, String>, Map<String, String>,
+          String>
+      get smartWidgetsDraft => $composableBuilder(
+          column: $table.smartWidgetsDraft,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
 }
 
 class $$UserDraftTableTableOrderingComposer
@@ -8268,26 +8566,22 @@ class $$UserDraftTableTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<String> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<String> get pubkey => $composableBuilder(
       column: $table.pubkey, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get content => $composableBuilder(
-      column: $table.content, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get noteDraft => $composableBuilder(
+      column: $table.noteDraft, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get kind => $composableBuilder(
-      column: $table.kind, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get articleDraft => $composableBuilder(
+      column: $table.articleDraft,
+      builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get tags => $composableBuilder(
-      column: $table.tags, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get replies => $composableBuilder(
+      column: $table.replies, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<int> get lastUpdated => $composableBuilder(
-      column: $table.lastUpdated, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get smartWidgetsDraft => $composableBuilder(
+      column: $table.smartWidgetsDraft,
+      builder: (column) => ColumnOrderings(column));
 }
 
 class $$UserDraftTableTableAnnotationComposer
@@ -8299,26 +8593,21 @@ class $$UserDraftTableTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
   GeneratedColumn<String> get pubkey =>
       $composableBuilder(column: $table.pubkey, builder: (column) => column);
 
-  GeneratedColumn<String> get content =>
-      $composableBuilder(column: $table.content, builder: (column) => column);
+  GeneratedColumn<String> get noteDraft =>
+      $composableBuilder(column: $table.noteDraft, builder: (column) => column);
 
-  GeneratedColumn<int> get kind =>
-      $composableBuilder(column: $table.kind, builder: (column) => column);
+  GeneratedColumn<String> get articleDraft => $composableBuilder(
+      column: $table.articleDraft, builder: (column) => column);
 
-  GeneratedColumn<String> get tags =>
-      $composableBuilder(column: $table.tags, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<Map<String, String>, String> get replies =>
+      $composableBuilder(column: $table.replies, builder: (column) => column);
 
-  GeneratedColumn<int> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
-
-  GeneratedColumn<int> get lastUpdated => $composableBuilder(
-      column: $table.lastUpdated, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<Map<String, String>, String>
+      get smartWidgetsDraft => $composableBuilder(
+          column: $table.smartWidgetsDraft, builder: (column) => column);
 }
 
 class $$UserDraftTableTableTableManager extends RootTableManager<
@@ -8348,43 +8637,35 @@ class $$UserDraftTableTableTableManager extends RootTableManager<
           createComputedFieldComposer: () =>
               $$UserDraftTableTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
-            Value<String> id = const Value.absent(),
             Value<String> pubkey = const Value.absent(),
-            Value<String> content = const Value.absent(),
-            Value<int> kind = const Value.absent(),
-            Value<String> tags = const Value.absent(),
-            Value<int> createdAt = const Value.absent(),
-            Value<int?> lastUpdated = const Value.absent(),
+            Value<String> noteDraft = const Value.absent(),
+            Value<String> articleDraft = const Value.absent(),
+            Value<Map<String, String>> replies = const Value.absent(),
+            Value<Map<String, String>> smartWidgetsDraft = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               UserDraftTableCompanion(
-            id: id,
             pubkey: pubkey,
-            content: content,
-            kind: kind,
-            tags: tags,
-            createdAt: createdAt,
-            lastUpdated: lastUpdated,
+            noteDraft: noteDraft,
+            articleDraft: articleDraft,
+            replies: replies,
+            smartWidgetsDraft: smartWidgetsDraft,
             rowid: rowid,
           ),
           createCompanionCallback: ({
-            required String id,
             required String pubkey,
-            required String content,
-            required int kind,
-            Value<String> tags = const Value.absent(),
-            required int createdAt,
-            Value<int?> lastUpdated = const Value.absent(),
+            required String noteDraft,
+            required String articleDraft,
+            Value<Map<String, String>> replies = const Value.absent(),
+            Value<Map<String, String>> smartWidgetsDraft = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               UserDraftTableCompanion.insert(
-            id: id,
             pubkey: pubkey,
-            content: content,
-            kind: kind,
-            tags: tags,
-            createdAt: createdAt,
-            lastUpdated: lastUpdated,
+            noteDraft: noteDraft,
+            articleDraft: articleDraft,
+            replies: replies,
+            smartWidgetsDraft: smartWidgetsDraft,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -8412,15 +8693,15 @@ typedef $$UserDraftTableTableProcessedTableManager = ProcessedTableManager<
 typedef $$UserAppSettingsTableTableCreateCompanionBuilder
     = UserAppSettingsTableCompanion Function({
   required String pubkey,
-  Value<String> settings,
-  Value<int?> lastUpdated,
+  Value<String> filters,
+  Value<String> contentSources,
   Value<int> rowid,
 });
 typedef $$UserAppSettingsTableTableUpdateCompanionBuilder
     = UserAppSettingsTableCompanion Function({
   Value<String> pubkey,
-  Value<String> settings,
-  Value<int?> lastUpdated,
+  Value<String> filters,
+  Value<String> contentSources,
   Value<int> rowid,
 });
 
@@ -8436,11 +8717,12 @@ class $$UserAppSettingsTableTableFilterComposer
   ColumnFilters<String> get pubkey => $composableBuilder(
       column: $table.pubkey, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get settings => $composableBuilder(
-      column: $table.settings, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get filters => $composableBuilder(
+      column: $table.filters, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<int> get lastUpdated => $composableBuilder(
-      column: $table.lastUpdated, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get contentSources => $composableBuilder(
+      column: $table.contentSources,
+      builder: (column) => ColumnFilters(column));
 }
 
 class $$UserAppSettingsTableTableOrderingComposer
@@ -8455,11 +8737,12 @@ class $$UserAppSettingsTableTableOrderingComposer
   ColumnOrderings<String> get pubkey => $composableBuilder(
       column: $table.pubkey, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get settings => $composableBuilder(
-      column: $table.settings, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get filters => $composableBuilder(
+      column: $table.filters, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get lastUpdated => $composableBuilder(
-      column: $table.lastUpdated, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get contentSources => $composableBuilder(
+      column: $table.contentSources,
+      builder: (column) => ColumnOrderings(column));
 }
 
 class $$UserAppSettingsTableTableAnnotationComposer
@@ -8474,11 +8757,11 @@ class $$UserAppSettingsTableTableAnnotationComposer
   GeneratedColumn<String> get pubkey =>
       $composableBuilder(column: $table.pubkey, builder: (column) => column);
 
-  GeneratedColumn<String> get settings =>
-      $composableBuilder(column: $table.settings, builder: (column) => column);
+  GeneratedColumn<String> get filters =>
+      $composableBuilder(column: $table.filters, builder: (column) => column);
 
-  GeneratedColumn<int> get lastUpdated => $composableBuilder(
-      column: $table.lastUpdated, builder: (column) => column);
+  GeneratedColumn<String> get contentSources => $composableBuilder(
+      column: $table.contentSources, builder: (column) => column);
 }
 
 class $$UserAppSettingsTableTableTableManager extends RootTableManager<
@@ -8512,26 +8795,26 @@ class $$UserAppSettingsTableTableTableManager extends RootTableManager<
                   $db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> pubkey = const Value.absent(),
-            Value<String> settings = const Value.absent(),
-            Value<int?> lastUpdated = const Value.absent(),
+            Value<String> filters = const Value.absent(),
+            Value<String> contentSources = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               UserAppSettingsTableCompanion(
             pubkey: pubkey,
-            settings: settings,
-            lastUpdated: lastUpdated,
+            filters: filters,
+            contentSources: contentSources,
             rowid: rowid,
           ),
           createCompanionCallback: ({
             required String pubkey,
-            Value<String> settings = const Value.absent(),
-            Value<int?> lastUpdated = const Value.absent(),
+            Value<String> filters = const Value.absent(),
+            Value<String> contentSources = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               UserAppSettingsTableCompanion.insert(
             pubkey: pubkey,
-            settings: settings,
-            lastUpdated: lastUpdated,
+            filters: filters,
+            contentSources: contentSources,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -8560,18 +8843,16 @@ typedef $$UserAppSettingsTableTableProcessedTableManager
         PrefetchHooks Function()>;
 typedef $$UserWotTableTableCreateCompanionBuilder = UserWotTableCompanion
     Function({
-  required String id,
   required String pubkey,
-  Value<String> wotData,
-  Value<int?> lastUpdated,
+  required int createdAt,
+  Value<Map<String, double>> wot,
   Value<int> rowid,
 });
 typedef $$UserWotTableTableUpdateCompanionBuilder = UserWotTableCompanion
     Function({
-  Value<String> id,
   Value<String> pubkey,
-  Value<String> wotData,
-  Value<int?> lastUpdated,
+  Value<int> createdAt,
+  Value<Map<String, double>> wot,
   Value<int> rowid,
 });
 
@@ -8584,17 +8865,17 @@ class $$UserWotTableTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<String> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
-
   ColumnFilters<String> get pubkey => $composableBuilder(
       column: $table.pubkey, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get wotData => $composableBuilder(
-      column: $table.wotData, builder: (column) => ColumnFilters(column));
+  ColumnFilters<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<int> get lastUpdated => $composableBuilder(
-      column: $table.lastUpdated, builder: (column) => ColumnFilters(column));
+  ColumnWithTypeConverterFilters<Map<String, double>, Map<String, double>,
+          String>
+      get wot => $composableBuilder(
+          column: $table.wot,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
 }
 
 class $$UserWotTableTableOrderingComposer
@@ -8606,17 +8887,14 @@ class $$UserWotTableTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<String> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<String> get pubkey => $composableBuilder(
       column: $table.pubkey, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get wotData => $composableBuilder(
-      column: $table.wotData, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get lastUpdated => $composableBuilder(
-      column: $table.lastUpdated, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get wot => $composableBuilder(
+      column: $table.wot, builder: (column) => ColumnOrderings(column));
 }
 
 class $$UserWotTableTableAnnotationComposer
@@ -8628,17 +8906,14 @@ class $$UserWotTableTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
   GeneratedColumn<String> get pubkey =>
       $composableBuilder(column: $table.pubkey, builder: (column) => column);
 
-  GeneratedColumn<String> get wotData =>
-      $composableBuilder(column: $table.wotData, builder: (column) => column);
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumn<int> get lastUpdated => $composableBuilder(
-      column: $table.lastUpdated, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<Map<String, double>, String> get wot =>
+      $composableBuilder(column: $table.wot, builder: (column) => column);
 }
 
 class $$UserWotTableTableTableManager extends RootTableManager<
@@ -8667,31 +8942,27 @@ class $$UserWotTableTableTableManager extends RootTableManager<
           createComputedFieldComposer: () =>
               $$UserWotTableTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
-            Value<String> id = const Value.absent(),
             Value<String> pubkey = const Value.absent(),
-            Value<String> wotData = const Value.absent(),
-            Value<int?> lastUpdated = const Value.absent(),
+            Value<int> createdAt = const Value.absent(),
+            Value<Map<String, double>> wot = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               UserWotTableCompanion(
-            id: id,
             pubkey: pubkey,
-            wotData: wotData,
-            lastUpdated: lastUpdated,
+            createdAt: createdAt,
+            wot: wot,
             rowid: rowid,
           ),
           createCompanionCallback: ({
-            required String id,
             required String pubkey,
-            Value<String> wotData = const Value.absent(),
-            Value<int?> lastUpdated = const Value.absent(),
+            required int createdAt,
+            Value<Map<String, double>> wot = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               UserWotTableCompanion.insert(
-            id: id,
             pubkey: pubkey,
-            wotData: wotData,
-            lastUpdated: lastUpdated,
+            createdAt: createdAt,
+            wot: wot,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -8722,8 +8993,7 @@ typedef $$WotScoreTableTableCreateCompanionBuilder = WotScoreTableCompanion
   required String pubkey,
   required String originPubkey,
   Value<double> score,
-  Value<int> depth,
-  Value<int?> lastUpdated,
+  required int createdAt,
   Value<int> rowid,
 });
 typedef $$WotScoreTableTableUpdateCompanionBuilder = WotScoreTableCompanion
@@ -8732,8 +9002,7 @@ typedef $$WotScoreTableTableUpdateCompanionBuilder = WotScoreTableCompanion
   Value<String> pubkey,
   Value<String> originPubkey,
   Value<double> score,
-  Value<int> depth,
-  Value<int?> lastUpdated,
+  Value<int> createdAt,
   Value<int> rowid,
 });
 
@@ -8758,11 +9027,8 @@ class $$WotScoreTableTableFilterComposer
   ColumnFilters<double> get score => $composableBuilder(
       column: $table.score, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<int> get depth => $composableBuilder(
-      column: $table.depth, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<int> get lastUpdated => $composableBuilder(
-      column: $table.lastUpdated, builder: (column) => ColumnFilters(column));
+  ColumnFilters<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
 }
 
 class $$WotScoreTableTableOrderingComposer
@@ -8787,11 +9053,8 @@ class $$WotScoreTableTableOrderingComposer
   ColumnOrderings<double> get score => $composableBuilder(
       column: $table.score, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get depth => $composableBuilder(
-      column: $table.depth, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<int> get lastUpdated => $composableBuilder(
-      column: $table.lastUpdated, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 }
 
 class $$WotScoreTableTableAnnotationComposer
@@ -8815,11 +9078,8 @@ class $$WotScoreTableTableAnnotationComposer
   GeneratedColumn<double> get score =>
       $composableBuilder(column: $table.score, builder: (column) => column);
 
-  GeneratedColumn<int> get depth =>
-      $composableBuilder(column: $table.depth, builder: (column) => column);
-
-  GeneratedColumn<int> get lastUpdated => $composableBuilder(
-      column: $table.lastUpdated, builder: (column) => column);
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
 }
 
 class $$WotScoreTableTableTableManager extends RootTableManager<
@@ -8853,8 +9113,7 @@ class $$WotScoreTableTableTableManager extends RootTableManager<
             Value<String> pubkey = const Value.absent(),
             Value<String> originPubkey = const Value.absent(),
             Value<double> score = const Value.absent(),
-            Value<int> depth = const Value.absent(),
-            Value<int?> lastUpdated = const Value.absent(),
+            Value<int> createdAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               WotScoreTableCompanion(
@@ -8862,8 +9121,7 @@ class $$WotScoreTableTableTableManager extends RootTableManager<
             pubkey: pubkey,
             originPubkey: originPubkey,
             score: score,
-            depth: depth,
-            lastUpdated: lastUpdated,
+            createdAt: createdAt,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -8871,8 +9129,7 @@ class $$WotScoreTableTableTableManager extends RootTableManager<
             required String pubkey,
             required String originPubkey,
             Value<double> score = const Value.absent(),
-            Value<int> depth = const Value.absent(),
-            Value<int?> lastUpdated = const Value.absent(),
+            required int createdAt,
             Value<int> rowid = const Value.absent(),
           }) =>
               WotScoreTableCompanion.insert(
@@ -8880,8 +9137,7 @@ class $$WotScoreTableTableTableManager extends RootTableManager<
             pubkey: pubkey,
             originPubkey: originPubkey,
             score: score,
-            depth: depth,
-            lastUpdated: lastUpdated,
+            createdAt: createdAt,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -8905,6 +9161,320 @@ typedef $$WotScoreTableTableProcessedTableManager = ProcessedTableManager<
       BaseReferences<_$NostrDatabase, $WotScoreTableTable, WotScoreTableData>
     ),
     WotScoreTableData,
+    PrefetchHooks Function()>;
+typedef $$RelayInfoListTableTableCreateCompanionBuilder
+    = RelayInfoListTableCompanion Function({
+  required String name,
+  required String description,
+  required String pubkey,
+  required String contact,
+  Value<List<String>> nips,
+  required String software,
+  required String icon,
+  required String version,
+  required String url,
+  required String location,
+  required String latency,
+  required bool isPaid,
+  required bool isAuth,
+  required int lastUpdated,
+  Value<int> rowid,
+});
+typedef $$RelayInfoListTableTableUpdateCompanionBuilder
+    = RelayInfoListTableCompanion Function({
+  Value<String> name,
+  Value<String> description,
+  Value<String> pubkey,
+  Value<String> contact,
+  Value<List<String>> nips,
+  Value<String> software,
+  Value<String> icon,
+  Value<String> version,
+  Value<String> url,
+  Value<String> location,
+  Value<String> latency,
+  Value<bool> isPaid,
+  Value<bool> isAuth,
+  Value<int> lastUpdated,
+  Value<int> rowid,
+});
+
+class $$RelayInfoListTableTableFilterComposer
+    extends Composer<_$NostrDatabase, $RelayInfoListTableTable> {
+  $$RelayInfoListTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get pubkey => $composableBuilder(
+      column: $table.pubkey, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get contact => $composableBuilder(
+      column: $table.contact, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String> get nips =>
+      $composableBuilder(
+          column: $table.nips,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<String> get software => $composableBuilder(
+      column: $table.software, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get icon => $composableBuilder(
+      column: $table.icon, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get version => $composableBuilder(
+      column: $table.version, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get url => $composableBuilder(
+      column: $table.url, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get location => $composableBuilder(
+      column: $table.location, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get latency => $composableBuilder(
+      column: $table.latency, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isPaid => $composableBuilder(
+      column: $table.isPaid, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isAuth => $composableBuilder(
+      column: $table.isAuth, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get lastUpdated => $composableBuilder(
+      column: $table.lastUpdated, builder: (column) => ColumnFilters(column));
+}
+
+class $$RelayInfoListTableTableOrderingComposer
+    extends Composer<_$NostrDatabase, $RelayInfoListTableTable> {
+  $$RelayInfoListTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get pubkey => $composableBuilder(
+      column: $table.pubkey, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get contact => $composableBuilder(
+      column: $table.contact, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get nips => $composableBuilder(
+      column: $table.nips, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get software => $composableBuilder(
+      column: $table.software, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get icon => $composableBuilder(
+      column: $table.icon, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get version => $composableBuilder(
+      column: $table.version, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get url => $composableBuilder(
+      column: $table.url, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get location => $composableBuilder(
+      column: $table.location, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get latency => $composableBuilder(
+      column: $table.latency, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isPaid => $composableBuilder(
+      column: $table.isPaid, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isAuth => $composableBuilder(
+      column: $table.isAuth, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get lastUpdated => $composableBuilder(
+      column: $table.lastUpdated, builder: (column) => ColumnOrderings(column));
+}
+
+class $$RelayInfoListTableTableAnnotationComposer
+    extends Composer<_$NostrDatabase, $RelayInfoListTableTable> {
+  $$RelayInfoListTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => column);
+
+  GeneratedColumn<String> get pubkey =>
+      $composableBuilder(column: $table.pubkey, builder: (column) => column);
+
+  GeneratedColumn<String> get contact =>
+      $composableBuilder(column: $table.contact, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>, String> get nips =>
+      $composableBuilder(column: $table.nips, builder: (column) => column);
+
+  GeneratedColumn<String> get software =>
+      $composableBuilder(column: $table.software, builder: (column) => column);
+
+  GeneratedColumn<String> get icon =>
+      $composableBuilder(column: $table.icon, builder: (column) => column);
+
+  GeneratedColumn<String> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<String> get url =>
+      $composableBuilder(column: $table.url, builder: (column) => column);
+
+  GeneratedColumn<String> get location =>
+      $composableBuilder(column: $table.location, builder: (column) => column);
+
+  GeneratedColumn<String> get latency =>
+      $composableBuilder(column: $table.latency, builder: (column) => column);
+
+  GeneratedColumn<bool> get isPaid =>
+      $composableBuilder(column: $table.isPaid, builder: (column) => column);
+
+  GeneratedColumn<bool> get isAuth =>
+      $composableBuilder(column: $table.isAuth, builder: (column) => column);
+
+  GeneratedColumn<int> get lastUpdated => $composableBuilder(
+      column: $table.lastUpdated, builder: (column) => column);
+}
+
+class $$RelayInfoListTableTableTableManager extends RootTableManager<
+    _$NostrDatabase,
+    $RelayInfoListTableTable,
+    RelayInfoListTableData,
+    $$RelayInfoListTableTableFilterComposer,
+    $$RelayInfoListTableTableOrderingComposer,
+    $$RelayInfoListTableTableAnnotationComposer,
+    $$RelayInfoListTableTableCreateCompanionBuilder,
+    $$RelayInfoListTableTableUpdateCompanionBuilder,
+    (
+      RelayInfoListTableData,
+      BaseReferences<_$NostrDatabase, $RelayInfoListTableTable,
+          RelayInfoListTableData>
+    ),
+    RelayInfoListTableData,
+    PrefetchHooks Function()> {
+  $$RelayInfoListTableTableTableManager(
+      _$NostrDatabase db, $RelayInfoListTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RelayInfoListTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RelayInfoListTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RelayInfoListTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> name = const Value.absent(),
+            Value<String> description = const Value.absent(),
+            Value<String> pubkey = const Value.absent(),
+            Value<String> contact = const Value.absent(),
+            Value<List<String>> nips = const Value.absent(),
+            Value<String> software = const Value.absent(),
+            Value<String> icon = const Value.absent(),
+            Value<String> version = const Value.absent(),
+            Value<String> url = const Value.absent(),
+            Value<String> location = const Value.absent(),
+            Value<String> latency = const Value.absent(),
+            Value<bool> isPaid = const Value.absent(),
+            Value<bool> isAuth = const Value.absent(),
+            Value<int> lastUpdated = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RelayInfoListTableCompanion(
+            name: name,
+            description: description,
+            pubkey: pubkey,
+            contact: contact,
+            nips: nips,
+            software: software,
+            icon: icon,
+            version: version,
+            url: url,
+            location: location,
+            latency: latency,
+            isPaid: isPaid,
+            isAuth: isAuth,
+            lastUpdated: lastUpdated,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String name,
+            required String description,
+            required String pubkey,
+            required String contact,
+            Value<List<String>> nips = const Value.absent(),
+            required String software,
+            required String icon,
+            required String version,
+            required String url,
+            required String location,
+            required String latency,
+            required bool isPaid,
+            required bool isAuth,
+            required int lastUpdated,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RelayInfoListTableCompanion.insert(
+            name: name,
+            description: description,
+            pubkey: pubkey,
+            contact: contact,
+            nips: nips,
+            software: software,
+            icon: icon,
+            version: version,
+            url: url,
+            location: location,
+            latency: latency,
+            isPaid: isPaid,
+            isAuth: isAuth,
+            lastUpdated: lastUpdated,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$RelayInfoListTableTableProcessedTableManager = ProcessedTableManager<
+    _$NostrDatabase,
+    $RelayInfoListTableTable,
+    RelayInfoListTableData,
+    $$RelayInfoListTableTableFilterComposer,
+    $$RelayInfoListTableTableOrderingComposer,
+    $$RelayInfoListTableTableAnnotationComposer,
+    $$RelayInfoListTableTableCreateCompanionBuilder,
+    $$RelayInfoListTableTableUpdateCompanionBuilder,
+    (
+      RelayInfoListTableData,
+      BaseReferences<_$NostrDatabase, $RelayInfoListTableTable,
+          RelayInfoListTableData>
+    ),
+    RelayInfoListTableData,
     PrefetchHooks Function()>;
 
 class $NostrDatabaseManager {
@@ -8938,4 +9508,6 @@ class $NostrDatabaseManager {
       $$UserWotTableTableTableManager(_db, _db.userWotTable);
   $$WotScoreTableTableTableManager get wotScoreTable =>
       $$WotScoreTableTableTableManager(_db, _db.wotScoreTable);
+  $$RelayInfoListTableTableTableManager get relayInfoListTable =>
+      $$RelayInfoListTableTableTableManager(_db, _db.relayInfoListTable);
 }

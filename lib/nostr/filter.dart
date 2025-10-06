@@ -7,9 +7,6 @@ class Filter {
   /// a list of pubkeys or prefixes, the pubkey of an event must be one of these
   List<String>? authors;
 
-  /// a list of pubkeys or prefixes, the pubkey of an event must be one of these
-  List<String>? author;
-
   /// a list of a kind numbers
   List<int>? kinds;
 
@@ -40,6 +37,9 @@ class Filter {
   /// a list of identifiers that are referenced in a "t" tag
   List<String>? t;
 
+  /// a list of identifiers that are referenced in a "bolt11" tag
+  List<String>? bolt11;
+
   /// a timestamp, events must be newer than this to pass
   int? since;
 
@@ -53,7 +53,6 @@ class Filter {
   Filter({
     this.ids,
     this.authors,
-    this.author,
     this.kinds,
     this.e,
     this.p,
@@ -64,6 +63,7 @@ class Filter {
     this.a,
     this.t,
     this.q,
+    this.bolt11,
     this.since,
     this.until,
     this.limit,
@@ -74,7 +74,6 @@ class Filter {
     ids = json['ids'] == null ? null : List<String>.from(json['ids']);
     authors =
         json['authors'] == null ? null : List<String>.from(json['authors']);
-    author = json['author'] == null ? null : List<String>.from(json['author']);
     kinds = json['kinds'] == null ? null : List<int>.from(json['kinds']);
     e = json['#e'] == null ? null : List<String>.from(json['#e']);
     p = json['#p'] == null ? null : List<String>.from(json['#p']);
@@ -85,6 +84,8 @@ class Filter {
     l = json['#l'] == null ? null : List<String>.from(json['#l']);
     q = json['#q'] == null ? null : List<String>.from(json['#q']);
     k = json['#k'] == null ? null : List<String>.from(json['#k']);
+    bolt11 =
+        json['#bolt11'] == null ? null : List<String>.from(json['#bolt11']);
     since = json['since'];
     until = json['until'];
     limit = json['limit'];
@@ -99,12 +100,8 @@ class Filter {
     if (authors != null) {
       data['authors'] = authors;
     }
-
     if (kinds != null) {
       data['kinds'] = kinds;
-    }
-    if (author != null) {
-      data['#author'] = author;
     }
     if (e != null) {
       data['#e'] = e;
@@ -132,6 +129,9 @@ class Filter {
     }
     if (k != null) {
       data['#k'] = k;
+    }
+    if (bolt11 != null) {
+      data['#bolt11'] = bolt11;
     }
     if (since != null) {
       data['since'] = since;

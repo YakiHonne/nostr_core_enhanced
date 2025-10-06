@@ -5,12 +5,10 @@ class RelaySetTable extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
   TextColumn get pubkey => text()();
-  TextColumn get relays =>
-      text().withDefault(const Constant('{}'))(); // JSON object
-  IntColumn get createdAt => integer()();
-  IntColumn get loadedTimestamp => integer().nullable()();
-  TextColumn get sources =>
-      text().withDefault(const Constant('[]'))(); // JSON array
+  TextColumn get relaysMap => text().withDefault(const Constant('{}'))();
+  TextColumn get direction => text()();
+  IntColumn get relayMinCountPerPubkey =>
+      integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};

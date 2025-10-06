@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:drift/drift.dart';
+import 'package:nostr_core_enhanced/db/drift_database.dart';
 import 'package:nostr_core_enhanced/models/contact_list.dart';
 import 'package:nostr_core_enhanced/nostr/event.dart';
 import 'package:nostr_core_enhanced/nostr/nips/nip_065.dart';
@@ -17,6 +21,21 @@ class UserRelayList {
     required this.refreshedTimestamp,
   });
 
+  UserRelayListTableCompanion toCompanion() {
+    return UserRelayListTableCompanion(
+      pubkey: Value(pubkey),
+      relays: Value(
+        jsonEncode(
+          relays.map(
+            (key, val) => MapEntry(key, val.name),
+          ),
+        ),
+      ),
+      createdAt: Value(createdAt),
+      refreshedTimestamp: Value(refreshedTimestamp),
+    );
+  }
+
   Iterable<String> get urls => relays.keys;
 
   Iterable<String> get readUrls => relays.entries
@@ -34,6 +53,24 @@ class UserRelayList {
           relays[relay] == ReadWriteMarker.writeOnly ||
           relays[relay] == ReadWriteMarker.readWrite)
       .toList();
+
+  factory UserRelayList.fromUserRelayListTableData(
+    UserRelayListTableData data,
+  ) {
+    final decoded = jsonDecode(data.relays) as Map<String, dynamic>;
+
+    return UserRelayList(
+      pubkey: data.pubkey,
+      relays: decoded.map(
+        (key, value) => MapEntry(
+          key,
+          ReadWriteMarker.values.byName(value),
+        ),
+      ),
+      createdAt: data.createdAt,
+      refreshedTimestamp: data.refreshedTimestamp,
+    );
+  }
 
   static UserRelayList fromNip65(Nip65 nip65) {
     final relays = <String, ReadWriteMarker>{};

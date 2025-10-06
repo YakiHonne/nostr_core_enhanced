@@ -1,7 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first, constant_identifier_names
 import 'dart:convert';
 
-import 'package:nostr_core_enhanced/models/models.dart';
+import 'package:drift/drift.dart';
+import 'package:nostr_core_enhanced/db/drift_database.dart';
 import 'package:nostr_core_enhanced/nostr/nostr.dart';
 
 import '../utils/utils.dart';
@@ -19,6 +20,26 @@ class AppSharedSettings {
   String pubkey;
   ContentFilters filters;
   ContentSources contentSources;
+
+  UserAppSettingsTableCompanion toCompanion() {
+    return UserAppSettingsTableCompanion(
+      pubkey: Value(pubkey),
+      filters: Value(filters.toJson()),
+      contentSources: Value(contentSources.toJson()),
+    );
+  }
+
+  factory AppSharedSettings.fromAppSharedSettingsTableData(
+    UserAppSettingsTableData data,
+  ) {
+    return AppSharedSettings(
+      pubkey: data.pubkey,
+      filters: ContentFilters.fromMap2(jsonDecode(data.filters)),
+      contentSources: ContentSources.fromMap(
+        jsonDecode(data.contentSources),
+      ),
+    );
+  }
 
   AppSharedSettings({
     required this.pubkey,
@@ -54,7 +75,7 @@ class AppSharedSettings {
     return AppSharedSettings(
       pubkey: pubkey ?? '',
       filters: ContentFilters.defaultFilters(),
-      contentSources: ContentSources.defaultEmptySources(),
+      contentSources: ContentSources.defaultEmptySources(pubkey),
     );
   }
 
@@ -154,6 +175,7 @@ class ContentFilters {
   factory ContentFilters.fromMap(List list) {
     List<DiscoverFilter> discoverFilters = [];
     List<NotesFilter> notesFilters = [];
+
     for (final item in list) {
       if (item['type'] == 1) {
         discoverFilters.add(DiscoverFilter.fromMap(item));
@@ -161,6 +183,22 @@ class ContentFilters {
         notesFilters.add(NotesFilter.fromMap(item));
       }
     }
+
+    return ContentFilters(
+      discoverFilters: discoverFilters,
+      notesFilters: notesFilters,
+    );
+  }
+
+  factory ContentFilters.fromMap2(Map<String, dynamic> map) {
+    List<DiscoverFilter> discoverFilters = List<DiscoverFilter>.from(
+      (map['discoverFilters'] as List).map((x) => DiscoverFilter.fromMap(x)),
+    );
+
+    List<NotesFilter> notesFilters = List<NotesFilter>.from(
+      (map['notesFilters'] as List).map((x) => NotesFilter.fromMap(x)),
+    );
+
     return ContentFilters(
       discoverFilters: discoverFilters,
       notesFilters: notesFilters,
@@ -550,8 +588,6 @@ class ContentSources {
           ),
           index: 0,
         ),
-        dvmFeed: DvmFeed(dvms: [], index: 1),
-        relaysFeed: RelaysFeed(relays: [], index: 2),
       ),
       discoverSources: DiscoverSources(
         communityFeed: DiscoverCommunityFeed(
@@ -575,25 +611,23 @@ class ContentSources {
           ),
           index: 0,
         ),
-        dvmFeed: DvmFeed(dvms: [], index: 1),
-        relaysFeed: RelaysFeed(relays: [], index: 2),
       ),
     );
   }
 
-  factory ContentSources.defaultEmptySources() {
+  factory ContentSources.defaultEmptySources(String? pubkey) {
     return ContentSources(
       notesSources: NotesSources(
         communityFeed: NotesCommunityFeed(
           recent: CommunityFeedOption(
             name: SOURCE_RECENT,
-            enabled: true,
+            enabled: pubkey != null,
             index: 0,
             id: uuid.v4(),
           ),
           recentWithReplies: CommunityFeedOption(
             name: SOURCE_RECENT_WITH_REPLIES,
-            enabled: true,
+            enabled: pubkey != null,
             index: 1,
             id: uuid.v4(),
           ),
@@ -617,28 +651,6 @@ class ContentSources {
           ),
           index: 0,
         ),
-        dvmFeed: DvmFeed(
-          dvms: [
-            DvmModel(
-              id: uuid.v4(),
-              pubkey: defaultNotesDvm,
-              dvmType: DvmType.articlesContent,
-              enabled: true,
-            ),
-          ],
-          index: 1,
-        ),
-        relaysFeed: RelaysFeed(
-          relays: [
-            FeedRelay(
-              id: uuid.v4(),
-              url: defaultAlgo,
-              enabled: true,
-              relayInfo: null,
-            ),
-          ],
-          index: 2,
-        ),
       ),
       discoverSources: DiscoverSources(
         communityFeed: DiscoverCommunityFeed(
@@ -661,28 +673,6 @@ class ContentSources {
             id: uuid.v4(),
           ),
           index: 0,
-        ),
-        dvmFeed: DvmFeed(
-          dvms: [
-            DvmModel(
-              id: uuid.v4(),
-              pubkey: defaultDiscoverDvm,
-              dvmType: DvmType.articlesContent,
-              enabled: true,
-            ),
-          ],
-          index: 1,
-        ),
-        relaysFeed: RelaysFeed(
-          relays: [
-            FeedRelay(
-              id: uuid.v4(),
-              url: defaultAlgo,
-              enabled: true,
-              relayInfo: null,
-            ),
-          ],
-          index: 2,
         ),
       ),
     );
@@ -721,13 +711,9 @@ class ContentSources {
 
 class NotesSources {
   NotesCommunityFeed communityFeed;
-  DvmFeed dvmFeed;
-  RelaysFeed relaysFeed;
 
   NotesSources({
     required this.communityFeed,
-    required this.dvmFeed,
-    required this.relaysFeed,
   });
 
   factory NotesSources.defaultSources() {
@@ -765,52 +751,24 @@ class NotesSources {
         ),
         index: 0,
       ),
-      dvmFeed: DvmFeed(
-        dvms: [
-          DvmModel(
-            id: uuid.v4(),
-            pubkey: defaultNotesDvm,
-            dvmType: DvmType.articlesContent,
-            enabled: true,
-          ),
-        ],
-        index: 1,
-      ),
-      relaysFeed: RelaysFeed(
-        relays: [
-          FeedRelay(
-            id: uuid.v4(),
-            url: defaultAlgo,
-            enabled: true,
-            relayInfo: null,
-          ),
-        ],
-        index: 2,
-      ),
     );
   }
 
   NotesSources deepCopy() {
     return NotesSources(
       communityFeed: communityFeed.deepCopy(),
-      dvmFeed: dvmFeed.deepCopy(),
-      relaysFeed: relaysFeed.deepCopy(),
     );
   }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'community': communityFeed.toMap(),
-      'dvms': dvmFeed.toMap(),
-      'relays': relaysFeed.toMap(),
     };
   }
 
   Map<String, dynamic> toEventMap() {
     return <String, dynamic>{
       'community': communityFeed.toEventMap(),
-      'dvms': dvmFeed.toEventMap(),
-      'relays': relaysFeed.toEventMap(),
     };
   }
 
@@ -836,22 +794,6 @@ class NotesSources {
           selectedNotesSource = o.id;
           name = o.name;
         }
-      } else if (firstFeed is DvmFeed && dvmFeed.dvms.isNotEmpty) {
-        final o = dvmFeed.dvms.firstWhere(
-          (element) => element.enabled,
-          orElse: () => dvmFeed.dvms.first,
-        );
-
-        selectedNotesSource = o.pubkey;
-        name = o.pubkey;
-      } else if (firstFeed is RelaysFeed && relaysFeed.relays.isNotEmpty) {
-        final o = relaysFeed.relays.firstWhere(
-          (element) => element.enabled,
-          orElse: () => relaysFeed.relays.first,
-        );
-
-        selectedNotesSource = o.id;
-        name = o.url;
       }
     }
 
@@ -883,16 +825,6 @@ class NotesSources {
         if (isEnabled) {
           return currentSource;
         }
-      } else if (feed is RelaysFeed) {
-        isEnabled = feed.relays
-            .where(
-              (element) => element.id == currentSource.key && element.enabled,
-            )
-            .isNotEmpty;
-
-        if (isEnabled) {
-          return currentSource;
-        }
       }
     }
 
@@ -900,19 +832,13 @@ class NotesSources {
   }
 
   List<BaseFeed> getFeedsByOrder() {
-    return [communityFeed, dvmFeed, relaysFeed]
-      ..sort((a, b) => a.index.compareTo(b.index));
+    return [communityFeed];
   }
 
   factory NotesSources.fromMap(Map<String, dynamic> map) {
     return NotesSources(
       communityFeed:
           NotesCommunityFeed.fromMap(map['community'] as Map<String, dynamic>),
-      dvmFeed: DvmFeed.fromMap(
-        map['dvms'] as Map<String, dynamic>,
-        DvmType.notesContent,
-      ),
-      relaysFeed: RelaysFeed.fromMap(map['relays'] as Map<String, dynamic>),
     );
   }
 
@@ -924,26 +850,18 @@ class NotesSources {
 
   NotesSources copyWith({
     NotesCommunityFeed? communityFeed,
-    DvmFeed? dvmFeed,
-    RelaysFeed? relaysFeed,
   }) {
     return NotesSources(
       communityFeed: communityFeed ?? this.communityFeed,
-      dvmFeed: dvmFeed ?? this.dvmFeed,
-      relaysFeed: relaysFeed ?? this.relaysFeed,
     );
   }
 }
 
 class DiscoverSources {
   DiscoverCommunityFeed communityFeed;
-  DvmFeed dvmFeed;
-  RelaysFeed relaysFeed;
 
   DiscoverSources({
     required this.communityFeed,
-    required this.dvmFeed,
-    required this.relaysFeed,
   });
 
   factory DiscoverSources.defaultSources() {
@@ -969,36 +887,12 @@ class DiscoverSources {
         ),
         index: 0,
       ),
-      dvmFeed: DvmFeed(
-        dvms: [
-          DvmModel(
-            id: uuid.v4(),
-            pubkey: defaultDiscoverDvm,
-            dvmType: DvmType.articlesContent,
-            enabled: true,
-          ),
-        ],
-        index: 1,
-      ),
-      relaysFeed: RelaysFeed(
-        relays: [
-          FeedRelay(
-            id: uuid.v4(),
-            url: defaultAlgo,
-            enabled: true,
-            relayInfo: null,
-          ),
-        ],
-        index: 2,
-      ),
     );
   }
 
   DiscoverSources deepCopy() {
     return DiscoverSources(
       communityFeed: communityFeed.deepCopy(),
-      dvmFeed: dvmFeed.deepCopy(),
-      relaysFeed: relaysFeed.deepCopy(),
     );
   }
 
@@ -1024,22 +918,6 @@ class DiscoverSources {
           selectedDiscoverSource = o.id;
           name = o.name;
         }
-      } else if (firstFeed is DvmFeed && dvmFeed.dvms.isNotEmpty) {
-        final o = dvmFeed.dvms.firstWhere(
-          (element) => element.enabled,
-          orElse: () => dvmFeed.dvms.first,
-        );
-
-        selectedDiscoverSource = o.pubkey;
-        name = o.pubkey;
-      } else if (firstFeed is RelaysFeed && relaysFeed.relays.isNotEmpty) {
-        final o = relaysFeed.relays.firstWhere(
-          (element) => element.enabled,
-          orElse: () => relaysFeed.relays.first,
-        );
-
-        selectedDiscoverSource = o.id;
-        name = o.url;
       }
     }
 
@@ -1070,16 +948,6 @@ class DiscoverSources {
         if (isEnabled) {
           return currentSource;
         }
-      } else if (feed is RelaysFeed) {
-        isEnabled = feed.relays
-            .where(
-              (element) => element.id == currentSource.key && element.enabled,
-            )
-            .isNotEmpty;
-
-        if (isEnabled) {
-          return currentSource;
-        }
       }
     }
 
@@ -1089,22 +957,17 @@ class DiscoverSources {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'community': communityFeed.toMap(),
-      'dvms': dvmFeed.toMap(),
-      'relays': relaysFeed.toMap(),
     };
   }
 
   Map<String, dynamic> toEventMap() {
     return <String, dynamic>{
       'community': communityFeed.toEventMap(),
-      'dvms': dvmFeed.toEventMap(),
-      'relays': relaysFeed.toEventMap(),
     };
   }
 
   List<BaseFeed> getFeedsByOrder() {
-    return [communityFeed, dvmFeed, relaysFeed]
-      ..sort((a, b) => a.index.compareTo(b.index));
+    return [communityFeed];
   }
 
   factory DiscoverSources.fromMap(Map<String, dynamic> map) {
@@ -1112,11 +975,6 @@ class DiscoverSources {
       communityFeed: DiscoverCommunityFeed.fromMap(
         map['community'] as Map<String, dynamic>,
       ),
-      dvmFeed: DvmFeed.fromMap(
-        map['dvms'] as Map<String, dynamic>,
-        DvmType.articlesContent,
-      ),
-      relaysFeed: RelaysFeed.fromMap(map['relays'] as Map<String, dynamic>),
     );
   }
 
@@ -1127,13 +985,9 @@ class DiscoverSources {
 
   DiscoverSources copyWith({
     DiscoverCommunityFeed? communityFeed,
-    DvmFeed? dvmFeed,
-    RelaysFeed? relaysFeed,
   }) {
     return DiscoverSources(
       communityFeed: communityFeed ?? this.communityFeed,
-      dvmFeed: dvmFeed ?? this.dvmFeed,
-      relaysFeed: relaysFeed ?? this.relaysFeed,
     );
   }
 }
@@ -1593,14 +1447,14 @@ class DvmFeed extends BaseFeed {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'index': index,
+      'index': 2,
       'list': dvms.map((dvm) => [dvm.pubkey, dvm.enabled]).toList(),
     };
   }
 
   Map<String, dynamic> toEventMap() {
     return <String, dynamic>{
-      'index': index,
+      'index': 2,
       'list': dvms.map((dvm) => [dvm.pubkey, dvm.enabled]).toList(),
     };
   }
@@ -1629,7 +1483,7 @@ class DvmFeed extends BaseFeed {
       }
     }
 
-    return DvmFeed(index: map['index'], dvms: dvms);
+    return DvmFeed(index: 2, dvms: dvms);
   }
 
   String toJson() => json.encode(toMap());
@@ -1641,140 +1495,6 @@ class DvmFeed extends BaseFeed {
     return DvmFeed(
       index: index ?? this.index,
       dvms: dvms ?? this.dvms,
-    );
-  }
-}
-
-class RelaysFeed extends BaseFeed {
-  List<FeedRelay> relays;
-
-  RelaysFeed({
-    required this.relays,
-    required super.index,
-  });
-
-  RelaysFeed deepCopy() {
-    return RelaysFeed(
-      index: index,
-      relays: List.from(relays),
-    );
-  }
-
-  Map<String, String> getMappedContent() {
-    return {
-      for (final relay in relays) relay.id: relay.url,
-    };
-  }
-
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'index': index,
-      'list': relays.map((r) => [r.url, r.enabled]).toList(),
-    };
-  }
-
-  Map<String, dynamic> toEventMap() {
-    return <String, dynamic>{
-      'index': index,
-      'list': relays.map((r) => [r.url, r.enabled]).toList(),
-    };
-  }
-
-  bool isDisabled() {
-    return relays.where((element) => element.enabled).isEmpty;
-  }
-
-  factory RelaysFeed.fromMap(Map<String, dynamic> map) {
-    final list = map['list'] as List?;
-    List<FeedRelay> relays = [];
-
-    if (list != null && list.isNotEmpty) {
-      for (int i = 0; i < list.length; i++) {
-        final item = list[i];
-        if (item is List && item.length >= 2) {
-          final dvm = FeedRelay(
-            id: uuid.v4(),
-            url: item[0],
-            enabled: item[1] as bool,
-            relayInfo: null,
-          );
-
-          relays.add(dvm);
-        }
-      }
-    }
-
-    return RelaysFeed(
-      index: map['index'],
-      relays: relays,
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory RelaysFeed.fromJson(String source) =>
-      RelaysFeed.fromMap(json.decode(source) as Map<String, dynamic>);
-
-  RelaysFeed copyWith({
-    int? index,
-    List<FeedRelay>? relays,
-  }) {
-    return RelaysFeed(
-      index: index ?? this.index,
-      relays: relays ?? this.relays,
-    );
-  }
-}
-
-class FeedRelay {
-  String id;
-  String url;
-  RelayInfo? relayInfo;
-  bool enabled;
-
-  FeedRelay({
-    required this.id,
-    required this.url,
-    required this.relayInfo,
-    required this.enabled,
-  });
-
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'id': id,
-      'url': url,
-      'relayInfo': relayInfo?.toMap(),
-      'enabled': enabled,
-    };
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory FeedRelay.fromJson(String source) =>
-      FeedRelay.fromMap(json.decode(source) as Map<String, dynamic>);
-
-  factory FeedRelay.fromMap(Map<String, dynamic> map) {
-    return FeedRelay(
-      id: map['id'] as String,
-      url: map['url'] as String,
-      relayInfo: map['relayInfo'] != null
-          ? RelayInfo.fromMap(map['relayInfo'] as Map<String, dynamic>)
-          : null,
-      enabled: map['enabled'] as bool,
-    );
-  }
-
-  FeedRelay copyWith({
-    String? id,
-    String? url,
-    RelayInfo? relayInfo,
-    bool? enabled,
-  }) {
-    return FeedRelay(
-      id: id ?? this.id,
-      url: url ?? this.url,
-      relayInfo: relayInfo ?? this.relayInfo,
-      enabled: enabled ?? this.enabled,
     );
   }
 }
