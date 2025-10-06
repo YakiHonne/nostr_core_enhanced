@@ -47,7 +47,7 @@ void main() async {
   // Initialize Nostr core
   final nostrCore = NostrCore();
   await nostrCore.initialize();
-  
+
   // Your Nostr application logic here
 }
 ```
@@ -95,12 +95,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- The Nostr community for their amazing protocol
-- All contributors who helped with development
-- The Flutter team for their excellent framework
 
 ## Support
 
