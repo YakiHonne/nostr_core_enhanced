@@ -13,6 +13,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:nostr_core_enhanced/db/db_wrapper.dart';
 import 'package:nostr_core_enhanced/db/nostr_cache_manager.dart';
 import 'package:nostr_core_enhanced/models/models.dart';
+import 'package:nostr_core_enhanced/nostr/event_signer/remote_event_signer.dart';
 import 'package:nostr_core_enhanced/nostr/nostr.dart';
 import 'package:nostr_core_enhanced/utils/utils.dart';
 import 'package:uuid/uuid.dart';
@@ -129,7 +130,12 @@ class NostrCore {
   Future<void> forceReconnect() async {
     remoteCacheService.reconnect();
 
-    final nostrConnectRelays = List<String>.from(relays());
+    final nostrConnectRelays = List<String>.from(
+      relays()
+        ..remove(
+          remoteSignerRelays.first,
+        ),
+    );
 
     await closeConnect(nostrConnectRelays);
 
@@ -461,12 +467,19 @@ class NostrCore {
     EventCallBack? eventCallBack,
     EOSECallBack? eoseCallBack,
     Function(bool)? onConnectionStatus,
+    bool removeRemoteSignerRelay = true,
   }) {
     Map<String, List<Filter>> result = {};
 
     final webSocketRelays = this.relays();
 
     for (var relay in webSocketRelays) {
+      if (removeRemoteSignerRelay) {
+        if (relay == remoteSignerRelays.first) {
+          continue;
+        }
+      }
+
       if (relays.isNotEmpty && relays.contains(relay) || relays.isEmpty) {
         if (webSockets[relay] != null) {
           result[relay] = filters;
@@ -476,7 +489,6 @@ class NostrCore {
 
     return addSubscriptions(
       result,
-      relays,
       eventCallBack: eventCallBack,
       eoseCallBack: eoseCallBack,
       onConnectionStatus: onConnectionStatus,
@@ -484,8 +496,7 @@ class NostrCore {
   }
 
   String addSubscriptions(
-    Map<String, List<Filter>> filters,
-    List<String> relays, {
+    Map<String, List<Filter>> filters, {
     EventCallBack? eventCallBack,
     EOSECallBack? eoseCallBack,
     Function(bool)? onConnectionStatus,
@@ -639,10 +650,25 @@ class NostrCore {
     List<String> selectedRelays, {
     OKCallBack? sendCallBack,
     bool isAuth = false,
+    bool removeRemoteSignerRelay = true,
   }) {
+    List<String> toBeSentRelay = selectedRelays;
+
+    if (removeRemoteSignerRelay &&
+        selectedRelays.contains(remoteSignerRelays.first)) {
+      toBeSentRelay = List<String>.from(selectedRelays)
+        ..remove(remoteSignerRelays.first);
+
+      if (selectedRelays.isEmpty) {
+        toBeSentRelay = List.from(relays())..remove(remoteSignerRelays.first);
+      }
+    } else {
+      toBeSentRelay = selectedRelays.isEmpty ? relays() : selectedRelays;
+    }
+
     Sends sends = Sends(
       generate64RandomHexChars(),
-      selectedRelays.isNotEmpty ? selectedRelays : relays(),
+      toBeSentRelay,
       DateTime.now().millisecondsSinceEpoch,
       event.id,
       sendCallBack,

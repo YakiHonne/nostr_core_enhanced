@@ -103,7 +103,7 @@ class RemoteEventSigner implements EventSigner {
 
   // Public fields
   final Function(String, bool)? onAuth;
-  late NostrCore nc;
+  final NostrCore nc;
 
   late String publicKey;
   late Bip340EventSigner localSigner;
@@ -117,13 +117,8 @@ class RemoteEventSigner implements EventSigner {
   int _serial = 0;
   late String _idPrefix;
 
-  RemoteEventSigner({this.onAuth, NostrCore? nc}) {
+  RemoteEventSigner({this.onAuth, required this.nc}) {
     _idPrefix = _generateRandomId();
-    if (nc != null) {
-      this.nc = nc;
-    } else {
-      nc = NostrCore();
-    }
   }
 
   bool get isReady => bunkerPubkey.isNotEmpty && relays.isNotEmpty;
@@ -139,7 +134,7 @@ class RemoteEventSigner implements EventSigner {
     String clientSecretKey,
     BunkerPointer bunkerPointer, {
     Function(String, bool)? onAuth,
-    NostrCore? nc,
+    required NostrCore nc,
   }) async {
     final signer = RemoteEventSigner(onAuth: onAuth, nc: nc);
 
@@ -152,11 +147,7 @@ class RemoteEventSigner implements EventSigner {
     );
 
     await signer._setupSubscription();
-    final isSuccessful = await signer.connect();
-
-    if (isSuccessful) {
-      return signer;
-    }
+    await signer.connect();
 
     return signer;
   }
@@ -183,7 +174,7 @@ class RemoteEventSigner implements EventSigner {
     required Function(String) onConnectionUrlReady,
     Function(String, bool)? onAuth,
     int maxWait = 300000,
-    NostrCore? nc,
+    required NostrCore nc,
   }) async {
     final signer = RemoteEventSigner(onAuth: onAuth, nc: nc);
     await signer.generateKeysAndConnect(onConnectionUrlReady);
@@ -210,6 +201,7 @@ class RemoteEventSigner implements EventSigner {
         ),
       ],
       signer.relays,
+      removeRemoteSignerRelay: false,
       eventCallBack: (event, relay) async {
         logger.i(event.toJson());
         if (seenEventIds.contains(event.id)) return;
@@ -270,8 +262,6 @@ class RemoteEventSigner implements EventSigner {
         if (pubkey.isEmpty || relays.isEmpty) {
           return null;
         }
-
-        logger.i(secret);
 
         return BunkerPointer(
           pubkey: pubkey,
@@ -372,6 +362,7 @@ class RemoteEventSigner implements EventSigner {
 
   Future<void> _setupSubscription() async {
     if (!_isOpen) {
+      logger.i('Setting up subscription for remote signer...');
       await nc.connectNonConnectedRelays(relays.toSet());
       Set<String> processedIds = {};
 
@@ -384,6 +375,7 @@ class RemoteEventSigner implements EventSigner {
           ),
         ],
         relays,
+        removeRemoteSignerRelay: false,
         eventCallBack: (event, relay) =>
             _handleSubscriptionEvent(event, relay, processedIds),
       );
@@ -474,10 +466,14 @@ class RemoteEventSigner implements EventSigner {
     List<String> params,
   ) async {
     final completer = Completer<Map<String, dynamic>>();
-
+    logger.i(_subscriptionId);
     if (_subscriptionId == null) {
+      logger.i('Not subscribed, setting up subscription...');
       await _setupSubscription();
     }
+
+    logger.i('Subscribed : $_subscriptionId');
+    logger.i(nc.connectStatus);
 
     _serial++;
     final id = '$_idPrefix-$_serial';
@@ -518,7 +514,14 @@ class RemoteEventSigner implements EventSigner {
     _waitingForAuth[id] = true;
 
     // Send the event
-    nc.sendEvent(event!, relays);
+    nc.sendEvent(
+      event!,
+      relays,
+      removeRemoteSignerRelay: false,
+      sendCallBack: (ok, relay, unCompletedRelays) {
+        logger.i('  ${ok.status}: ${ok.message} from $relay');
+      },
+    );
 
     // Setup timeout
     Timer(const Duration(seconds: 30), () {
@@ -593,6 +596,8 @@ class RemoteEventSigner implements EventSigner {
       'tags': event.tags,
       'created_at': event.createdAt,
     };
+
+    logger.i(eventData);
 
     final response = await sendRequest('sign_event', [json.encode(eventData)]);
     final result = response['result'];
@@ -741,7 +746,7 @@ class RemoteEventSigner implements EventSigner {
   factory RemoteEventSigner.fromJson({
     required String jsonString,
     required Function(String, bool) onAuth,
-    NostrCore? nc,
+    required NostrCore nc,
   }) {
     final decoded = json.decode(jsonString);
     final remote = RemoteEventSigner(onAuth: onAuth, nc: nc);

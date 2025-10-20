@@ -272,7 +272,6 @@ class EventStats extends Equatable {
 
     return copyWith(
       zaps: newZaps,
-      newestCreatedAt: getNewestCreatedAt(currentUnixTimestampSeconds()),
     );
   }
 
@@ -305,7 +304,6 @@ class EventStats extends Equatable {
 
     return copyWith(
       zaps: newZaps,
-      newestCreatedAt: getNewestCreatedAt(realZapEvent.createdAt),
     );
   }
 

@@ -258,16 +258,6 @@ class Metadata extends Equatable {
         n.contains(str2);
   }
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Metadata &&
-          runtimeType == other.runtimeType &&
-          pubkey == other.pubkey;
-
-  @override
-  int get hashCode => pubkey.hashCode;
-
   Metadata copyWith({
     String? pubkey,
     String? name,
