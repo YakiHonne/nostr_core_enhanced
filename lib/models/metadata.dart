@@ -185,31 +185,17 @@ class Metadata extends Equatable {
     );
   }
 
-  String getName() {
+  String getName({bool prioritizeDisplayName = true}) {
+    if (Helpers.isNotBlank(displayName) && prioritizeDisplayName) {
+      return displayName;
+    }
+
     if (Helpers.isNotBlank(name)) {
       return name;
     }
 
     if (Helpers.isNotBlank(displayName)) {
       return displayName;
-    }
-
-    final pub = Nip19.encodePubkey(pubkey);
-
-    final p = pub.length <= 7
-        ? pub
-        : '${pub.substring(1, 7)}...${pub.substring(pub.length - 7, pub.length)}';
-
-    return p;
-  }
-
-  String getDisplayName() {
-    if (Helpers.isNotBlank(displayName)) {
-      return displayName;
-    }
-
-    if (Helpers.isNotBlank(name)) {
-      return name;
     }
 
     final pub = Nip19.encodePubkey(pubkey);

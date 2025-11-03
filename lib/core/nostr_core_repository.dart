@@ -13,6 +13,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:nostr_core_enhanced/db/db_wrapper.dart';
 import 'package:nostr_core_enhanced/db/nostr_cache_manager.dart';
 import 'package:nostr_core_enhanced/models/models.dart';
+import 'package:nostr_core_enhanced/models/tor_socket_reader.dart';
 import 'package:nostr_core_enhanced/nostr/event_signer/remote_event_signer.dart';
 import 'package:nostr_core_enhanced/nostr/nostr.dart';
 import 'package:nostr_core_enhanced/utils/utils.dart';
@@ -345,6 +346,16 @@ class NostrCore {
     }
 
     if (source != EventsSource.cache) {
+      final nonConnectedRelays = <String>[];
+
+      if (relays.isNotEmpty) {
+        nonConnectedRelays.addAll(getNonConnectedRelays(relays));
+
+        if (nonConnectedRelays.isNotEmpty) {
+          await connectNonConnectedRelays(nonConnectedRelays.toSet());
+        }
+      }
+
       id = addSubscription(
         filters,
         relays,
@@ -389,6 +400,10 @@ class NostrCore {
             if (!completer.isCompleted) {
               closeRequests(<String>[id]);
               completer.complete(id);
+
+              if (nonConnectedRelays.isNotEmpty) {
+                closeConnect(nonConnectedRelays);
+              }
             }
           },
         );
@@ -396,6 +411,11 @@ class NostrCore {
     }
 
     return completer.future;
+  }
+
+  List<String> getNonConnectedRelays(List<String> relays) {
+    final currentActiveRelays = activeRelays();
+    return relays.where((r) => !currentActiveRelays.contains(r)).toList();
   }
 
   Future<String> doSubscribe(
@@ -857,40 +877,129 @@ class NostrCore {
       final isOnionRelay = uri.host.endsWith('.onion');
 
       if (isOnionRelay) {
-        // Configure HttpClient with proxy
-        final httpClient = HttpClient();
-        httpClient.findProxy = (uri) => 'PROXY 127.0.0.1:9050';
-        httpClient.badCertificateCallback = (cert, host, port) => true;
-        final httpUri = Uri(
-          scheme: uri.scheme == 'wss' ? 'https' : 'http',
-          host: uri.host,
-          port: uri.port,
-          path: uri.path.isEmpty ? '/' : uri.path,
-        );
-        // Connect to get the WebSocket directly
-        final request = await httpClient.getUrl(httpUri);
-        request.headers.add('Connection', 'Upgrade');
-        request.headers.add('Upgrade', 'websocket');
-        request.headers.add('Sec-WebSocket-Version', '13');
-        request.headers.add('Sec-WebSocket-Key', _generateWebSocketKey());
-
-        final response = await request.close();
-        logger.i(response.statusCode);
-
-        if (response.statusCode == 101) {
-          final socket = await response.detachSocket();
-          return WebSocket.fromUpgradedSocket(socket, serverSide: false);
-        } else {
-          return null;
-        }
+        // Use SOCKS5 proxy for Tor (not HTTP PROXY)
+        return _connectTorSocket(uri);
       } else {
+        // Regular WebSocket connection for non-onion relays
         return await WebSocket.connect(relay).timeout(
           const Duration(seconds: 5),
         );
       }
     } catch (e) {
       _setConnectStatus(relay, 3);
-      printLog('Error: $e');
+      printLog('Error connecting to $relay: $e');
+      return null;
+    }
+  }
+
+  Future<WebSocket?> _connectTorSocket(Uri uri) async {
+    printLog('Connecting to onion relay through Tor SOCKS5: ${uri.toString()}');
+
+    final host = uri.host;
+    final port = uri.port;
+    final path = uri.path.isEmpty ? '/' : uri.path;
+
+    Socket? socket;
+    TorByteStream? byteStream;
+
+    try {
+      socket = await Socket.connect('127.0.0.1', 9050,
+          timeout: Duration(seconds: 10));
+      printLog(
+          'Connected to Tor proxy: ${socket.remoteAddress}:${socket.remotePort}');
+
+      byteStream = TorByteStream(socket);
+
+      // === SOCKS5 HANDSHAKE ===
+      socket.add([0x05, 0x01, 0x00]);
+      await socket.flush();
+      final greeting = await byteStream.read(2);
+      if (greeting[0] != 0x05 || greeting[1] != 0x00) {
+        throw Exception('SOCKS5 auth failed');
+      }
+
+      final hostBytes = utf8.encode(host);
+      final connectRequest = Uint8List.fromList([
+        0x05,
+        0x01,
+        0x00,
+        0x03,
+        hostBytes.length,
+        ...hostBytes,
+        (port >> 8) & 0xFF,
+        port & 0xFF,
+      ]);
+      socket.add(connectRequest);
+      await socket.flush();
+
+      final header = await byteStream.read(4);
+      if (header[0] != 0x05 || header[1] != 0x00) {
+        return null;
+      }
+
+      final atyp = header[3];
+      switch (atyp) {
+        case 0x01:
+          await byteStream.read(6);
+          break;
+        case 0x03:
+          final len = (await byteStream.read(1))[0];
+          await byteStream.read(len + 2);
+          break;
+        case 0x04:
+          await byteStream.read(18);
+          break;
+        default:
+          return null;
+      }
+
+      printLog('SOCKS5 handshake complete!');
+
+      // === WEBSOCKET UPGRADE ===
+      final key = _generateWebSocketKey();
+      final upgrade = [
+        'GET $path HTTP/1.1',
+        'Host: $host:$port',
+        'Upgrade: websocket',
+        'Connection: Upgrade',
+        'Sec-WebSocket-Key: $key',
+        'Sec-WebSocket-Version: 13',
+        '\r\n',
+      ].join('\r\n');
+
+      socket.add(utf8.encode(upgrade));
+      await socket.flush();
+
+      // Read HTTP response
+      final responseBuffer = <int>[];
+      while (!String.fromCharCodes(responseBuffer).contains('\r\n\r\n')) {
+        final byte = await byteStream.read(1);
+        responseBuffer.add(byte[0]);
+      }
+
+      final response = String.fromCharCodes(responseBuffer);
+      printLog('HTTP response received: $response');
+
+      if (!response.contains('101 Switching Protocols')) {
+        throw Exception('WebSocket upgrade failed: $response');
+      }
+
+      printLog('WebSocket upgrade successful!');
+
+      // === DETACH AND CREATE WEBSOCKET ===
+      final wrappedSocket = byteStream.detachSocket();
+      byteStream = null; // Don't close it!
+
+      logger.i('Before fromUpgradedSocket');
+      final ws = WebSocket.fromUpgradedSocket(wrappedSocket, serverSide: false);
+      logger.i('After fromUpgradedSocket — SUCCESS');
+
+      return ws;
+    } catch (e, stack) {
+      printLog('Connection failed: $e');
+      printLog('Stack trace: $stack');
+      await byteStream?.close();
+      await socket?.close();
       return null;
     }
   }
@@ -902,24 +1011,39 @@ class NostrCore {
   }
 
   Future<bool> checkRelayConnectivity(String relay) async {
+    final uri = Uri.parse(relay);
+    final isOnion = uri.host.endsWith('.onion');
+
+    WebSocket? ws;
     try {
-      final socket = await WebSocket.connect(relay).timeout(
-        const Duration(seconds: 1),
+      if (isOnion) {
+        ws = await _connectTorSocket(uri);
+      } else {
+        ws = await WebSocket.connect(relay).timeout(Duration(seconds: 2));
+      }
+
+      if (ws == null) {
+        logger.e('WebSocket is null');
+        return false;
+      }
+
+      // SAFE: Use WebSocket, not raw socket
+      bool responded = false;
+      final sub = ws.listen(
+        (data) => responded = true,
+        onDone: () => responded = true,
       );
 
-      // Send a ping
-      socket.add("ping");
+      ws.add('ping');
+      await Future.delayed(Duration(seconds: 2));
+      await sub.cancel();
+      await ws.close();
 
-      // Wait for first response (or close)
-      final response = await socket.first.timeout(
-        const Duration(seconds: 1),
-        onTimeout: () => "timeout",
-      );
-
-      await socket.close();
-
-      return response != "timeout";
-    } catch (_) {
+      logger.i('Relay responded: $responded');
+      return responded;
+    } catch (e, st) {
+      logger.e('Check failed: $e', stackTrace: st);
+      await ws?.close();
       return false;
     }
   }

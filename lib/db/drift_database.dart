@@ -35,6 +35,9 @@ class NostrDatabase extends _$NostrDatabase {
           await m.createAll();
         },
         onUpgrade: (Migrator m, int from, int to) async {},
+        beforeOpen: (details) async {
+          await customStatement('PRAGMA journal_mode=WAL;');
+        },
       );
 
   static QueryExecutor _openConnection() {
