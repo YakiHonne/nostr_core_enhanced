@@ -37,6 +37,9 @@ class Filter {
   /// a list of identifiers that are referenced in a "t" tag
   List<String>? t;
 
+  /// a list of identifiers that are referenced in a "search" tag
+  String? search;
+
   /// a list of identifiers that are referenced in a "bolt11" tag
   List<String>? bolt11;
 
@@ -58,6 +61,7 @@ class Filter {
     this.p,
     this.l,
     this.d,
+    this.search,
     this.k,
     this.c,
     this.a,
@@ -84,6 +88,7 @@ class Filter {
     l = json['#l'] == null ? null : List<String>.from(json['#l']);
     q = json['#q'] == null ? null : List<String>.from(json['#q']);
     k = json['#k'] == null ? null : List<String>.from(json['#k']);
+    search = json['#search'].toString();
     bolt11 =
         json['#bolt11'] == null ? null : List<String>.from(json['#bolt11']);
     since = json['since'];
@@ -102,6 +107,9 @@ class Filter {
     }
     if (kinds != null) {
       data['kinds'] = kinds;
+    }
+    if (search != null) {
+      data['search'] = search;
     }
     if (e != null) {
       data['#e'] = e;

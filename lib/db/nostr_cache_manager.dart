@@ -418,28 +418,41 @@ class NostrDB extends CacheManager {
         if (f.authors?.isNotEmpty ?? false) {
           conditions.add(tbl.pubkey.isIn(f.authors!));
         }
+
+        if (f.search?.isNotEmpty ?? false) {
+          conditions.add(tbl.content.lower().contains(f.search!.toLowerCase()));
+        }
+
         if (f.ids?.isNotEmpty ?? false) conditions.add(tbl.id.isIn(f.ids!));
+
         if (f.kinds?.isNotEmpty ?? false) {
           conditions.add(tbl.kind.isIn(f.kinds!));
         }
+
         if (currentUser?.isNotEmpty ?? false) {
           conditions.add(tbl.currentUser.equals(currentUser!));
         }
+
         if (f.d?.isNotEmpty ?? false) conditions.add(tbl.dTag.isIn(f.d!));
+
         if (f.since != null) {
           conditions.add(tbl.createdAt.isBiggerOrEqualValue(f.since!));
         }
+
         if (f.until != null) {
           conditions.add(tbl.createdAt.isSmallerOrEqualValue(f.until!));
         }
 
         // Tag-based filters
         addIfNotEmpty(f.e, (v) => tbl.eTags.contains('"$v"'));
-        addIfNotEmpty(f.k, (v) => tbl.kTags.contains('"$v"'));
-        addIfNotEmpty(f.p, (v) => tbl.pTags.contains('"$v"'));
         addIfNotEmpty(f.l, (v) => tbl.lTags.contains('"$v"'));
-        addIfNotEmpty(f.q, (v) => tbl.qTags.contains('"$v"'));
+        addIfNotEmpty(f.p, (v) => tbl.pTags.contains('"$v"'));
         addIfNotEmpty(f.c, (v) => tbl.cTags.contains('"$v"'));
+        addIfNotEmpty(f.k, (v) => tbl.kTags.contains('"$v"'));
+        addIfNotEmpty(f.q, (v) => tbl.qTags.contains('"$v"'));
+        addIfNotEmpty(f.t, (v) => tbl.tTags.contains('"$v"'));
+        addIfNotEmpty(f.a, (v) => tbl.aTags.contains('"$v"'));
+        addIfNotEmpty(f.bolt11, (v) => tbl.tags.contains('"$v"'));
         addIfNotEmpty(relays, (v) => tbl.seenOn.contains('"$v"'));
 
         // Combine all with AND

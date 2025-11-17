@@ -12,6 +12,7 @@ class RemoteCacheEventsType {
   static const trendingUsers24 = 'scored_users_24h';
   static const scored = 'scored';
   static const search = 'search';
+  static const userSearch = 'user_search';
 }
 
 class RemoteCacheEventsSelector {

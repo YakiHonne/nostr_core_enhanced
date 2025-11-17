@@ -45,6 +45,8 @@ class EventKind {
 
   static const int RELAY_LIST_METADATA = 10002;
 
+  static const int SEARCH_RELAYS = 10002;
+
   static const int FAVORITE_RELAYS = 10012;
 
   static const int INTEREST_SET = 10015;

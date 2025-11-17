@@ -47,6 +47,13 @@ const List<String> DEFAULT_DM_RELAYS = [
   'wss://relay.0xchat.com',
 ];
 
+const List<String> DEFAULT_SEARCH_RELAYS = [
+  'wss://search.nos.today',
+  'wss://relay.nostr.band',
+  'wss://relay.ditto.pub',
+  'wss://nostr.polyserv.xyz',
+];
+
 class NostrCore {
   late NostrDB db;
   late DbWrapper dbWrapper;
@@ -790,7 +797,6 @@ class NostrCore {
           break;
 
         default:
-          logger.i('$relay ${m.message}');
           printLog('Received message not supported: $message');
           break;
       }
@@ -1039,7 +1045,6 @@ class NostrCore {
       await sub.cancel();
       await ws.close();
 
-      logger.i('Relay responded: $responded');
       return responded;
     } catch (e, st) {
       logger.e('Check failed: $e', stackTrace: st);

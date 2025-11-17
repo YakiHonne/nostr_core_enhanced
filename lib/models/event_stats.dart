@@ -164,11 +164,14 @@ class EventStats extends Equatable {
     }
   }
 
-  Map<String, String> filteredReplies(List<String> mutes) {
-    if (mutes.isNotEmpty) {
+  Map<String, String> filteredReplies(
+    List<String> mutes,
+    List<String> mutesEvents,
+  ) {
+    if (mutes.isNotEmpty || mutesEvents.isNotEmpty) {
       final map = Map<String, String>.from(replies)
         ..removeWhere(
-          (key, value) => mutes.contains(value),
+          (key, value) => mutes.contains(value) || mutesEvents.contains(key),
         );
 
       return map;
