@@ -24,7 +24,14 @@ part 'drift_database.g.dart';
   RelayInfoListTable,
 ])
 class NostrDatabase extends _$NostrDatabase {
-  NostrDatabase() : super(_openConnection());
+  static NostrDatabase? _instance;
+
+  factory NostrDatabase() {
+    _instance ??= NostrDatabase._internal();
+    return _instance!;
+  }
+
+  NostrDatabase._internal() : super(_openConnection());
 
   @override
   int get schemaVersion => 1;
@@ -37,6 +44,10 @@ class NostrDatabase extends _$NostrDatabase {
         onUpgrade: (Migrator m, int from, int to) async {},
         beforeOpen: (details) async {
           await customStatement('PRAGMA journal_mode=WAL;');
+          await customStatement('PRAGMA busy_timeout=30000;');
+          await customStatement('PRAGMA synchronous=NORMAL;');
+          await customStatement('PRAGMA cache_size=10000;');
+          await customStatement('PRAGMA temp_store=MEMORY;');
         },
       );
 

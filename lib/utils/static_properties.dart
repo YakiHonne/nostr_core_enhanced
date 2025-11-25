@@ -45,7 +45,7 @@ class EventKind {
 
   static const int RELAY_LIST_METADATA = 10002;
 
-  static const int SEARCH_RELAYS = 10002;
+  static const int SEARCH_RELAYS = 10007;
 
   static const int FAVORITE_RELAYS = 10012;
 
@@ -70,6 +70,8 @@ class EventKind {
   static const int BLOSSOM_HTTP_AUTH = 24242;
 
   static const int HTTP_AUTH = 27235;
+
+  static const int RELAY_SET = 30002;
 
   static const int CATEGORIZED_BOOKMARK = 30003;
 

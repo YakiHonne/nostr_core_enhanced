@@ -369,7 +369,8 @@ class DiscoverArticleFilter {
 
   factory DiscoverArticleFilter.fromJson(String source) =>
       DiscoverArticleFilter.fromMap(
-          json.decode(source) as Map<String, dynamic>);
+        json.decode(source) as Map<String, dynamic>,
+      );
 }
 
 class DiscoverCurationFilter {
