@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:amberflutter/amberflutter.dart';
 import 'package:nostr_core_enhanced/nostr/nostr.dart';
+import 'package:nostr_core_enhanced/utils/spider_util.dart';
 import 'package:nostr_core_enhanced/utils/static_properties.dart';
 
 class AmberEventSigner implements EventSigner {
@@ -141,7 +142,8 @@ class AmberEventSigner implements EventSigner {
       }
 
       return null;
-    } catch (_) {
+    } catch (e, stack) {
+      logger.i(stack);
       return null;
     }
   }

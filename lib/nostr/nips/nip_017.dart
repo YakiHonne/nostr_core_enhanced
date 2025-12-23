@@ -71,7 +71,7 @@ class Nip17 {
     return ev;
   }
 
-  static Future<Event> _decodeSealedGossip(
+  static Future<Event?> _decodeSealedGossip(
     Event event,
     Bip340EventSigner signer,
   ) async {
@@ -94,10 +94,10 @@ class Nip17 {
           return innerEvent;
         }
       } catch (e) {
-        throw Exception(e);
+        return null;
       }
     }
 
-    throw Exception("${event.kind} is not nip24 compatible");
+    return null;
   }
 }

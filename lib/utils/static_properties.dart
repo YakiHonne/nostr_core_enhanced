@@ -21,6 +21,8 @@ class EventKind {
 
   static const int GENERIC_REPOST = 16;
 
+  static const int PICTURE = 20;
+
   static const int VIDEO_HORIZONTAL = 21;
 
   static const int VIDEO_VERTICAL = 22;
@@ -42,6 +44,8 @@ class EventKind {
   static const int ZAP = 9735;
 
   static const int MUTE_LIST = 10000;
+
+  static const int PINNED_NOTES = 10001;
 
   static const int RELAY_LIST_METADATA = 10002;
 
@@ -86,6 +90,10 @@ class EventKind {
   static const int SMART_WIDGET_ENH = 30033;
 
   static const int RELAY_DISCOVERY = 30166;
+
+  static const int LEGACY_VIDEO_HORIZONTAL = 34235;
+
+  static const int LEGACY_VIDEO_VERTICAL = 34236;
 
   static const int VIDEO_VIEW = 34237;
 

@@ -204,7 +204,7 @@ class Event implements BaseEvent {
       kind: json['kind'],
       content: json['content'],
       tags: tags,
-      sig: json['sig'],
+      sig: json['sig'] ?? '',
       currentUser: currentUser ?? '',
       seenOn: seenOn ?? [],
       verify: verify,

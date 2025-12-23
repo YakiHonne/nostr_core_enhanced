@@ -135,10 +135,12 @@ class AppSharedSettings {
 
 class ContentFilters {
   List<DiscoverFilter> discoverFilters;
+  List<MediaFilter> mediaFilters;
   List<NotesFilter> notesFilters;
 
   ContentFilters({
     required this.discoverFilters,
+    required this.mediaFilters,
     required this.notesFilters,
   });
 
@@ -148,32 +150,45 @@ class ContentFilters {
     };
   }
 
-  ContentFilters deepCopy() {
-    return ContentFilters(
-      discoverFilters: List.from(discoverFilters),
-      notesFilters: List.from(notesFilters),
-    );
-  }
-
   Map<String, NotesFilter> getNotesMappedContent() {
     return {
       for (final filter in notesFilters) filter.id: filter,
     };
   }
 
+  Map<String, MediaFilter> getMediaMappedContent() {
+    return {
+      for (final filter in mediaFilters) filter.id: filter,
+    };
+  }
+
+  ContentFilters deepCopy() {
+    return ContentFilters(
+      discoverFilters: List.from(discoverFilters),
+      mediaFilters: List.from(mediaFilters),
+      notesFilters: List.from(notesFilters),
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'discoverFilters': discoverFilters.map((x) => x.toMap()).toList(),
+      'mediaFilters': mediaFilters.map((x) => x.toMap()).toList(),
       'notesFilters': notesFilters.map((x) => x.toMap()).toList(),
     };
   }
 
   factory ContentFilters.defaultFilters() {
-    return ContentFilters(discoverFilters: [], notesFilters: []);
+    return ContentFilters(
+      discoverFilters: [],
+      notesFilters: [],
+      mediaFilters: [],
+    );
   }
 
   factory ContentFilters.fromMap(List list) {
     List<DiscoverFilter> discoverFilters = [];
+    List<MediaFilter> mediaFilters = [];
     List<NotesFilter> notesFilters = [];
 
     for (final item in list) {
@@ -181,11 +196,14 @@ class ContentFilters {
         discoverFilters.add(DiscoverFilter.fromMap(item));
       } else if (item['type'] == 2) {
         notesFilters.add(NotesFilter.fromMap(item));
+      } else {
+        mediaFilters.add(MediaFilter.fromMap(item));
       }
     }
 
     return ContentFilters(
       discoverFilters: discoverFilters,
+      mediaFilters: mediaFilters,
       notesFilters: notesFilters,
     );
   }
@@ -199,9 +217,16 @@ class ContentFilters {
       (map['notesFilters'] as List).map((x) => NotesFilter.fromMap(x)),
     );
 
+    List<MediaFilter> mediaFilter = map['mediaFilters'] != null
+        ? List<MediaFilter>.from(
+            (map['mediaFilters'] as List).map((x) => MediaFilter.fromMap(x)),
+          )
+        : [];
+
     return ContentFilters(
       discoverFilters: discoverFilters,
       notesFilters: notesFilters,
+      mediaFilters: mediaFilter,
     );
   }
 
@@ -333,6 +358,88 @@ class DiscoverFilter {
 
   factory DiscoverFilter.fromJson(String source) =>
       DiscoverFilter.fromMap(json.decode(source) as Map<String, dynamic>);
+}
+
+class MediaFilter {
+  String id;
+  String title;
+  List<String> includedKeywords;
+  List<String> excludedKeywords;
+  List<String> postedBy;
+  bool hideSensitive;
+  int? from;
+  int? to;
+
+  MediaFilter({
+    required this.hideSensitive,
+    required this.id,
+    required this.title,
+    required this.includedKeywords,
+    required this.excludedKeywords,
+    required this.postedBy,
+    this.from,
+    this.to,
+  });
+
+  bool isDefault() {
+    return id == '';
+  }
+
+  factory MediaFilter.defaultFilter() {
+    return MediaFilter(
+      hideSensitive: false,
+      id: '',
+      title: '',
+      includedKeywords: [],
+      excludedKeywords: [],
+      postedBy: [],
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'id': id,
+      'title': title,
+      'included_words': includedKeywords,
+      'excluded_words': excludedKeywords,
+      'posted_by': postedBy,
+      'hide_sensitive': hideSensitive,
+      'from': from,
+      'to': to,
+    };
+  }
+
+  @override
+  factory MediaFilter.fromMap(Map<String, dynamic> map) {
+    return MediaFilter(
+      id: map['id'] as String? ?? uuid.v4(),
+      title: map['title'] as String,
+      from: map['from'] as int?,
+      to: map['to'] as int?,
+      includedKeywords: List<String>.from(map['included_words'] as List),
+      excludedKeywords: List<String>.from(map['excluded_words'] as List),
+      postedBy: List<String>.from(map['posted_by'] as List),
+      hideSensitive: map['hide_sensitive'] as bool,
+    );
+  }
+
+  Map<String, dynamic> toEventMap() {
+    return <String, dynamic>{
+      'type': 3,
+      'title': title,
+      'included_words': includedKeywords,
+      'excluded_words': excludedKeywords,
+      'posted_by': postedBy,
+      'hide_sensitive': hideSensitive,
+      'from': from,
+      'to': to,
+    };
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory MediaFilter.fromJson(String source) =>
+      MediaFilter.fromMap(json.decode(source) as Map<String, dynamic>);
 }
 
 class DiscoverArticleFilter {
@@ -526,16 +633,19 @@ class NotesFilter {
 class ContentSources {
   NotesSources notesSources;
   DiscoverSources discoverSources;
+  MediaSources mediaSources;
 
   ContentSources({
     required this.notesSources,
     required this.discoverSources,
+    required this.mediaSources,
   });
 
   ContentSources deepCopy() {
     return ContentSources(
       notesSources: notesSources.deepCopy(),
       discoverSources: discoverSources.deepCopy(),
+      mediaSources: mediaSources.deepCopy(),
     );
   }
 
@@ -543,6 +653,7 @@ class ContentSources {
     return <String, dynamic>{
       'notes': notesSources.toMap(),
       'mixed_content': discoverSources.toMap(),
+      'media': mediaSources.toMap(),
     };
   }
 
@@ -550,6 +661,7 @@ class ContentSources {
     return <String, dynamic>{
       'notes': notesSources.toEventMap(),
       'mixed_content': discoverSources.toEventMap(),
+      'media': mediaSources.toEventMap(),
     };
   }
 
@@ -608,6 +720,23 @@ class ContentSources {
             name: SOURCE_GLOBAL,
             enabled: true,
             index: 2,
+            id: uuid.v4(),
+          ),
+          index: 0,
+        ),
+      ),
+      mediaSources: MediaSources(
+        communityFeed: MediaCommunityFeed(
+          recent: CommunityFeedOption(
+            name: SOURCE_RECENT,
+            enabled: true,
+            index: 0,
+            id: uuid.v4(),
+          ),
+          global: CommunityFeedOption(
+            name: SOURCE_GLOBAL,
+            enabled: true,
+            index: 1,
             id: uuid.v4(),
           ),
           index: 0,
@@ -676,6 +805,23 @@ class ContentSources {
           index: 0,
         ),
       ),
+      mediaSources: MediaSources(
+        communityFeed: MediaCommunityFeed(
+          recent: CommunityFeedOption(
+            name: SOURCE_RECENT,
+            enabled: true,
+            index: 0,
+            id: uuid.v4(),
+          ),
+          global: CommunityFeedOption(
+            name: SOURCE_GLOBAL,
+            enabled: true,
+            index: 1,
+            id: uuid.v4(),
+          ),
+          index: 0,
+        ),
+      ),
     );
   }
 
@@ -691,6 +837,11 @@ class ContentSources {
               map['mixed_content'] as Map<String, dynamic>,
             )
           : DiscoverSources.defaultSources(),
+      mediaSources: map['media'] != null
+          ? MediaSources.fromMap(
+              map['media'] as Map<String, dynamic>,
+            )
+          : MediaSources.defaultSources(),
     );
   }
 
@@ -702,10 +853,12 @@ class ContentSources {
   ContentSources copyWith({
     NotesSources? notesSources,
     DiscoverSources? discoverSources,
+    MediaSources? mediaSources,
   }) {
     return ContentSources(
       notesSources: notesSources ?? this.notesSources,
       discoverSources: discoverSources ?? this.discoverSources,
+      mediaSources: mediaSources ?? this.mediaSources,
     );
   }
 }
@@ -988,6 +1141,131 @@ class DiscoverSources {
     DiscoverCommunityFeed? communityFeed,
   }) {
     return DiscoverSources(
+      communityFeed: communityFeed ?? this.communityFeed,
+    );
+  }
+}
+
+class MediaSources {
+  MediaCommunityFeed communityFeed;
+
+  MediaSources({
+    required this.communityFeed,
+  });
+
+  factory MediaSources.defaultSources() {
+    return MediaSources(
+      communityFeed: MediaCommunityFeed(
+        recent: CommunityFeedOption(
+          name: SOURCE_RECENT,
+          enabled: true,
+          index: 0,
+          id: uuid.v4(),
+        ),
+        global: CommunityFeedOption(
+          name: SOURCE_GLOBAL,
+          enabled: true,
+          index: 1,
+          id: uuid.v4(),
+        ),
+        index: 0,
+      ),
+    );
+  }
+
+  MediaSources deepCopy() {
+    return MediaSources(
+      communityFeed: communityFeed.deepCopy(),
+    );
+  }
+
+  MapEntry<String, String> getFirstMediaSource() {
+    String selectedDiscoverSource = '';
+    String name = '';
+    final feeds = getFeedsByOrder();
+
+    if (feeds.isNotEmpty) {
+      final firstFeed = feeds.first;
+      if (firstFeed is MediaCommunityFeed) {
+        final options = [communityFeed.recent, communityFeed.global]
+          ..sort((a, b) => a.index.compareTo(b.index));
+        if (options.isNotEmpty) {
+          final o = options.firstWhere(
+            (element) => element.enabled,
+            orElse: () => options.first,
+          );
+
+          selectedDiscoverSource = o.id;
+          name = o.name;
+        }
+      }
+    }
+
+    return MapEntry(selectedDiscoverSource, name);
+  }
+
+  MapEntry<String, String> getCurrentSelectedMediaSource(
+    MapEntry<String, String> currentSource,
+  ) {
+    bool isEnabled = false;
+
+    for (final feed in getFeedsByOrder()) {
+      if (feed is MediaCommunityFeed) {
+        isEnabled =
+            (feed.recent.id == currentSource.key && feed.recent.enabled) ||
+                (feed.global.id == currentSource.key && feed.global.enabled);
+        if (isEnabled) {
+          return currentSource;
+        }
+      } else if (feed is DvmFeed) {
+        isEnabled = feed.dvms
+            .where(
+              (element) => element.id == currentSource.key && element.enabled,
+            )
+            .isNotEmpty;
+
+        if (isEnabled) {
+          return currentSource;
+        }
+      }
+    }
+
+    return getFirstMediaSource();
+  }
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'community': communityFeed.toMap(),
+    };
+  }
+
+  Map<String, dynamic> toEventMap() {
+    return <String, dynamic>{
+      'community': communityFeed.toEventMap(),
+    };
+  }
+
+  List<BaseFeed> getFeedsByOrder() {
+    return [communityFeed];
+  }
+
+  factory MediaSources.fromMap(Map<String, dynamic> map) {
+    return MediaSources(
+      communityFeed: MediaCommunityFeed.fromMap(
+        map['community'] as Map<String, dynamic>,
+      ),
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory MediaSources.fromJson(String source) =>
+      MediaSources.fromMap(json.decode(source) as Map<String, dynamic>);
+
+  MediaSources copyWith({
+    MediaCommunityFeed? communityFeed,
+  }) {
+    return MediaSources(
       communityFeed: communityFeed ?? this.communityFeed,
     );
   }
@@ -1420,6 +1698,135 @@ class DiscoverCommunityFeed extends BaseFeed {
       index: index ?? this.index,
       network: network ?? this.network,
       top: top ?? this.top,
+      global: global ?? this.global,
+    );
+  }
+}
+
+class MediaCommunityFeed extends BaseFeed {
+  CommunityFeedOption recent;
+  CommunityFeedOption global;
+
+  MediaCommunityFeed({
+    required this.recent,
+    required this.global,
+    required super.index,
+  });
+
+  MediaCommunityFeed deepCopy() {
+    return MediaCommunityFeed(
+      index: index,
+      recent: recent.deepCopy(),
+      global: global.deepCopy(),
+    );
+  }
+
+  Map<String, CommunityFeedOption> getMappedContent() {
+    List<CommunityFeedOption> options = [recent, global]
+      ..sort((a, b) => a.index.compareTo(b.index));
+
+    return {
+      for (final option in options) option.id: option,
+    };
+  }
+
+  bool isDisabled() {
+    return !recent.enabled && !global.enabled;
+  }
+
+  Map<String, dynamic> toMap() {
+    List<CommunityFeedOption> options = [recent, global];
+
+    options.sort((a, b) => a.index.compareTo(b.index));
+
+    return <String, dynamic>{
+      'index': index,
+      'list': options
+          .map(
+            (e) => [e.name, e.enabled],
+          )
+          .toList(),
+    };
+  }
+
+  Map<String, dynamic> toEventMap() {
+    List<CommunityFeedOption> options = [recent, global];
+
+    options.sort((a, b) => a.index.compareTo(b.index));
+
+    return <String, dynamic>{
+      'index': index,
+      'list': options
+          .map(
+            (e) => [e.name, e.enabled],
+          )
+          .toList(),
+    };
+  }
+
+  factory MediaCommunityFeed.fromMap(Map<String, dynamic> map) {
+    final list = map['list'] as List?;
+    CommunityFeedOption recent = CommunityFeedOption(
+      name: SOURCE_RECENT,
+      enabled: true,
+      index: 0,
+      id: uuid.v4(),
+    );
+
+    CommunityFeedOption global = CommunityFeedOption(
+      name: SOURCE_GLOBAL,
+      enabled: true,
+      index: 1,
+      id: uuid.v4(),
+    );
+
+    if (list != null && list.isNotEmpty) {
+      for (int i = 0; i < list.length; i++) {
+        final item = list[i];
+        if (item is List && item.length >= 2) {
+          if (item.first == SOURCE_RECENT) {
+            recent = CommunityFeedOption(
+              name: item.first,
+              enabled: item[1] as bool,
+              index: i,
+              id: uuid.v4(),
+            );
+          }
+
+          if (item.first == SOURCE_GLOBAL) {
+            global = CommunityFeedOption(
+              name: item.first,
+              enabled: item[1] as bool,
+              index: i,
+              id: uuid.v4(),
+            );
+          }
+        }
+      }
+    }
+
+    return MediaCommunityFeed(
+      index: map['index'],
+      recent: recent,
+      global: global,
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory MediaCommunityFeed.fromJson(String source) =>
+      MediaCommunityFeed.fromMap(
+        json.decode(source) as Map<String, dynamic>,
+      );
+
+  MediaCommunityFeed copyWith({
+    int? index,
+    CommunityFeedOption? recent,
+    CommunityFeedOption? global,
+  }) {
+    return MediaCommunityFeed(
+      index: index ?? this.index,
+      recent: recent ?? this.recent,
       global: global ?? this.global,
     );
   }
