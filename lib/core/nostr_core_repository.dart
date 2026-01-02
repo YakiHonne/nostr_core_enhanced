@@ -37,8 +37,10 @@ const Duration REFRESH_USER_RELAY_DURATION = Duration(minutes: 10);
 
 const List<String> DEFAULT_BOOTSTRAP_RELAYS = [
   "wss://relay.damus.io",
-  "wss://relay.nostr.band",
   'wss://nostr-01.yakihonne.com',
+  'wss://nos.lol',
+  'wss://indexer.coracle.social',
+  'wss://purplepag.es',
 ];
 
 const List<String> DEFAULT_DM_RELAYS = [
