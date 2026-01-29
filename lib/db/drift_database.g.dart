@@ -6191,6 +6191,3448 @@ class RelayInfoListTableCompanion
   }
 }
 
+class $CashuMintTableTable extends CashuMintTable
+    with TableInfo<$CashuMintTableTable, CashuMintTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CashuMintTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _pubkeyMeta = const VerificationMeta('pubkey');
+  @override
+  late final GeneratedColumn<String> pubkey = GeneratedColumn<String>(
+      'pubkey', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _mintURLMeta =
+      const VerificationMeta('mintURL');
+  @override
+  late final GeneratedColumn<String> mintURL = GeneratedColumn<String>(
+      'mint_u_r_l', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  static const VerificationMeta _balanceMeta =
+      const VerificationMeta('balance');
+  @override
+  late final GeneratedColumn<int> balance = GeneratedColumn<int>(
+      'balance', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _maxNutsVersionMeta =
+      const VerificationMeta('maxNutsVersion');
+  @override
+  late final GeneratedColumn<int> maxNutsVersion = GeneratedColumn<int>(
+      'max_nuts_version', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  @override
+  List<GeneratedColumn> get $columns =>
+      [pubkey, mintURL, name, balance, maxNutsVersion];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'IMint';
+  @override
+  VerificationContext validateIntegrity(Insertable<CashuMintTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('pubkey')) {
+      context.handle(_pubkeyMeta,
+          pubkey.isAcceptableOrUnknown(data['pubkey']!, _pubkeyMeta));
+    } else if (isInserting) {
+      context.missing(_pubkeyMeta);
+    }
+    if (data.containsKey('mint_u_r_l')) {
+      context.handle(_mintURLMeta,
+          mintURL.isAcceptableOrUnknown(data['mint_u_r_l']!, _mintURLMeta));
+    } else if (isInserting) {
+      context.missing(_mintURLMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    }
+    if (data.containsKey('balance')) {
+      context.handle(_balanceMeta,
+          balance.isAcceptableOrUnknown(data['balance']!, _balanceMeta));
+    }
+    if (data.containsKey('max_nuts_version')) {
+      context.handle(
+          _maxNutsVersionMeta,
+          maxNutsVersion.isAcceptableOrUnknown(
+              data['max_nuts_version']!, _maxNutsVersionMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {pubkey, mintURL};
+  @override
+  CashuMintTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CashuMintTableData(
+      pubkey: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}pubkey'])!,
+      mintURL: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}mint_u_r_l'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      balance: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}balance'])!,
+      maxNutsVersion: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}max_nuts_version'])!,
+    );
+  }
+
+  @override
+  $CashuMintTableTable createAlias(String alias) {
+    return $CashuMintTableTable(attachedDatabase, alias);
+  }
+}
+
+class CashuMintTableData extends DataClass
+    implements Insertable<CashuMintTableData> {
+  final String pubkey;
+  final String mintURL;
+  final String name;
+  final int balance;
+  final int maxNutsVersion;
+  const CashuMintTableData(
+      {required this.pubkey,
+      required this.mintURL,
+      required this.name,
+      required this.balance,
+      required this.maxNutsVersion});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['pubkey'] = Variable<String>(pubkey);
+    map['mint_u_r_l'] = Variable<String>(mintURL);
+    map['name'] = Variable<String>(name);
+    map['balance'] = Variable<int>(balance);
+    map['max_nuts_version'] = Variable<int>(maxNutsVersion);
+    return map;
+  }
+
+  CashuMintTableCompanion toCompanion(bool nullToAbsent) {
+    return CashuMintTableCompanion(
+      pubkey: Value(pubkey),
+      mintURL: Value(mintURL),
+      name: Value(name),
+      balance: Value(balance),
+      maxNutsVersion: Value(maxNutsVersion),
+    );
+  }
+
+  factory CashuMintTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CashuMintTableData(
+      pubkey: serializer.fromJson<String>(json['pubkey']),
+      mintURL: serializer.fromJson<String>(json['mintURL']),
+      name: serializer.fromJson<String>(json['name']),
+      balance: serializer.fromJson<int>(json['balance']),
+      maxNutsVersion: serializer.fromJson<int>(json['maxNutsVersion']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'pubkey': serializer.toJson<String>(pubkey),
+      'mintURL': serializer.toJson<String>(mintURL),
+      'name': serializer.toJson<String>(name),
+      'balance': serializer.toJson<int>(balance),
+      'maxNutsVersion': serializer.toJson<int>(maxNutsVersion),
+    };
+  }
+
+  CashuMintTableData copyWith(
+          {String? pubkey,
+          String? mintURL,
+          String? name,
+          int? balance,
+          int? maxNutsVersion}) =>
+      CashuMintTableData(
+        pubkey: pubkey ?? this.pubkey,
+        mintURL: mintURL ?? this.mintURL,
+        name: name ?? this.name,
+        balance: balance ?? this.balance,
+        maxNutsVersion: maxNutsVersion ?? this.maxNutsVersion,
+      );
+  CashuMintTableData copyWithCompanion(CashuMintTableCompanion data) {
+    return CashuMintTableData(
+      pubkey: data.pubkey.present ? data.pubkey.value : this.pubkey,
+      mintURL: data.mintURL.present ? data.mintURL.value : this.mintURL,
+      name: data.name.present ? data.name.value : this.name,
+      balance: data.balance.present ? data.balance.value : this.balance,
+      maxNutsVersion: data.maxNutsVersion.present
+          ? data.maxNutsVersion.value
+          : this.maxNutsVersion,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashuMintTableData(')
+          ..write('pubkey: $pubkey, ')
+          ..write('mintURL: $mintURL, ')
+          ..write('name: $name, ')
+          ..write('balance: $balance, ')
+          ..write('maxNutsVersion: $maxNutsVersion')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(pubkey, mintURL, name, balance, maxNutsVersion);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CashuMintTableData &&
+          other.pubkey == this.pubkey &&
+          other.mintURL == this.mintURL &&
+          other.name == this.name &&
+          other.balance == this.balance &&
+          other.maxNutsVersion == this.maxNutsVersion);
+}
+
+class CashuMintTableCompanion extends UpdateCompanion<CashuMintTableData> {
+  final Value<String> pubkey;
+  final Value<String> mintURL;
+  final Value<String> name;
+  final Value<int> balance;
+  final Value<int> maxNutsVersion;
+  final Value<int> rowid;
+  const CashuMintTableCompanion({
+    this.pubkey = const Value.absent(),
+    this.mintURL = const Value.absent(),
+    this.name = const Value.absent(),
+    this.balance = const Value.absent(),
+    this.maxNutsVersion = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CashuMintTableCompanion.insert({
+    required String pubkey,
+    required String mintURL,
+    this.name = const Value.absent(),
+    this.balance = const Value.absent(),
+    this.maxNutsVersion = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : pubkey = Value(pubkey),
+        mintURL = Value(mintURL);
+  static Insertable<CashuMintTableData> custom({
+    Expression<String>? pubkey,
+    Expression<String>? mintURL,
+    Expression<String>? name,
+    Expression<int>? balance,
+    Expression<int>? maxNutsVersion,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (pubkey != null) 'pubkey': pubkey,
+      if (mintURL != null) 'mint_u_r_l': mintURL,
+      if (name != null) 'name': name,
+      if (balance != null) 'balance': balance,
+      if (maxNutsVersion != null) 'max_nuts_version': maxNutsVersion,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CashuMintTableCompanion copyWith(
+      {Value<String>? pubkey,
+      Value<String>? mintURL,
+      Value<String>? name,
+      Value<int>? balance,
+      Value<int>? maxNutsVersion,
+      Value<int>? rowid}) {
+    return CashuMintTableCompanion(
+      pubkey: pubkey ?? this.pubkey,
+      mintURL: mintURL ?? this.mintURL,
+      name: name ?? this.name,
+      balance: balance ?? this.balance,
+      maxNutsVersion: maxNutsVersion ?? this.maxNutsVersion,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (pubkey.present) {
+      map['pubkey'] = Variable<String>(pubkey.value);
+    }
+    if (mintURL.present) {
+      map['mint_u_r_l'] = Variable<String>(mintURL.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (balance.present) {
+      map['balance'] = Variable<int>(balance.value);
+    }
+    if (maxNutsVersion.present) {
+      map['max_nuts_version'] = Variable<int>(maxNutsVersion.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashuMintTableCompanion(')
+          ..write('pubkey: $pubkey, ')
+          ..write('mintURL: $mintURL, ')
+          ..write('name: $name, ')
+          ..write('balance: $balance, ')
+          ..write('maxNutsVersion: $maxNutsVersion, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CashuKeysetInfoTableTable extends CashuKeysetInfoTable
+    with TableInfo<$CashuKeysetInfoTableTable, CashuKeysetInfoTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CashuKeysetInfoTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _mintURLMeta =
+      const VerificationMeta('mintURL');
+  @override
+  late final GeneratedColumn<String> mintURL = GeneratedColumn<String>(
+      'mint_u_r_l', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+      'unit', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _activeMeta = const VerificationMeta('active');
+  @override
+  late final GeneratedColumn<bool> active = GeneratedColumn<bool>(
+      'active', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("active" IN (0, 1))'));
+  static const VerificationMeta _keysetRawMeta =
+      const VerificationMeta('keysetRaw');
+  @override
+  late final GeneratedColumn<String> keysetRaw = GeneratedColumn<String>(
+      'keyset_raw', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  static const VerificationMeta _inputFeePPKMeta =
+      const VerificationMeta('inputFeePPK');
+  @override
+  late final GeneratedColumn<int> inputFeePPK = GeneratedColumn<int>(
+      'input_fee_p_p_k', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, mintURL, unit, active, keysetRaw, inputFeePPK];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'KeysetInfo';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<CashuKeysetInfoTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('mint_u_r_l')) {
+      context.handle(_mintURLMeta,
+          mintURL.isAcceptableOrUnknown(data['mint_u_r_l']!, _mintURLMeta));
+    } else if (isInserting) {
+      context.missing(_mintURLMeta);
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+          _unitMeta, unit.isAcceptableOrUnknown(data['unit']!, _unitMeta));
+    } else if (isInserting) {
+      context.missing(_unitMeta);
+    }
+    if (data.containsKey('active')) {
+      context.handle(_activeMeta,
+          active.isAcceptableOrUnknown(data['active']!, _activeMeta));
+    } else if (isInserting) {
+      context.missing(_activeMeta);
+    }
+    if (data.containsKey('keyset_raw')) {
+      context.handle(_keysetRawMeta,
+          keysetRaw.isAcceptableOrUnknown(data['keyset_raw']!, _keysetRawMeta));
+    }
+    if (data.containsKey('input_fee_p_p_k')) {
+      context.handle(
+          _inputFeePPKMeta,
+          inputFeePPK.isAcceptableOrUnknown(
+              data['input_fee_p_p_k']!, _inputFeePPKMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id, mintURL};
+  @override
+  CashuKeysetInfoTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CashuKeysetInfoTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      mintURL: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}mint_u_r_l'])!,
+      unit: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}unit'])!,
+      active: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}active'])!,
+      keysetRaw: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}keyset_raw'])!,
+      inputFeePPK: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}input_fee_p_p_k'])!,
+    );
+  }
+
+  @override
+  $CashuKeysetInfoTableTable createAlias(String alias) {
+    return $CashuKeysetInfoTableTable(attachedDatabase, alias);
+  }
+}
+
+class CashuKeysetInfoTableData extends DataClass
+    implements Insertable<CashuKeysetInfoTableData> {
+  final String id;
+  final String mintURL;
+  final String unit;
+  final bool active;
+  final String keysetRaw;
+  final int inputFeePPK;
+  const CashuKeysetInfoTableData(
+      {required this.id,
+      required this.mintURL,
+      required this.unit,
+      required this.active,
+      required this.keysetRaw,
+      required this.inputFeePPK});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['mint_u_r_l'] = Variable<String>(mintURL);
+    map['unit'] = Variable<String>(unit);
+    map['active'] = Variable<bool>(active);
+    map['keyset_raw'] = Variable<String>(keysetRaw);
+    map['input_fee_p_p_k'] = Variable<int>(inputFeePPK);
+    return map;
+  }
+
+  CashuKeysetInfoTableCompanion toCompanion(bool nullToAbsent) {
+    return CashuKeysetInfoTableCompanion(
+      id: Value(id),
+      mintURL: Value(mintURL),
+      unit: Value(unit),
+      active: Value(active),
+      keysetRaw: Value(keysetRaw),
+      inputFeePPK: Value(inputFeePPK),
+    );
+  }
+
+  factory CashuKeysetInfoTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CashuKeysetInfoTableData(
+      id: serializer.fromJson<String>(json['id']),
+      mintURL: serializer.fromJson<String>(json['mintURL']),
+      unit: serializer.fromJson<String>(json['unit']),
+      active: serializer.fromJson<bool>(json['active']),
+      keysetRaw: serializer.fromJson<String>(json['keysetRaw']),
+      inputFeePPK: serializer.fromJson<int>(json['inputFeePPK']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'mintURL': serializer.toJson<String>(mintURL),
+      'unit': serializer.toJson<String>(unit),
+      'active': serializer.toJson<bool>(active),
+      'keysetRaw': serializer.toJson<String>(keysetRaw),
+      'inputFeePPK': serializer.toJson<int>(inputFeePPK),
+    };
+  }
+
+  CashuKeysetInfoTableData copyWith(
+          {String? id,
+          String? mintURL,
+          String? unit,
+          bool? active,
+          String? keysetRaw,
+          int? inputFeePPK}) =>
+      CashuKeysetInfoTableData(
+        id: id ?? this.id,
+        mintURL: mintURL ?? this.mintURL,
+        unit: unit ?? this.unit,
+        active: active ?? this.active,
+        keysetRaw: keysetRaw ?? this.keysetRaw,
+        inputFeePPK: inputFeePPK ?? this.inputFeePPK,
+      );
+  CashuKeysetInfoTableData copyWithCompanion(
+      CashuKeysetInfoTableCompanion data) {
+    return CashuKeysetInfoTableData(
+      id: data.id.present ? data.id.value : this.id,
+      mintURL: data.mintURL.present ? data.mintURL.value : this.mintURL,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      active: data.active.present ? data.active.value : this.active,
+      keysetRaw: data.keysetRaw.present ? data.keysetRaw.value : this.keysetRaw,
+      inputFeePPK:
+          data.inputFeePPK.present ? data.inputFeePPK.value : this.inputFeePPK,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashuKeysetInfoTableData(')
+          ..write('id: $id, ')
+          ..write('mintURL: $mintURL, ')
+          ..write('unit: $unit, ')
+          ..write('active: $active, ')
+          ..write('keysetRaw: $keysetRaw, ')
+          ..write('inputFeePPK: $inputFeePPK')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, mintURL, unit, active, keysetRaw, inputFeePPK);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CashuKeysetInfoTableData &&
+          other.id == this.id &&
+          other.mintURL == this.mintURL &&
+          other.unit == this.unit &&
+          other.active == this.active &&
+          other.keysetRaw == this.keysetRaw &&
+          other.inputFeePPK == this.inputFeePPK);
+}
+
+class CashuKeysetInfoTableCompanion
+    extends UpdateCompanion<CashuKeysetInfoTableData> {
+  final Value<String> id;
+  final Value<String> mintURL;
+  final Value<String> unit;
+  final Value<bool> active;
+  final Value<String> keysetRaw;
+  final Value<int> inputFeePPK;
+  final Value<int> rowid;
+  const CashuKeysetInfoTableCompanion({
+    this.id = const Value.absent(),
+    this.mintURL = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.active = const Value.absent(),
+    this.keysetRaw = const Value.absent(),
+    this.inputFeePPK = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CashuKeysetInfoTableCompanion.insert({
+    required String id,
+    required String mintURL,
+    required String unit,
+    required bool active,
+    this.keysetRaw = const Value.absent(),
+    this.inputFeePPK = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        mintURL = Value(mintURL),
+        unit = Value(unit),
+        active = Value(active);
+  static Insertable<CashuKeysetInfoTableData> custom({
+    Expression<String>? id,
+    Expression<String>? mintURL,
+    Expression<String>? unit,
+    Expression<bool>? active,
+    Expression<String>? keysetRaw,
+    Expression<int>? inputFeePPK,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (mintURL != null) 'mint_u_r_l': mintURL,
+      if (unit != null) 'unit': unit,
+      if (active != null) 'active': active,
+      if (keysetRaw != null) 'keyset_raw': keysetRaw,
+      if (inputFeePPK != null) 'input_fee_p_p_k': inputFeePPK,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CashuKeysetInfoTableCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? mintURL,
+      Value<String>? unit,
+      Value<bool>? active,
+      Value<String>? keysetRaw,
+      Value<int>? inputFeePPK,
+      Value<int>? rowid}) {
+    return CashuKeysetInfoTableCompanion(
+      id: id ?? this.id,
+      mintURL: mintURL ?? this.mintURL,
+      unit: unit ?? this.unit,
+      active: active ?? this.active,
+      keysetRaw: keysetRaw ?? this.keysetRaw,
+      inputFeePPK: inputFeePPK ?? this.inputFeePPK,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (mintURL.present) {
+      map['mint_u_r_l'] = Variable<String>(mintURL.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (active.present) {
+      map['active'] = Variable<bool>(active.value);
+    }
+    if (keysetRaw.present) {
+      map['keyset_raw'] = Variable<String>(keysetRaw.value);
+    }
+    if (inputFeePPK.present) {
+      map['input_fee_p_p_k'] = Variable<int>(inputFeePPK.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashuKeysetInfoTableCompanion(')
+          ..write('id: $id, ')
+          ..write('mintURL: $mintURL, ')
+          ..write('unit: $unit, ')
+          ..write('active: $active, ')
+          ..write('keysetRaw: $keysetRaw, ')
+          ..write('inputFeePPK: $inputFeePPK, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CashuInvoiceTableTable extends CashuInvoiceTable
+    with TableInfo<$CashuInvoiceTableTable, CashuInvoiceTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CashuInvoiceTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _quoteMeta = const VerificationMeta('quote');
+  @override
+  late final GeneratedColumn<String> quote = GeneratedColumn<String>(
+      'quote', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _requestMeta =
+      const VerificationMeta('request');
+  @override
+  late final GeneratedColumn<String> request = GeneratedColumn<String>(
+      'request', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _paidMeta = const VerificationMeta('paid');
+  @override
+  late final GeneratedColumn<bool> paid = GeneratedColumn<bool>(
+      'paid', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("paid" IN (0, 1))'));
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<String> amount = GeneratedColumn<String>(
+      'amount', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _expiryMeta = const VerificationMeta('expiry');
+  @override
+  late final GeneratedColumn<int> expiry = GeneratedColumn<int>(
+      'expiry', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _mintURLMeta =
+      const VerificationMeta('mintURL');
+  @override
+  late final GeneratedColumn<String> mintURL = GeneratedColumn<String>(
+      'mint_u_r_l', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, quote, request, paid, amount, expiry, mintURL];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'IInvoice';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<CashuInvoiceTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('quote')) {
+      context.handle(
+          _quoteMeta, quote.isAcceptableOrUnknown(data['quote']!, _quoteMeta));
+    } else if (isInserting) {
+      context.missing(_quoteMeta);
+    }
+    if (data.containsKey('request')) {
+      context.handle(_requestMeta,
+          request.isAcceptableOrUnknown(data['request']!, _requestMeta));
+    } else if (isInserting) {
+      context.missing(_requestMeta);
+    }
+    if (data.containsKey('paid')) {
+      context.handle(
+          _paidMeta, paid.isAcceptableOrUnknown(data['paid']!, _paidMeta));
+    } else if (isInserting) {
+      context.missing(_paidMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(_amountMeta,
+          amount.isAcceptableOrUnknown(data['amount']!, _amountMeta));
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('expiry')) {
+      context.handle(_expiryMeta,
+          expiry.isAcceptableOrUnknown(data['expiry']!, _expiryMeta));
+    } else if (isInserting) {
+      context.missing(_expiryMeta);
+    }
+    if (data.containsKey('mint_u_r_l')) {
+      context.handle(_mintURLMeta,
+          mintURL.isAcceptableOrUnknown(data['mint_u_r_l']!, _mintURLMeta));
+    } else if (isInserting) {
+      context.missing(_mintURLMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {mintURL, quote};
+  @override
+  CashuInvoiceTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CashuInvoiceTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      quote: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}quote'])!,
+      request: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}request'])!,
+      paid: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}paid'])!,
+      amount: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}amount'])!,
+      expiry: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}expiry'])!,
+      mintURL: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}mint_u_r_l'])!,
+    );
+  }
+
+  @override
+  $CashuInvoiceTableTable createAlias(String alias) {
+    return $CashuInvoiceTableTable(attachedDatabase, alias);
+  }
+}
+
+class CashuInvoiceTableData extends DataClass
+    implements Insertable<CashuInvoiceTableData> {
+  final String id;
+  final String quote;
+  final String request;
+  final bool paid;
+  final String amount;
+  final int expiry;
+  final String mintURL;
+  const CashuInvoiceTableData(
+      {required this.id,
+      required this.quote,
+      required this.request,
+      required this.paid,
+      required this.amount,
+      required this.expiry,
+      required this.mintURL});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['quote'] = Variable<String>(quote);
+    map['request'] = Variable<String>(request);
+    map['paid'] = Variable<bool>(paid);
+    map['amount'] = Variable<String>(amount);
+    map['expiry'] = Variable<int>(expiry);
+    map['mint_u_r_l'] = Variable<String>(mintURL);
+    return map;
+  }
+
+  CashuInvoiceTableCompanion toCompanion(bool nullToAbsent) {
+    return CashuInvoiceTableCompanion(
+      id: Value(id),
+      quote: Value(quote),
+      request: Value(request),
+      paid: Value(paid),
+      amount: Value(amount),
+      expiry: Value(expiry),
+      mintURL: Value(mintURL),
+    );
+  }
+
+  factory CashuInvoiceTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CashuInvoiceTableData(
+      id: serializer.fromJson<String>(json['id']),
+      quote: serializer.fromJson<String>(json['quote']),
+      request: serializer.fromJson<String>(json['request']),
+      paid: serializer.fromJson<bool>(json['paid']),
+      amount: serializer.fromJson<String>(json['amount']),
+      expiry: serializer.fromJson<int>(json['expiry']),
+      mintURL: serializer.fromJson<String>(json['mintURL']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'quote': serializer.toJson<String>(quote),
+      'request': serializer.toJson<String>(request),
+      'paid': serializer.toJson<bool>(paid),
+      'amount': serializer.toJson<String>(amount),
+      'expiry': serializer.toJson<int>(expiry),
+      'mintURL': serializer.toJson<String>(mintURL),
+    };
+  }
+
+  CashuInvoiceTableData copyWith(
+          {String? id,
+          String? quote,
+          String? request,
+          bool? paid,
+          String? amount,
+          int? expiry,
+          String? mintURL}) =>
+      CashuInvoiceTableData(
+        id: id ?? this.id,
+        quote: quote ?? this.quote,
+        request: request ?? this.request,
+        paid: paid ?? this.paid,
+        amount: amount ?? this.amount,
+        expiry: expiry ?? this.expiry,
+        mintURL: mintURL ?? this.mintURL,
+      );
+  CashuInvoiceTableData copyWithCompanion(CashuInvoiceTableCompanion data) {
+    return CashuInvoiceTableData(
+      id: data.id.present ? data.id.value : this.id,
+      quote: data.quote.present ? data.quote.value : this.quote,
+      request: data.request.present ? data.request.value : this.request,
+      paid: data.paid.present ? data.paid.value : this.paid,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      expiry: data.expiry.present ? data.expiry.value : this.expiry,
+      mintURL: data.mintURL.present ? data.mintURL.value : this.mintURL,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashuInvoiceTableData(')
+          ..write('id: $id, ')
+          ..write('quote: $quote, ')
+          ..write('request: $request, ')
+          ..write('paid: $paid, ')
+          ..write('amount: $amount, ')
+          ..write('expiry: $expiry, ')
+          ..write('mintURL: $mintURL')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, quote, request, paid, amount, expiry, mintURL);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CashuInvoiceTableData &&
+          other.id == this.id &&
+          other.quote == this.quote &&
+          other.request == this.request &&
+          other.paid == this.paid &&
+          other.amount == this.amount &&
+          other.expiry == this.expiry &&
+          other.mintURL == this.mintURL);
+}
+
+class CashuInvoiceTableCompanion
+    extends UpdateCompanion<CashuInvoiceTableData> {
+  final Value<String> id;
+  final Value<String> quote;
+  final Value<String> request;
+  final Value<bool> paid;
+  final Value<String> amount;
+  final Value<int> expiry;
+  final Value<String> mintURL;
+  final Value<int> rowid;
+  const CashuInvoiceTableCompanion({
+    this.id = const Value.absent(),
+    this.quote = const Value.absent(),
+    this.request = const Value.absent(),
+    this.paid = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.expiry = const Value.absent(),
+    this.mintURL = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CashuInvoiceTableCompanion.insert({
+    required String id,
+    required String quote,
+    required String request,
+    required bool paid,
+    required String amount,
+    required int expiry,
+    required String mintURL,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        quote = Value(quote),
+        request = Value(request),
+        paid = Value(paid),
+        amount = Value(amount),
+        expiry = Value(expiry),
+        mintURL = Value(mintURL);
+  static Insertable<CashuInvoiceTableData> custom({
+    Expression<String>? id,
+    Expression<String>? quote,
+    Expression<String>? request,
+    Expression<bool>? paid,
+    Expression<String>? amount,
+    Expression<int>? expiry,
+    Expression<String>? mintURL,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (quote != null) 'quote': quote,
+      if (request != null) 'request': request,
+      if (paid != null) 'paid': paid,
+      if (amount != null) 'amount': amount,
+      if (expiry != null) 'expiry': expiry,
+      if (mintURL != null) 'mint_u_r_l': mintURL,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CashuInvoiceTableCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? quote,
+      Value<String>? request,
+      Value<bool>? paid,
+      Value<String>? amount,
+      Value<int>? expiry,
+      Value<String>? mintURL,
+      Value<int>? rowid}) {
+    return CashuInvoiceTableCompanion(
+      id: id ?? this.id,
+      quote: quote ?? this.quote,
+      request: request ?? this.request,
+      paid: paid ?? this.paid,
+      amount: amount ?? this.amount,
+      expiry: expiry ?? this.expiry,
+      mintURL: mintURL ?? this.mintURL,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (quote.present) {
+      map['quote'] = Variable<String>(quote.value);
+    }
+    if (request.present) {
+      map['request'] = Variable<String>(request.value);
+    }
+    if (paid.present) {
+      map['paid'] = Variable<bool>(paid.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<String>(amount.value);
+    }
+    if (expiry.present) {
+      map['expiry'] = Variable<int>(expiry.value);
+    }
+    if (mintURL.present) {
+      map['mint_u_r_l'] = Variable<String>(mintURL.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashuInvoiceTableCompanion(')
+          ..write('id: $id, ')
+          ..write('quote: $quote, ')
+          ..write('request: $request, ')
+          ..write('paid: $paid, ')
+          ..write('amount: $amount, ')
+          ..write('expiry: $expiry, ')
+          ..write('mintURL: $mintURL, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CashuUnblindingDataTableTable extends CashuUnblindingDataTable
+    with
+        TableInfo<$CashuUnblindingDataTableTable,
+            CashuUnblindingDataTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CashuUnblindingDataTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _mintURLMeta =
+      const VerificationMeta('mintURL');
+  @override
+  late final GeneratedColumn<String> mintURL = GeneratedColumn<String>(
+      'mint_u_r_l', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+      'unit', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _actionTypeRawMeta =
+      const VerificationMeta('actionTypeRaw');
+  @override
+  late final GeneratedColumn<int> actionTypeRaw = GeneratedColumn<int>(
+      'action_type_raw', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _actionValueMeta =
+      const VerificationMeta('actionValue');
+  @override
+  late final GeneratedColumn<String> actionValue = GeneratedColumn<String>(
+      'action_value', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<String> amount = GeneratedColumn<String>(
+      'amount', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _C_Meta = const VerificationMeta('C_');
+  @override
+  late final GeneratedColumn<String> C_ = GeneratedColumn<String>(
+      'c', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _dleqPlainTextMeta =
+      const VerificationMeta('dleqPlainText');
+  @override
+  late final GeneratedColumn<String> dleqPlainText = GeneratedColumn<String>(
+      'dleq_plain_text', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  static const VerificationMeta _rMeta = const VerificationMeta('r');
+  @override
+  late final GeneratedColumn<String> r = GeneratedColumn<String>(
+      'r', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _secretMeta = const VerificationMeta('secret');
+  @override
+  late final GeneratedColumn<String> secret = GeneratedColumn<String>(
+      'secret', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        mintURL,
+        unit,
+        actionTypeRaw,
+        actionValue,
+        id,
+        amount,
+        C_,
+        dleqPlainText,
+        r,
+        secret
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'UnblindingData';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<CashuUnblindingDataTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('mint_u_r_l')) {
+      context.handle(_mintURLMeta,
+          mintURL.isAcceptableOrUnknown(data['mint_u_r_l']!, _mintURLMeta));
+    } else if (isInserting) {
+      context.missing(_mintURLMeta);
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+          _unitMeta, unit.isAcceptableOrUnknown(data['unit']!, _unitMeta));
+    } else if (isInserting) {
+      context.missing(_unitMeta);
+    }
+    if (data.containsKey('action_type_raw')) {
+      context.handle(
+          _actionTypeRawMeta,
+          actionTypeRaw.isAcceptableOrUnknown(
+              data['action_type_raw']!, _actionTypeRawMeta));
+    } else if (isInserting) {
+      context.missing(_actionTypeRawMeta);
+    }
+    if (data.containsKey('action_value')) {
+      context.handle(
+          _actionValueMeta,
+          actionValue.isAcceptableOrUnknown(
+              data['action_value']!, _actionValueMeta));
+    } else if (isInserting) {
+      context.missing(_actionValueMeta);
+    }
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(_amountMeta,
+          amount.isAcceptableOrUnknown(data['amount']!, _amountMeta));
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('c')) {
+      context.handle(_C_Meta, C_.isAcceptableOrUnknown(data['c']!, _C_Meta));
+    } else if (isInserting) {
+      context.missing(_C_Meta);
+    }
+    if (data.containsKey('dleq_plain_text')) {
+      context.handle(
+          _dleqPlainTextMeta,
+          dleqPlainText.isAcceptableOrUnknown(
+              data['dleq_plain_text']!, _dleqPlainTextMeta));
+    }
+    if (data.containsKey('r')) {
+      context.handle(_rMeta, r.isAcceptableOrUnknown(data['r']!, _rMeta));
+    } else if (isInserting) {
+      context.missing(_rMeta);
+    }
+    if (data.containsKey('secret')) {
+      context.handle(_secretMeta,
+          secret.isAcceptableOrUnknown(data['secret']!, _secretMeta));
+    } else if (isInserting) {
+      context.missing(_secretMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id, secret};
+  @override
+  CashuUnblindingDataTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CashuUnblindingDataTableData(
+      mintURL: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}mint_u_r_l'])!,
+      unit: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}unit'])!,
+      actionTypeRaw: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}action_type_raw'])!,
+      actionValue: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}action_value'])!,
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      amount: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}amount'])!,
+      C_: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}c'])!,
+      dleqPlainText: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}dleq_plain_text'])!,
+      r: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}r'])!,
+      secret: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}secret'])!,
+    );
+  }
+
+  @override
+  $CashuUnblindingDataTableTable createAlias(String alias) {
+    return $CashuUnblindingDataTableTable(attachedDatabase, alias);
+  }
+}
+
+class CashuUnblindingDataTableData extends DataClass
+    implements Insertable<CashuUnblindingDataTableData> {
+  final String mintURL;
+  final String unit;
+  final int actionTypeRaw;
+  final String actionValue;
+  final String id;
+  final String amount;
+  final String C_;
+  final String dleqPlainText;
+  final String r;
+  final String secret;
+  const CashuUnblindingDataTableData(
+      {required this.mintURL,
+      required this.unit,
+      required this.actionTypeRaw,
+      required this.actionValue,
+      required this.id,
+      required this.amount,
+      required this.C_,
+      required this.dleqPlainText,
+      required this.r,
+      required this.secret});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['mint_u_r_l'] = Variable<String>(mintURL);
+    map['unit'] = Variable<String>(unit);
+    map['action_type_raw'] = Variable<int>(actionTypeRaw);
+    map['action_value'] = Variable<String>(actionValue);
+    map['id'] = Variable<String>(id);
+    map['amount'] = Variable<String>(amount);
+    map['c'] = Variable<String>(C_);
+    map['dleq_plain_text'] = Variable<String>(dleqPlainText);
+    map['r'] = Variable<String>(r);
+    map['secret'] = Variable<String>(secret);
+    return map;
+  }
+
+  CashuUnblindingDataTableCompanion toCompanion(bool nullToAbsent) {
+    return CashuUnblindingDataTableCompanion(
+      mintURL: Value(mintURL),
+      unit: Value(unit),
+      actionTypeRaw: Value(actionTypeRaw),
+      actionValue: Value(actionValue),
+      id: Value(id),
+      amount: Value(amount),
+      C_: Value(C_),
+      dleqPlainText: Value(dleqPlainText),
+      r: Value(r),
+      secret: Value(secret),
+    );
+  }
+
+  factory CashuUnblindingDataTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CashuUnblindingDataTableData(
+      mintURL: serializer.fromJson<String>(json['mintURL']),
+      unit: serializer.fromJson<String>(json['unit']),
+      actionTypeRaw: serializer.fromJson<int>(json['actionTypeRaw']),
+      actionValue: serializer.fromJson<String>(json['actionValue']),
+      id: serializer.fromJson<String>(json['id']),
+      amount: serializer.fromJson<String>(json['amount']),
+      C_: serializer.fromJson<String>(json['C_']),
+      dleqPlainText: serializer.fromJson<String>(json['dleqPlainText']),
+      r: serializer.fromJson<String>(json['r']),
+      secret: serializer.fromJson<String>(json['secret']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'mintURL': serializer.toJson<String>(mintURL),
+      'unit': serializer.toJson<String>(unit),
+      'actionTypeRaw': serializer.toJson<int>(actionTypeRaw),
+      'actionValue': serializer.toJson<String>(actionValue),
+      'id': serializer.toJson<String>(id),
+      'amount': serializer.toJson<String>(amount),
+      'C_': serializer.toJson<String>(C_),
+      'dleqPlainText': serializer.toJson<String>(dleqPlainText),
+      'r': serializer.toJson<String>(r),
+      'secret': serializer.toJson<String>(secret),
+    };
+  }
+
+  CashuUnblindingDataTableData copyWith(
+          {String? mintURL,
+          String? unit,
+          int? actionTypeRaw,
+          String? actionValue,
+          String? id,
+          String? amount,
+          String? C_,
+          String? dleqPlainText,
+          String? r,
+          String? secret}) =>
+      CashuUnblindingDataTableData(
+        mintURL: mintURL ?? this.mintURL,
+        unit: unit ?? this.unit,
+        actionTypeRaw: actionTypeRaw ?? this.actionTypeRaw,
+        actionValue: actionValue ?? this.actionValue,
+        id: id ?? this.id,
+        amount: amount ?? this.amount,
+        C_: C_ ?? this.C_,
+        dleqPlainText: dleqPlainText ?? this.dleqPlainText,
+        r: r ?? this.r,
+        secret: secret ?? this.secret,
+      );
+  CashuUnblindingDataTableData copyWithCompanion(
+      CashuUnblindingDataTableCompanion data) {
+    return CashuUnblindingDataTableData(
+      mintURL: data.mintURL.present ? data.mintURL.value : this.mintURL,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      actionTypeRaw: data.actionTypeRaw.present
+          ? data.actionTypeRaw.value
+          : this.actionTypeRaw,
+      actionValue:
+          data.actionValue.present ? data.actionValue.value : this.actionValue,
+      id: data.id.present ? data.id.value : this.id,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      C_: data.C_.present ? data.C_.value : this.C_,
+      dleqPlainText: data.dleqPlainText.present
+          ? data.dleqPlainText.value
+          : this.dleqPlainText,
+      r: data.r.present ? data.r.value : this.r,
+      secret: data.secret.present ? data.secret.value : this.secret,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashuUnblindingDataTableData(')
+          ..write('mintURL: $mintURL, ')
+          ..write('unit: $unit, ')
+          ..write('actionTypeRaw: $actionTypeRaw, ')
+          ..write('actionValue: $actionValue, ')
+          ..write('id: $id, ')
+          ..write('amount: $amount, ')
+          ..write('C_: $C_, ')
+          ..write('dleqPlainText: $dleqPlainText, ')
+          ..write('r: $r, ')
+          ..write('secret: $secret')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(mintURL, unit, actionTypeRaw, actionValue, id,
+      amount, C_, dleqPlainText, r, secret);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CashuUnblindingDataTableData &&
+          other.mintURL == this.mintURL &&
+          other.unit == this.unit &&
+          other.actionTypeRaw == this.actionTypeRaw &&
+          other.actionValue == this.actionValue &&
+          other.id == this.id &&
+          other.amount == this.amount &&
+          other.C_ == this.C_ &&
+          other.dleqPlainText == this.dleqPlainText &&
+          other.r == this.r &&
+          other.secret == this.secret);
+}
+
+class CashuUnblindingDataTableCompanion
+    extends UpdateCompanion<CashuUnblindingDataTableData> {
+  final Value<String> mintURL;
+  final Value<String> unit;
+  final Value<int> actionTypeRaw;
+  final Value<String> actionValue;
+  final Value<String> id;
+  final Value<String> amount;
+  final Value<String> C_;
+  final Value<String> dleqPlainText;
+  final Value<String> r;
+  final Value<String> secret;
+  final Value<int> rowid;
+  const CashuUnblindingDataTableCompanion({
+    this.mintURL = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.actionTypeRaw = const Value.absent(),
+    this.actionValue = const Value.absent(),
+    this.id = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.C_ = const Value.absent(),
+    this.dleqPlainText = const Value.absent(),
+    this.r = const Value.absent(),
+    this.secret = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CashuUnblindingDataTableCompanion.insert({
+    required String mintURL,
+    required String unit,
+    required int actionTypeRaw,
+    required String actionValue,
+    required String id,
+    required String amount,
+    required String C_,
+    this.dleqPlainText = const Value.absent(),
+    required String r,
+    required String secret,
+    this.rowid = const Value.absent(),
+  })  : mintURL = Value(mintURL),
+        unit = Value(unit),
+        actionTypeRaw = Value(actionTypeRaw),
+        actionValue = Value(actionValue),
+        id = Value(id),
+        amount = Value(amount),
+        C_ = Value(C_),
+        r = Value(r),
+        secret = Value(secret);
+  static Insertable<CashuUnblindingDataTableData> custom({
+    Expression<String>? mintURL,
+    Expression<String>? unit,
+    Expression<int>? actionTypeRaw,
+    Expression<String>? actionValue,
+    Expression<String>? id,
+    Expression<String>? amount,
+    Expression<String>? C_,
+    Expression<String>? dleqPlainText,
+    Expression<String>? r,
+    Expression<String>? secret,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (mintURL != null) 'mint_u_r_l': mintURL,
+      if (unit != null) 'unit': unit,
+      if (actionTypeRaw != null) 'action_type_raw': actionTypeRaw,
+      if (actionValue != null) 'action_value': actionValue,
+      if (id != null) 'id': id,
+      if (amount != null) 'amount': amount,
+      if (C_ != null) 'c': C_,
+      if (dleqPlainText != null) 'dleq_plain_text': dleqPlainText,
+      if (r != null) 'r': r,
+      if (secret != null) 'secret': secret,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CashuUnblindingDataTableCompanion copyWith(
+      {Value<String>? mintURL,
+      Value<String>? unit,
+      Value<int>? actionTypeRaw,
+      Value<String>? actionValue,
+      Value<String>? id,
+      Value<String>? amount,
+      Value<String>? C_,
+      Value<String>? dleqPlainText,
+      Value<String>? r,
+      Value<String>? secret,
+      Value<int>? rowid}) {
+    return CashuUnblindingDataTableCompanion(
+      mintURL: mintURL ?? this.mintURL,
+      unit: unit ?? this.unit,
+      actionTypeRaw: actionTypeRaw ?? this.actionTypeRaw,
+      actionValue: actionValue ?? this.actionValue,
+      id: id ?? this.id,
+      amount: amount ?? this.amount,
+      C_: C_ ?? this.C_,
+      dleqPlainText: dleqPlainText ?? this.dleqPlainText,
+      r: r ?? this.r,
+      secret: secret ?? this.secret,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (mintURL.present) {
+      map['mint_u_r_l'] = Variable<String>(mintURL.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (actionTypeRaw.present) {
+      map['action_type_raw'] = Variable<int>(actionTypeRaw.value);
+    }
+    if (actionValue.present) {
+      map['action_value'] = Variable<String>(actionValue.value);
+    }
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<String>(amount.value);
+    }
+    if (C_.present) {
+      map['c'] = Variable<String>(C_.value);
+    }
+    if (dleqPlainText.present) {
+      map['dleq_plain_text'] = Variable<String>(dleqPlainText.value);
+    }
+    if (r.present) {
+      map['r'] = Variable<String>(r.value);
+    }
+    if (secret.present) {
+      map['secret'] = Variable<String>(secret.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashuUnblindingDataTableCompanion(')
+          ..write('mintURL: $mintURL, ')
+          ..write('unit: $unit, ')
+          ..write('actionTypeRaw: $actionTypeRaw, ')
+          ..write('actionValue: $actionValue, ')
+          ..write('id: $id, ')
+          ..write('amount: $amount, ')
+          ..write('C_: $C_, ')
+          ..write('dleqPlainText: $dleqPlainText, ')
+          ..write('r: $r, ')
+          ..write('secret: $secret, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CashuMintInfoTableTable extends CashuMintInfoTable
+    with TableInfo<$CashuMintInfoTableTable, CashuMintInfoTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CashuMintInfoTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _mintURLMeta =
+      const VerificationMeta('mintURL');
+  @override
+  late final GeneratedColumn<String> mintURL = GeneratedColumn<String>(
+      'mint_u_r_l', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  static const VerificationMeta _iconUrlMeta =
+      const VerificationMeta('iconUrl');
+  @override
+  late final GeneratedColumn<String> iconUrl = GeneratedColumn<String>(
+      'icon_url', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  static const VerificationMeta _pubkeyMeta = const VerificationMeta('pubkey');
+  @override
+  late final GeneratedColumn<String> pubkey = GeneratedColumn<String>(
+      'pubkey', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  static const VerificationMeta _versionMeta =
+      const VerificationMeta('version');
+  @override
+  late final GeneratedColumn<String> version = GeneratedColumn<String>(
+      'version', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  static const VerificationMeta _descriptionLongMeta =
+      const VerificationMeta('descriptionLong');
+  @override
+  late final GeneratedColumn<String> descriptionLong = GeneratedColumn<String>(
+      'description_long', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  @override
+  late final GeneratedColumnWithTypeConverter<List<Map<String, String>>, String>
+      contact = GeneratedColumn<String>('contact', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<List<Map<String, String>>>(
+              $CashuMintInfoTableTable.$convertercontact);
+  static const VerificationMeta _motdMeta = const VerificationMeta('motd');
+  @override
+  late final GeneratedColumn<String> motd = GeneratedColumn<String>(
+      'motd', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  static const VerificationMeta _nutsJsonMeta =
+      const VerificationMeta('nutsJson');
+  @override
+  late final GeneratedColumn<String> nutsJson = GeneratedColumn<String>(
+      'nuts_json', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  @override
+  List<GeneratedColumn> get $columns => [
+        mintURL,
+        name,
+        iconUrl,
+        pubkey,
+        version,
+        description,
+        descriptionLong,
+        contact,
+        motd,
+        nutsJson
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'MintInfo';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<CashuMintInfoTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('mint_u_r_l')) {
+      context.handle(_mintURLMeta,
+          mintURL.isAcceptableOrUnknown(data['mint_u_r_l']!, _mintURLMeta));
+    } else if (isInserting) {
+      context.missing(_mintURLMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    }
+    if (data.containsKey('icon_url')) {
+      context.handle(_iconUrlMeta,
+          iconUrl.isAcceptableOrUnknown(data['icon_url']!, _iconUrlMeta));
+    }
+    if (data.containsKey('pubkey')) {
+      context.handle(_pubkeyMeta,
+          pubkey.isAcceptableOrUnknown(data['pubkey']!, _pubkeyMeta));
+    }
+    if (data.containsKey('version')) {
+      context.handle(_versionMeta,
+          version.isAcceptableOrUnknown(data['version']!, _versionMeta));
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    }
+    if (data.containsKey('description_long')) {
+      context.handle(
+          _descriptionLongMeta,
+          descriptionLong.isAcceptableOrUnknown(
+              data['description_long']!, _descriptionLongMeta));
+    }
+    if (data.containsKey('motd')) {
+      context.handle(
+          _motdMeta, motd.isAcceptableOrUnknown(data['motd']!, _motdMeta));
+    }
+    if (data.containsKey('nuts_json')) {
+      context.handle(_nutsJsonMeta,
+          nutsJson.isAcceptableOrUnknown(data['nuts_json']!, _nutsJsonMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {mintURL};
+  @override
+  CashuMintInfoTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CashuMintInfoTableData(
+      mintURL: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}mint_u_r_l'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      iconUrl: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}icon_url'])!,
+      pubkey: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}pubkey'])!,
+      version: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}version'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
+      descriptionLong: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}description_long'])!,
+      contact: $CashuMintInfoTableTable.$convertercontact.fromSql(
+          attachedDatabase.typeMapping
+              .read(DriftSqlType.string, data['${effectivePrefix}contact'])!),
+      motd: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}motd'])!,
+      nutsJson: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}nuts_json'])!,
+    );
+  }
+
+  @override
+  $CashuMintInfoTableTable createAlias(String alias) {
+    return $CashuMintInfoTableTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<List<Map<String, String>>, String> $convertercontact =
+      const StringListOfMapConverter();
+}
+
+class CashuMintInfoTableData extends DataClass
+    implements Insertable<CashuMintInfoTableData> {
+  final String mintURL;
+  final String name;
+  final String iconUrl;
+  final String pubkey;
+  final String version;
+  final String description;
+  final String descriptionLong;
+  final List<Map<String, String>> contact;
+  final String motd;
+  final String nutsJson;
+  const CashuMintInfoTableData(
+      {required this.mintURL,
+      required this.name,
+      required this.iconUrl,
+      required this.pubkey,
+      required this.version,
+      required this.description,
+      required this.descriptionLong,
+      required this.contact,
+      required this.motd,
+      required this.nutsJson});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['mint_u_r_l'] = Variable<String>(mintURL);
+    map['name'] = Variable<String>(name);
+    map['icon_url'] = Variable<String>(iconUrl);
+    map['pubkey'] = Variable<String>(pubkey);
+    map['version'] = Variable<String>(version);
+    map['description'] = Variable<String>(description);
+    map['description_long'] = Variable<String>(descriptionLong);
+    {
+      map['contact'] = Variable<String>(
+          $CashuMintInfoTableTable.$convertercontact.toSql(contact));
+    }
+    map['motd'] = Variable<String>(motd);
+    map['nuts_json'] = Variable<String>(nutsJson);
+    return map;
+  }
+
+  CashuMintInfoTableCompanion toCompanion(bool nullToAbsent) {
+    return CashuMintInfoTableCompanion(
+      mintURL: Value(mintURL),
+      name: Value(name),
+      iconUrl: Value(iconUrl),
+      pubkey: Value(pubkey),
+      version: Value(version),
+      description: Value(description),
+      descriptionLong: Value(descriptionLong),
+      contact: Value(contact),
+      motd: Value(motd),
+      nutsJson: Value(nutsJson),
+    );
+  }
+
+  factory CashuMintInfoTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CashuMintInfoTableData(
+      mintURL: serializer.fromJson<String>(json['mintURL']),
+      name: serializer.fromJson<String>(json['name']),
+      iconUrl: serializer.fromJson<String>(json['iconUrl']),
+      pubkey: serializer.fromJson<String>(json['pubkey']),
+      version: serializer.fromJson<String>(json['version']),
+      description: serializer.fromJson<String>(json['description']),
+      descriptionLong: serializer.fromJson<String>(json['descriptionLong']),
+      contact: serializer.fromJson<List<Map<String, String>>>(json['contact']),
+      motd: serializer.fromJson<String>(json['motd']),
+      nutsJson: serializer.fromJson<String>(json['nutsJson']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'mintURL': serializer.toJson<String>(mintURL),
+      'name': serializer.toJson<String>(name),
+      'iconUrl': serializer.toJson<String>(iconUrl),
+      'pubkey': serializer.toJson<String>(pubkey),
+      'version': serializer.toJson<String>(version),
+      'description': serializer.toJson<String>(description),
+      'descriptionLong': serializer.toJson<String>(descriptionLong),
+      'contact': serializer.toJson<List<Map<String, String>>>(contact),
+      'motd': serializer.toJson<String>(motd),
+      'nutsJson': serializer.toJson<String>(nutsJson),
+    };
+  }
+
+  CashuMintInfoTableData copyWith(
+          {String? mintURL,
+          String? name,
+          String? iconUrl,
+          String? pubkey,
+          String? version,
+          String? description,
+          String? descriptionLong,
+          List<Map<String, String>>? contact,
+          String? motd,
+          String? nutsJson}) =>
+      CashuMintInfoTableData(
+        mintURL: mintURL ?? this.mintURL,
+        name: name ?? this.name,
+        iconUrl: iconUrl ?? this.iconUrl,
+        pubkey: pubkey ?? this.pubkey,
+        version: version ?? this.version,
+        description: description ?? this.description,
+        descriptionLong: descriptionLong ?? this.descriptionLong,
+        contact: contact ?? this.contact,
+        motd: motd ?? this.motd,
+        nutsJson: nutsJson ?? this.nutsJson,
+      );
+  CashuMintInfoTableData copyWithCompanion(CashuMintInfoTableCompanion data) {
+    return CashuMintInfoTableData(
+      mintURL: data.mintURL.present ? data.mintURL.value : this.mintURL,
+      name: data.name.present ? data.name.value : this.name,
+      iconUrl: data.iconUrl.present ? data.iconUrl.value : this.iconUrl,
+      pubkey: data.pubkey.present ? data.pubkey.value : this.pubkey,
+      version: data.version.present ? data.version.value : this.version,
+      description:
+          data.description.present ? data.description.value : this.description,
+      descriptionLong: data.descriptionLong.present
+          ? data.descriptionLong.value
+          : this.descriptionLong,
+      contact: data.contact.present ? data.contact.value : this.contact,
+      motd: data.motd.present ? data.motd.value : this.motd,
+      nutsJson: data.nutsJson.present ? data.nutsJson.value : this.nutsJson,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashuMintInfoTableData(')
+          ..write('mintURL: $mintURL, ')
+          ..write('name: $name, ')
+          ..write('iconUrl: $iconUrl, ')
+          ..write('pubkey: $pubkey, ')
+          ..write('version: $version, ')
+          ..write('description: $description, ')
+          ..write('descriptionLong: $descriptionLong, ')
+          ..write('contact: $contact, ')
+          ..write('motd: $motd, ')
+          ..write('nutsJson: $nutsJson')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(mintURL, name, iconUrl, pubkey, version,
+      description, descriptionLong, contact, motd, nutsJson);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CashuMintInfoTableData &&
+          other.mintURL == this.mintURL &&
+          other.name == this.name &&
+          other.iconUrl == this.iconUrl &&
+          other.pubkey == this.pubkey &&
+          other.version == this.version &&
+          other.description == this.description &&
+          other.descriptionLong == this.descriptionLong &&
+          other.contact == this.contact &&
+          other.motd == this.motd &&
+          other.nutsJson == this.nutsJson);
+}
+
+class CashuMintInfoTableCompanion
+    extends UpdateCompanion<CashuMintInfoTableData> {
+  final Value<String> mintURL;
+  final Value<String> name;
+  final Value<String> iconUrl;
+  final Value<String> pubkey;
+  final Value<String> version;
+  final Value<String> description;
+  final Value<String> descriptionLong;
+  final Value<List<Map<String, String>>> contact;
+  final Value<String> motd;
+  final Value<String> nutsJson;
+  final Value<int> rowid;
+  const CashuMintInfoTableCompanion({
+    this.mintURL = const Value.absent(),
+    this.name = const Value.absent(),
+    this.iconUrl = const Value.absent(),
+    this.pubkey = const Value.absent(),
+    this.version = const Value.absent(),
+    this.description = const Value.absent(),
+    this.descriptionLong = const Value.absent(),
+    this.contact = const Value.absent(),
+    this.motd = const Value.absent(),
+    this.nutsJson = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CashuMintInfoTableCompanion.insert({
+    required String mintURL,
+    this.name = const Value.absent(),
+    this.iconUrl = const Value.absent(),
+    this.pubkey = const Value.absent(),
+    this.version = const Value.absent(),
+    this.description = const Value.absent(),
+    this.descriptionLong = const Value.absent(),
+    required List<Map<String, String>> contact,
+    this.motd = const Value.absent(),
+    this.nutsJson = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : mintURL = Value(mintURL),
+        contact = Value(contact);
+  static Insertable<CashuMintInfoTableData> custom({
+    Expression<String>? mintURL,
+    Expression<String>? name,
+    Expression<String>? iconUrl,
+    Expression<String>? pubkey,
+    Expression<String>? version,
+    Expression<String>? description,
+    Expression<String>? descriptionLong,
+    Expression<String>? contact,
+    Expression<String>? motd,
+    Expression<String>? nutsJson,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (mintURL != null) 'mint_u_r_l': mintURL,
+      if (name != null) 'name': name,
+      if (iconUrl != null) 'icon_url': iconUrl,
+      if (pubkey != null) 'pubkey': pubkey,
+      if (version != null) 'version': version,
+      if (description != null) 'description': description,
+      if (descriptionLong != null) 'description_long': descriptionLong,
+      if (contact != null) 'contact': contact,
+      if (motd != null) 'motd': motd,
+      if (nutsJson != null) 'nuts_json': nutsJson,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CashuMintInfoTableCompanion copyWith(
+      {Value<String>? mintURL,
+      Value<String>? name,
+      Value<String>? iconUrl,
+      Value<String>? pubkey,
+      Value<String>? version,
+      Value<String>? description,
+      Value<String>? descriptionLong,
+      Value<List<Map<String, String>>>? contact,
+      Value<String>? motd,
+      Value<String>? nutsJson,
+      Value<int>? rowid}) {
+    return CashuMintInfoTableCompanion(
+      mintURL: mintURL ?? this.mintURL,
+      name: name ?? this.name,
+      iconUrl: iconUrl ?? this.iconUrl,
+      pubkey: pubkey ?? this.pubkey,
+      version: version ?? this.version,
+      description: description ?? this.description,
+      descriptionLong: descriptionLong ?? this.descriptionLong,
+      contact: contact ?? this.contact,
+      motd: motd ?? this.motd,
+      nutsJson: nutsJson ?? this.nutsJson,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (mintURL.present) {
+      map['mint_u_r_l'] = Variable<String>(mintURL.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (iconUrl.present) {
+      map['icon_url'] = Variable<String>(iconUrl.value);
+    }
+    if (pubkey.present) {
+      map['pubkey'] = Variable<String>(pubkey.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<String>(version.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (descriptionLong.present) {
+      map['description_long'] = Variable<String>(descriptionLong.value);
+    }
+    if (contact.present) {
+      map['contact'] = Variable<String>(
+          $CashuMintInfoTableTable.$convertercontact.toSql(contact.value));
+    }
+    if (motd.present) {
+      map['motd'] = Variable<String>(motd.value);
+    }
+    if (nutsJson.present) {
+      map['nuts_json'] = Variable<String>(nutsJson.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashuMintInfoTableCompanion(')
+          ..write('mintURL: $mintURL, ')
+          ..write('name: $name, ')
+          ..write('iconUrl: $iconUrl, ')
+          ..write('pubkey: $pubkey, ')
+          ..write('version: $version, ')
+          ..write('description: $description, ')
+          ..write('descriptionLong: $descriptionLong, ')
+          ..write('contact: $contact, ')
+          ..write('motd: $motd, ')
+          ..write('nutsJson: $nutsJson, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CashuLightningInvoiceTableTable extends CashuLightningInvoiceTable
+    with
+        TableInfo<$CashuLightningInvoiceTableTable,
+            CashuLightningInvoiceTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CashuLightningInvoiceTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _prMeta = const VerificationMeta('pr');
+  @override
+  late final GeneratedColumn<String> pr = GeneratedColumn<String>(
+      'pr', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _hashMeta = const VerificationMeta('hash');
+  @override
+  late final GeneratedColumn<String> hash = GeneratedColumn<String>(
+      'hash', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<String> amount = GeneratedColumn<String>(
+      'amount', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _mintURLMeta =
+      const VerificationMeta('mintURL');
+  @override
+  late final GeneratedColumn<String> mintURL = GeneratedColumn<String>(
+      'mint_u_r_l', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [id, pr, hash, amount, mintURL];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'cashu_lightning_invoice';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<CashuLightningInvoiceTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('pr')) {
+      context.handle(_prMeta, pr.isAcceptableOrUnknown(data['pr']!, _prMeta));
+    } else if (isInserting) {
+      context.missing(_prMeta);
+    }
+    if (data.containsKey('hash')) {
+      context.handle(
+          _hashMeta, hash.isAcceptableOrUnknown(data['hash']!, _hashMeta));
+    } else if (isInserting) {
+      context.missing(_hashMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(_amountMeta,
+          amount.isAcceptableOrUnknown(data['amount']!, _amountMeta));
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('mint_u_r_l')) {
+      context.handle(_mintURLMeta,
+          mintURL.isAcceptableOrUnknown(data['mint_u_r_l']!, _mintURLMeta));
+    } else if (isInserting) {
+      context.missing(_mintURLMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {mintURL, hash};
+  @override
+  CashuLightningInvoiceTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CashuLightningInvoiceTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      pr: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}pr'])!,
+      hash: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}hash'])!,
+      amount: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}amount'])!,
+      mintURL: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}mint_u_r_l'])!,
+    );
+  }
+
+  @override
+  $CashuLightningInvoiceTableTable createAlias(String alias) {
+    return $CashuLightningInvoiceTableTable(attachedDatabase, alias);
+  }
+}
+
+class CashuLightningInvoiceTableData extends DataClass
+    implements Insertable<CashuLightningInvoiceTableData> {
+  final String id;
+  final String pr;
+  final String hash;
+  final String amount;
+  final String mintURL;
+  const CashuLightningInvoiceTableData(
+      {required this.id,
+      required this.pr,
+      required this.hash,
+      required this.amount,
+      required this.mintURL});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['pr'] = Variable<String>(pr);
+    map['hash'] = Variable<String>(hash);
+    map['amount'] = Variable<String>(amount);
+    map['mint_u_r_l'] = Variable<String>(mintURL);
+    return map;
+  }
+
+  CashuLightningInvoiceTableCompanion toCompanion(bool nullToAbsent) {
+    return CashuLightningInvoiceTableCompanion(
+      id: Value(id),
+      pr: Value(pr),
+      hash: Value(hash),
+      amount: Value(amount),
+      mintURL: Value(mintURL),
+    );
+  }
+
+  factory CashuLightningInvoiceTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CashuLightningInvoiceTableData(
+      id: serializer.fromJson<String>(json['id']),
+      pr: serializer.fromJson<String>(json['pr']),
+      hash: serializer.fromJson<String>(json['hash']),
+      amount: serializer.fromJson<String>(json['amount']),
+      mintURL: serializer.fromJson<String>(json['mintURL']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'pr': serializer.toJson<String>(pr),
+      'hash': serializer.toJson<String>(hash),
+      'amount': serializer.toJson<String>(amount),
+      'mintURL': serializer.toJson<String>(mintURL),
+    };
+  }
+
+  CashuLightningInvoiceTableData copyWith(
+          {String? id,
+          String? pr,
+          String? hash,
+          String? amount,
+          String? mintURL}) =>
+      CashuLightningInvoiceTableData(
+        id: id ?? this.id,
+        pr: pr ?? this.pr,
+        hash: hash ?? this.hash,
+        amount: amount ?? this.amount,
+        mintURL: mintURL ?? this.mintURL,
+      );
+  CashuLightningInvoiceTableData copyWithCompanion(
+      CashuLightningInvoiceTableCompanion data) {
+    return CashuLightningInvoiceTableData(
+      id: data.id.present ? data.id.value : this.id,
+      pr: data.pr.present ? data.pr.value : this.pr,
+      hash: data.hash.present ? data.hash.value : this.hash,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      mintURL: data.mintURL.present ? data.mintURL.value : this.mintURL,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashuLightningInvoiceTableData(')
+          ..write('id: $id, ')
+          ..write('pr: $pr, ')
+          ..write('hash: $hash, ')
+          ..write('amount: $amount, ')
+          ..write('mintURL: $mintURL')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, pr, hash, amount, mintURL);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CashuLightningInvoiceTableData &&
+          other.id == this.id &&
+          other.pr == this.pr &&
+          other.hash == this.hash &&
+          other.amount == this.amount &&
+          other.mintURL == this.mintURL);
+}
+
+class CashuLightningInvoiceTableCompanion
+    extends UpdateCompanion<CashuLightningInvoiceTableData> {
+  final Value<String> id;
+  final Value<String> pr;
+  final Value<String> hash;
+  final Value<String> amount;
+  final Value<String> mintURL;
+  final Value<int> rowid;
+  const CashuLightningInvoiceTableCompanion({
+    this.id = const Value.absent(),
+    this.pr = const Value.absent(),
+    this.hash = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.mintURL = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CashuLightningInvoiceTableCompanion.insert({
+    required String id,
+    required String pr,
+    required String hash,
+    required String amount,
+    required String mintURL,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        pr = Value(pr),
+        hash = Value(hash),
+        amount = Value(amount),
+        mintURL = Value(mintURL);
+  static Insertable<CashuLightningInvoiceTableData> custom({
+    Expression<String>? id,
+    Expression<String>? pr,
+    Expression<String>? hash,
+    Expression<String>? amount,
+    Expression<String>? mintURL,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (pr != null) 'pr': pr,
+      if (hash != null) 'hash': hash,
+      if (amount != null) 'amount': amount,
+      if (mintURL != null) 'mint_u_r_l': mintURL,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CashuLightningInvoiceTableCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? pr,
+      Value<String>? hash,
+      Value<String>? amount,
+      Value<String>? mintURL,
+      Value<int>? rowid}) {
+    return CashuLightningInvoiceTableCompanion(
+      id: id ?? this.id,
+      pr: pr ?? this.pr,
+      hash: hash ?? this.hash,
+      amount: amount ?? this.amount,
+      mintURL: mintURL ?? this.mintURL,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (pr.present) {
+      map['pr'] = Variable<String>(pr.value);
+    }
+    if (hash.present) {
+      map['hash'] = Variable<String>(hash.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<String>(amount.value);
+    }
+    if (mintURL.present) {
+      map['mint_u_r_l'] = Variable<String>(mintURL.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashuLightningInvoiceTableCompanion(')
+          ..write('id: $id, ')
+          ..write('pr: $pr, ')
+          ..write('hash: $hash, ')
+          ..write('amount: $amount, ')
+          ..write('mintURL: $mintURL, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CashuTokensTableTable extends CashuTokensTable
+    with TableInfo<$CashuTokensTableTable, CashuTokensTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CashuTokensTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _mintUrlMeta =
+      const VerificationMeta('mintUrl');
+  @override
+  late final GeneratedColumn<String> mintUrl = GeneratedColumn<String>(
+      'mint_url', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+      'unit', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _pubkeyMeta = const VerificationMeta('pubkey');
+  @override
+  late final GeneratedColumn<String> pubkey = GeneratedColumn<String>(
+      'pubkey', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String> proofs =
+      GeneratedColumn<String>('proofs', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<List<String>>($CashuTokensTableTable.$converterproofs);
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String>
+      deletedTokensIds = GeneratedColumn<String>(
+              'deleted_tokens_ids', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<List<String>>(
+              $CashuTokensTableTable.$converterdeletedTokensIds);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, mintUrl, unit, pubkey, createdAt, proofs, deletedTokensIds];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'CashuTokens';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<CashuTokensTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('mint_url')) {
+      context.handle(_mintUrlMeta,
+          mintUrl.isAcceptableOrUnknown(data['mint_url']!, _mintUrlMeta));
+    } else if (isInserting) {
+      context.missing(_mintUrlMeta);
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+          _unitMeta, unit.isAcceptableOrUnknown(data['unit']!, _unitMeta));
+    } else if (isInserting) {
+      context.missing(_unitMeta);
+    }
+    if (data.containsKey('pubkey')) {
+      context.handle(_pubkeyMeta,
+          pubkey.isAcceptableOrUnknown(data['pubkey']!, _pubkeyMeta));
+    } else if (isInserting) {
+      context.missing(_pubkeyMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CashuTokensTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CashuTokensTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      mintUrl: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}mint_url'])!,
+      unit: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}unit'])!,
+      pubkey: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}pubkey'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
+      proofs: $CashuTokensTableTable.$converterproofs.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}proofs'])!),
+      deletedTokensIds: $CashuTokensTableTable.$converterdeletedTokensIds
+          .fromSql(attachedDatabase.typeMapping.read(DriftSqlType.string,
+              data['${effectivePrefix}deleted_tokens_ids'])!),
+    );
+  }
+
+  @override
+  $CashuTokensTableTable createAlias(String alias) {
+    return $CashuTokensTableTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<List<String>, String> $converterproofs =
+      const StringListConverter();
+  static TypeConverter<List<String>, String> $converterdeletedTokensIds =
+      const StringListConverter();
+}
+
+class CashuTokensTableData extends DataClass
+    implements Insertable<CashuTokensTableData> {
+  final String id;
+  final String mintUrl;
+  final String unit;
+  final String pubkey;
+  final int createdAt;
+  final List<String> proofs;
+  final List<String> deletedTokensIds;
+  const CashuTokensTableData(
+      {required this.id,
+      required this.mintUrl,
+      required this.unit,
+      required this.pubkey,
+      required this.createdAt,
+      required this.proofs,
+      required this.deletedTokensIds});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['mint_url'] = Variable<String>(mintUrl);
+    map['unit'] = Variable<String>(unit);
+    map['pubkey'] = Variable<String>(pubkey);
+    map['created_at'] = Variable<int>(createdAt);
+    {
+      map['proofs'] = Variable<String>(
+          $CashuTokensTableTable.$converterproofs.toSql(proofs));
+    }
+    {
+      map['deleted_tokens_ids'] = Variable<String>($CashuTokensTableTable
+          .$converterdeletedTokensIds
+          .toSql(deletedTokensIds));
+    }
+    return map;
+  }
+
+  CashuTokensTableCompanion toCompanion(bool nullToAbsent) {
+    return CashuTokensTableCompanion(
+      id: Value(id),
+      mintUrl: Value(mintUrl),
+      unit: Value(unit),
+      pubkey: Value(pubkey),
+      createdAt: Value(createdAt),
+      proofs: Value(proofs),
+      deletedTokensIds: Value(deletedTokensIds),
+    );
+  }
+
+  factory CashuTokensTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CashuTokensTableData(
+      id: serializer.fromJson<String>(json['id']),
+      mintUrl: serializer.fromJson<String>(json['mintUrl']),
+      unit: serializer.fromJson<String>(json['unit']),
+      pubkey: serializer.fromJson<String>(json['pubkey']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      proofs: serializer.fromJson<List<String>>(json['proofs']),
+      deletedTokensIds:
+          serializer.fromJson<List<String>>(json['deletedTokensIds']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'mintUrl': serializer.toJson<String>(mintUrl),
+      'unit': serializer.toJson<String>(unit),
+      'pubkey': serializer.toJson<String>(pubkey),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'proofs': serializer.toJson<List<String>>(proofs),
+      'deletedTokensIds': serializer.toJson<List<String>>(deletedTokensIds),
+    };
+  }
+
+  CashuTokensTableData copyWith(
+          {String? id,
+          String? mintUrl,
+          String? unit,
+          String? pubkey,
+          int? createdAt,
+          List<String>? proofs,
+          List<String>? deletedTokensIds}) =>
+      CashuTokensTableData(
+        id: id ?? this.id,
+        mintUrl: mintUrl ?? this.mintUrl,
+        unit: unit ?? this.unit,
+        pubkey: pubkey ?? this.pubkey,
+        createdAt: createdAt ?? this.createdAt,
+        proofs: proofs ?? this.proofs,
+        deletedTokensIds: deletedTokensIds ?? this.deletedTokensIds,
+      );
+  CashuTokensTableData copyWithCompanion(CashuTokensTableCompanion data) {
+    return CashuTokensTableData(
+      id: data.id.present ? data.id.value : this.id,
+      mintUrl: data.mintUrl.present ? data.mintUrl.value : this.mintUrl,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      pubkey: data.pubkey.present ? data.pubkey.value : this.pubkey,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      proofs: data.proofs.present ? data.proofs.value : this.proofs,
+      deletedTokensIds: data.deletedTokensIds.present
+          ? data.deletedTokensIds.value
+          : this.deletedTokensIds,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashuTokensTableData(')
+          ..write('id: $id, ')
+          ..write('mintUrl: $mintUrl, ')
+          ..write('unit: $unit, ')
+          ..write('pubkey: $pubkey, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('proofs: $proofs, ')
+          ..write('deletedTokensIds: $deletedTokensIds')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, mintUrl, unit, pubkey, createdAt, proofs, deletedTokensIds);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CashuTokensTableData &&
+          other.id == this.id &&
+          other.mintUrl == this.mintUrl &&
+          other.unit == this.unit &&
+          other.pubkey == this.pubkey &&
+          other.createdAt == this.createdAt &&
+          other.proofs == this.proofs &&
+          other.deletedTokensIds == this.deletedTokensIds);
+}
+
+class CashuTokensTableCompanion extends UpdateCompanion<CashuTokensTableData> {
+  final Value<String> id;
+  final Value<String> mintUrl;
+  final Value<String> unit;
+  final Value<String> pubkey;
+  final Value<int> createdAt;
+  final Value<List<String>> proofs;
+  final Value<List<String>> deletedTokensIds;
+  final Value<int> rowid;
+  const CashuTokensTableCompanion({
+    this.id = const Value.absent(),
+    this.mintUrl = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.pubkey = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.proofs = const Value.absent(),
+    this.deletedTokensIds = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CashuTokensTableCompanion.insert({
+    required String id,
+    required String mintUrl,
+    required String unit,
+    required String pubkey,
+    required int createdAt,
+    required List<String> proofs,
+    required List<String> deletedTokensIds,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        mintUrl = Value(mintUrl),
+        unit = Value(unit),
+        pubkey = Value(pubkey),
+        createdAt = Value(createdAt),
+        proofs = Value(proofs),
+        deletedTokensIds = Value(deletedTokensIds);
+  static Insertable<CashuTokensTableData> custom({
+    Expression<String>? id,
+    Expression<String>? mintUrl,
+    Expression<String>? unit,
+    Expression<String>? pubkey,
+    Expression<int>? createdAt,
+    Expression<String>? proofs,
+    Expression<String>? deletedTokensIds,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (mintUrl != null) 'mint_url': mintUrl,
+      if (unit != null) 'unit': unit,
+      if (pubkey != null) 'pubkey': pubkey,
+      if (createdAt != null) 'created_at': createdAt,
+      if (proofs != null) 'proofs': proofs,
+      if (deletedTokensIds != null) 'deleted_tokens_ids': deletedTokensIds,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CashuTokensTableCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? mintUrl,
+      Value<String>? unit,
+      Value<String>? pubkey,
+      Value<int>? createdAt,
+      Value<List<String>>? proofs,
+      Value<List<String>>? deletedTokensIds,
+      Value<int>? rowid}) {
+    return CashuTokensTableCompanion(
+      id: id ?? this.id,
+      mintUrl: mintUrl ?? this.mintUrl,
+      unit: unit ?? this.unit,
+      pubkey: pubkey ?? this.pubkey,
+      createdAt: createdAt ?? this.createdAt,
+      proofs: proofs ?? this.proofs,
+      deletedTokensIds: deletedTokensIds ?? this.deletedTokensIds,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (mintUrl.present) {
+      map['mint_url'] = Variable<String>(mintUrl.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (pubkey.present) {
+      map['pubkey'] = Variable<String>(pubkey.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (proofs.present) {
+      map['proofs'] = Variable<String>(
+          $CashuTokensTableTable.$converterproofs.toSql(proofs.value));
+    }
+    if (deletedTokensIds.present) {
+      map['deleted_tokens_ids'] = Variable<String>($CashuTokensTableTable
+          .$converterdeletedTokensIds
+          .toSql(deletedTokensIds.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashuTokensTableCompanion(')
+          ..write('id: $id, ')
+          ..write('mintUrl: $mintUrl, ')
+          ..write('unit: $unit, ')
+          ..write('pubkey: $pubkey, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('proofs: $proofs, ')
+          ..write('deletedTokensIds: $deletedTokensIds, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CashuSpendingTableTable extends CashuSpendingTable
+    with TableInfo<$CashuSpendingTableTable, CashuSpendingTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CashuSpendingTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _pubkeyMeta = const VerificationMeta('pubkey');
+  @override
+  late final GeneratedColumn<String> pubkey = GeneratedColumn<String>(
+      'pubkey', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<int> kind = GeneratedColumn<int>(
+      'kind', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  late final GeneratedColumnWithTypeConverter<List<List<String>>, String>
+      content = GeneratedColumn<String>('content', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<List<List<String>>>(
+              $CashuSpendingTableTable.$convertercontent);
+  @override
+  late final GeneratedColumnWithTypeConverter<List<List<String>>, String> tags =
+      GeneratedColumn<String>('tags', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<List<List<String>>>(
+              $CashuSpendingTableTable.$convertertags);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, pubkey, createdAt, kind, content, tags];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'CashuSpending';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<CashuSpendingTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('pubkey')) {
+      context.handle(_pubkeyMeta,
+          pubkey.isAcceptableOrUnknown(data['pubkey']!, _pubkeyMeta));
+    } else if (isInserting) {
+      context.missing(_pubkeyMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+          _kindMeta, kind.isAcceptableOrUnknown(data['kind']!, _kindMeta));
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CashuSpendingTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CashuSpendingTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      pubkey: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}pubkey'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
+      kind: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}kind'])!,
+      content: $CashuSpendingTableTable.$convertercontent.fromSql(
+          attachedDatabase.typeMapping
+              .read(DriftSqlType.string, data['${effectivePrefix}content'])!),
+      tags: $CashuSpendingTableTable.$convertertags.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}tags'])!),
+    );
+  }
+
+  @override
+  $CashuSpendingTableTable createAlias(String alias) {
+    return $CashuSpendingTableTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<List<List<String>>, String> $convertercontent =
+      const StringListOfListConverter();
+  static TypeConverter<List<List<String>>, String> $convertertags =
+      const StringListOfListConverter();
+}
+
+class CashuSpendingTableData extends DataClass
+    implements Insertable<CashuSpendingTableData> {
+  final String id;
+  final String pubkey;
+  final int createdAt;
+  final int kind;
+  final List<List<String>> content;
+  final List<List<String>> tags;
+  const CashuSpendingTableData(
+      {required this.id,
+      required this.pubkey,
+      required this.createdAt,
+      required this.kind,
+      required this.content,
+      required this.tags});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['pubkey'] = Variable<String>(pubkey);
+    map['created_at'] = Variable<int>(createdAt);
+    map['kind'] = Variable<int>(kind);
+    {
+      map['content'] = Variable<String>(
+          $CashuSpendingTableTable.$convertercontent.toSql(content));
+    }
+    {
+      map['tags'] =
+          Variable<String>($CashuSpendingTableTable.$convertertags.toSql(tags));
+    }
+    return map;
+  }
+
+  CashuSpendingTableCompanion toCompanion(bool nullToAbsent) {
+    return CashuSpendingTableCompanion(
+      id: Value(id),
+      pubkey: Value(pubkey),
+      createdAt: Value(createdAt),
+      kind: Value(kind),
+      content: Value(content),
+      tags: Value(tags),
+    );
+  }
+
+  factory CashuSpendingTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CashuSpendingTableData(
+      id: serializer.fromJson<String>(json['id']),
+      pubkey: serializer.fromJson<String>(json['pubkey']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      kind: serializer.fromJson<int>(json['kind']),
+      content: serializer.fromJson<List<List<String>>>(json['content']),
+      tags: serializer.fromJson<List<List<String>>>(json['tags']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'pubkey': serializer.toJson<String>(pubkey),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'kind': serializer.toJson<int>(kind),
+      'content': serializer.toJson<List<List<String>>>(content),
+      'tags': serializer.toJson<List<List<String>>>(tags),
+    };
+  }
+
+  CashuSpendingTableData copyWith(
+          {String? id,
+          String? pubkey,
+          int? createdAt,
+          int? kind,
+          List<List<String>>? content,
+          List<List<String>>? tags}) =>
+      CashuSpendingTableData(
+        id: id ?? this.id,
+        pubkey: pubkey ?? this.pubkey,
+        createdAt: createdAt ?? this.createdAt,
+        kind: kind ?? this.kind,
+        content: content ?? this.content,
+        tags: tags ?? this.tags,
+      );
+  CashuSpendingTableData copyWithCompanion(CashuSpendingTableCompanion data) {
+    return CashuSpendingTableData(
+      id: data.id.present ? data.id.value : this.id,
+      pubkey: data.pubkey.present ? data.pubkey.value : this.pubkey,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      content: data.content.present ? data.content.value : this.content,
+      tags: data.tags.present ? data.tags.value : this.tags,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashuSpendingTableData(')
+          ..write('id: $id, ')
+          ..write('pubkey: $pubkey, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('kind: $kind, ')
+          ..write('content: $content, ')
+          ..write('tags: $tags')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, pubkey, createdAt, kind, content, tags);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CashuSpendingTableData &&
+          other.id == this.id &&
+          other.pubkey == this.pubkey &&
+          other.createdAt == this.createdAt &&
+          other.kind == this.kind &&
+          other.content == this.content &&
+          other.tags == this.tags);
+}
+
+class CashuSpendingTableCompanion
+    extends UpdateCompanion<CashuSpendingTableData> {
+  final Value<String> id;
+  final Value<String> pubkey;
+  final Value<int> createdAt;
+  final Value<int> kind;
+  final Value<List<List<String>>> content;
+  final Value<List<List<String>>> tags;
+  final Value<int> rowid;
+  const CashuSpendingTableCompanion({
+    this.id = const Value.absent(),
+    this.pubkey = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.content = const Value.absent(),
+    this.tags = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CashuSpendingTableCompanion.insert({
+    required String id,
+    required String pubkey,
+    required int createdAt,
+    required int kind,
+    required List<List<String>> content,
+    required List<List<String>> tags,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        pubkey = Value(pubkey),
+        createdAt = Value(createdAt),
+        kind = Value(kind),
+        content = Value(content),
+        tags = Value(tags);
+  static Insertable<CashuSpendingTableData> custom({
+    Expression<String>? id,
+    Expression<String>? pubkey,
+    Expression<int>? createdAt,
+    Expression<int>? kind,
+    Expression<String>? content,
+    Expression<String>? tags,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (pubkey != null) 'pubkey': pubkey,
+      if (createdAt != null) 'created_at': createdAt,
+      if (kind != null) 'kind': kind,
+      if (content != null) 'content': content,
+      if (tags != null) 'tags': tags,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CashuSpendingTableCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? pubkey,
+      Value<int>? createdAt,
+      Value<int>? kind,
+      Value<List<List<String>>>? content,
+      Value<List<List<String>>>? tags,
+      Value<int>? rowid}) {
+    return CashuSpendingTableCompanion(
+      id: id ?? this.id,
+      pubkey: pubkey ?? this.pubkey,
+      createdAt: createdAt ?? this.createdAt,
+      kind: kind ?? this.kind,
+      content: content ?? this.content,
+      tags: tags ?? this.tags,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (pubkey.present) {
+      map['pubkey'] = Variable<String>(pubkey.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<int>(kind.value);
+    }
+    if (content.present) {
+      map['content'] = Variable<String>(
+          $CashuSpendingTableTable.$convertercontent.toSql(content.value));
+    }
+    if (tags.present) {
+      map['tags'] = Variable<String>(
+          $CashuSpendingTableTable.$convertertags.toSql(tags.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashuSpendingTableCompanion(')
+          ..write('id: $id, ')
+          ..write('pubkey: $pubkey, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('kind: $kind, ')
+          ..write('content: $content, ')
+          ..write('tags: $tags, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CashuWalletTableTable extends CashuWalletTable
+    with TableInfo<$CashuWalletTableTable, CashuWalletTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CashuWalletTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _pubkeyMeta = const VerificationMeta('pubkey');
+  @override
+  late final GeneratedColumn<String> pubkey = GeneratedColumn<String>(
+      'pubkey', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _signSecretMeta =
+      const VerificationMeta('signSecret');
+  @override
+  late final GeneratedColumn<String> signSecret = GeneratedColumn<String>(
+      'sign_secret', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String> mints =
+      GeneratedColumn<String>('mints', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<List<String>>($CashuWalletTableTable.$convertermints);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, createdAt, pubkey, signSecret, mints];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'CashuWallet';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<CashuWalletTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('pubkey')) {
+      context.handle(_pubkeyMeta,
+          pubkey.isAcceptableOrUnknown(data['pubkey']!, _pubkeyMeta));
+    } else if (isInserting) {
+      context.missing(_pubkeyMeta);
+    }
+    if (data.containsKey('sign_secret')) {
+      context.handle(
+          _signSecretMeta,
+          signSecret.isAcceptableOrUnknown(
+              data['sign_secret']!, _signSecretMeta));
+    } else if (isInserting) {
+      context.missing(_signSecretMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {pubkey};
+  @override
+  CashuWalletTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CashuWalletTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
+      pubkey: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}pubkey'])!,
+      signSecret: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sign_secret'])!,
+      mints: $CashuWalletTableTable.$convertermints.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}mints'])!),
+    );
+  }
+
+  @override
+  $CashuWalletTableTable createAlias(String alias) {
+    return $CashuWalletTableTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<List<String>, String> $convertermints =
+      const StringListConverter();
+}
+
+class CashuWalletTableData extends DataClass
+    implements Insertable<CashuWalletTableData> {
+  final String id;
+  final int createdAt;
+  final String pubkey;
+  final String signSecret;
+  final List<String> mints;
+  const CashuWalletTableData(
+      {required this.id,
+      required this.createdAt,
+      required this.pubkey,
+      required this.signSecret,
+      required this.mints});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<int>(createdAt);
+    map['pubkey'] = Variable<String>(pubkey);
+    map['sign_secret'] = Variable<String>(signSecret);
+    {
+      map['mints'] =
+          Variable<String>($CashuWalletTableTable.$convertermints.toSql(mints));
+    }
+    return map;
+  }
+
+  CashuWalletTableCompanion toCompanion(bool nullToAbsent) {
+    return CashuWalletTableCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      pubkey: Value(pubkey),
+      signSecret: Value(signSecret),
+      mints: Value(mints),
+    );
+  }
+
+  factory CashuWalletTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CashuWalletTableData(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      pubkey: serializer.fromJson<String>(json['pubkey']),
+      signSecret: serializer.fromJson<String>(json['signSecret']),
+      mints: serializer.fromJson<List<String>>(json['mints']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'pubkey': serializer.toJson<String>(pubkey),
+      'signSecret': serializer.toJson<String>(signSecret),
+      'mints': serializer.toJson<List<String>>(mints),
+    };
+  }
+
+  CashuWalletTableData copyWith(
+          {String? id,
+          int? createdAt,
+          String? pubkey,
+          String? signSecret,
+          List<String>? mints}) =>
+      CashuWalletTableData(
+        id: id ?? this.id,
+        createdAt: createdAt ?? this.createdAt,
+        pubkey: pubkey ?? this.pubkey,
+        signSecret: signSecret ?? this.signSecret,
+        mints: mints ?? this.mints,
+      );
+  CashuWalletTableData copyWithCompanion(CashuWalletTableCompanion data) {
+    return CashuWalletTableData(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      pubkey: data.pubkey.present ? data.pubkey.value : this.pubkey,
+      signSecret:
+          data.signSecret.present ? data.signSecret.value : this.signSecret,
+      mints: data.mints.present ? data.mints.value : this.mints,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashuWalletTableData(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('pubkey: $pubkey, ')
+          ..write('signSecret: $signSecret, ')
+          ..write('mints: $mints')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, createdAt, pubkey, signSecret, mints);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CashuWalletTableData &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.pubkey == this.pubkey &&
+          other.signSecret == this.signSecret &&
+          other.mints == this.mints);
+}
+
+class CashuWalletTableCompanion extends UpdateCompanion<CashuWalletTableData> {
+  final Value<String> id;
+  final Value<int> createdAt;
+  final Value<String> pubkey;
+  final Value<String> signSecret;
+  final Value<List<String>> mints;
+  final Value<int> rowid;
+  const CashuWalletTableCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.pubkey = const Value.absent(),
+    this.signSecret = const Value.absent(),
+    this.mints = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CashuWalletTableCompanion.insert({
+    required String id,
+    required int createdAt,
+    required String pubkey,
+    required String signSecret,
+    required List<String> mints,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        createdAt = Value(createdAt),
+        pubkey = Value(pubkey),
+        signSecret = Value(signSecret),
+        mints = Value(mints);
+  static Insertable<CashuWalletTableData> custom({
+    Expression<String>? id,
+    Expression<int>? createdAt,
+    Expression<String>? pubkey,
+    Expression<String>? signSecret,
+    Expression<String>? mints,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (pubkey != null) 'pubkey': pubkey,
+      if (signSecret != null) 'sign_secret': signSecret,
+      if (mints != null) 'mints': mints,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CashuWalletTableCompanion copyWith(
+      {Value<String>? id,
+      Value<int>? createdAt,
+      Value<String>? pubkey,
+      Value<String>? signSecret,
+      Value<List<String>>? mints,
+      Value<int>? rowid}) {
+    return CashuWalletTableCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      pubkey: pubkey ?? this.pubkey,
+      signSecret: signSecret ?? this.signSecret,
+      mints: mints ?? this.mints,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (pubkey.present) {
+      map['pubkey'] = Variable<String>(pubkey.value);
+    }
+    if (signSecret.present) {
+      map['sign_secret'] = Variable<String>(signSecret.value);
+    }
+    if (mints.present) {
+      map['mints'] = Variable<String>(
+          $CashuWalletTableTable.$convertermints.toSql(mints.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashuWalletTableCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('pubkey: $pubkey, ')
+          ..write('signSecret: $signSecret, ')
+          ..write('mints: $mints, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$NostrDatabase extends GeneratedDatabase {
   _$NostrDatabase(QueryExecutor e) : super(e);
   $NostrDatabaseManager get managers => $NostrDatabaseManager(this);
@@ -6216,6 +9658,23 @@ abstract class _$NostrDatabase extends GeneratedDatabase {
   late final $WotScoreTableTable wotScoreTable = $WotScoreTableTable(this);
   late final $RelayInfoListTableTable relayInfoListTable =
       $RelayInfoListTableTable(this);
+  late final $CashuMintTableTable cashuMintTable = $CashuMintTableTable(this);
+  late final $CashuKeysetInfoTableTable cashuKeysetInfoTable =
+      $CashuKeysetInfoTableTable(this);
+  late final $CashuInvoiceTableTable cashuInvoiceTable =
+      $CashuInvoiceTableTable(this);
+  late final $CashuUnblindingDataTableTable cashuUnblindingDataTable =
+      $CashuUnblindingDataTableTable(this);
+  late final $CashuMintInfoTableTable cashuMintInfoTable =
+      $CashuMintInfoTableTable(this);
+  late final $CashuLightningInvoiceTableTable cashuLightningInvoiceTable =
+      $CashuLightningInvoiceTableTable(this);
+  late final $CashuTokensTableTable cashuTokensTable =
+      $CashuTokensTableTable(this);
+  late final $CashuSpendingTableTable cashuSpendingTable =
+      $CashuSpendingTableTable(this);
+  late final $CashuWalletTableTable cashuWalletTable =
+      $CashuWalletTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -6235,7 +9694,16 @@ abstract class _$NostrDatabase extends GeneratedDatabase {
         userAppSettingsTable,
         userWotTable,
         wotScoreTable,
-        relayInfoListTable
+        relayInfoListTable,
+        cashuMintTable,
+        cashuKeysetInfoTable,
+        cashuInvoiceTable,
+        cashuUnblindingDataTable,
+        cashuMintInfoTable,
+        cashuLightningInvoiceTable,
+        cashuTokensTable,
+        cashuSpendingTable,
+        cashuWalletTable
       ];
 }
 
@@ -9476,6 +12944,1864 @@ typedef $$RelayInfoListTableTableProcessedTableManager = ProcessedTableManager<
     ),
     RelayInfoListTableData,
     PrefetchHooks Function()>;
+typedef $$CashuMintTableTableCreateCompanionBuilder = CashuMintTableCompanion
+    Function({
+  required String pubkey,
+  required String mintURL,
+  Value<String> name,
+  Value<int> balance,
+  Value<int> maxNutsVersion,
+  Value<int> rowid,
+});
+typedef $$CashuMintTableTableUpdateCompanionBuilder = CashuMintTableCompanion
+    Function({
+  Value<String> pubkey,
+  Value<String> mintURL,
+  Value<String> name,
+  Value<int> balance,
+  Value<int> maxNutsVersion,
+  Value<int> rowid,
+});
+
+class $$CashuMintTableTableFilterComposer
+    extends Composer<_$NostrDatabase, $CashuMintTableTable> {
+  $$CashuMintTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get pubkey => $composableBuilder(
+      column: $table.pubkey, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get mintURL => $composableBuilder(
+      column: $table.mintURL, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get balance => $composableBuilder(
+      column: $table.balance, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get maxNutsVersion => $composableBuilder(
+      column: $table.maxNutsVersion,
+      builder: (column) => ColumnFilters(column));
+}
+
+class $$CashuMintTableTableOrderingComposer
+    extends Composer<_$NostrDatabase, $CashuMintTableTable> {
+  $$CashuMintTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get pubkey => $composableBuilder(
+      column: $table.pubkey, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get mintURL => $composableBuilder(
+      column: $table.mintURL, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get balance => $composableBuilder(
+      column: $table.balance, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get maxNutsVersion => $composableBuilder(
+      column: $table.maxNutsVersion,
+      builder: (column) => ColumnOrderings(column));
+}
+
+class $$CashuMintTableTableAnnotationComposer
+    extends Composer<_$NostrDatabase, $CashuMintTableTable> {
+  $$CashuMintTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get pubkey =>
+      $composableBuilder(column: $table.pubkey, builder: (column) => column);
+
+  GeneratedColumn<String> get mintURL =>
+      $composableBuilder(column: $table.mintURL, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get balance =>
+      $composableBuilder(column: $table.balance, builder: (column) => column);
+
+  GeneratedColumn<int> get maxNutsVersion => $composableBuilder(
+      column: $table.maxNutsVersion, builder: (column) => column);
+}
+
+class $$CashuMintTableTableTableManager extends RootTableManager<
+    _$NostrDatabase,
+    $CashuMintTableTable,
+    CashuMintTableData,
+    $$CashuMintTableTableFilterComposer,
+    $$CashuMintTableTableOrderingComposer,
+    $$CashuMintTableTableAnnotationComposer,
+    $$CashuMintTableTableCreateCompanionBuilder,
+    $$CashuMintTableTableUpdateCompanionBuilder,
+    (
+      CashuMintTableData,
+      BaseReferences<_$NostrDatabase, $CashuMintTableTable, CashuMintTableData>
+    ),
+    CashuMintTableData,
+    PrefetchHooks Function()> {
+  $$CashuMintTableTableTableManager(
+      _$NostrDatabase db, $CashuMintTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CashuMintTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CashuMintTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CashuMintTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> pubkey = const Value.absent(),
+            Value<String> mintURL = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<int> balance = const Value.absent(),
+            Value<int> maxNutsVersion = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CashuMintTableCompanion(
+            pubkey: pubkey,
+            mintURL: mintURL,
+            name: name,
+            balance: balance,
+            maxNutsVersion: maxNutsVersion,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String pubkey,
+            required String mintURL,
+            Value<String> name = const Value.absent(),
+            Value<int> balance = const Value.absent(),
+            Value<int> maxNutsVersion = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CashuMintTableCompanion.insert(
+            pubkey: pubkey,
+            mintURL: mintURL,
+            name: name,
+            balance: balance,
+            maxNutsVersion: maxNutsVersion,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$CashuMintTableTableProcessedTableManager = ProcessedTableManager<
+    _$NostrDatabase,
+    $CashuMintTableTable,
+    CashuMintTableData,
+    $$CashuMintTableTableFilterComposer,
+    $$CashuMintTableTableOrderingComposer,
+    $$CashuMintTableTableAnnotationComposer,
+    $$CashuMintTableTableCreateCompanionBuilder,
+    $$CashuMintTableTableUpdateCompanionBuilder,
+    (
+      CashuMintTableData,
+      BaseReferences<_$NostrDatabase, $CashuMintTableTable, CashuMintTableData>
+    ),
+    CashuMintTableData,
+    PrefetchHooks Function()>;
+typedef $$CashuKeysetInfoTableTableCreateCompanionBuilder
+    = CashuKeysetInfoTableCompanion Function({
+  required String id,
+  required String mintURL,
+  required String unit,
+  required bool active,
+  Value<String> keysetRaw,
+  Value<int> inputFeePPK,
+  Value<int> rowid,
+});
+typedef $$CashuKeysetInfoTableTableUpdateCompanionBuilder
+    = CashuKeysetInfoTableCompanion Function({
+  Value<String> id,
+  Value<String> mintURL,
+  Value<String> unit,
+  Value<bool> active,
+  Value<String> keysetRaw,
+  Value<int> inputFeePPK,
+  Value<int> rowid,
+});
+
+class $$CashuKeysetInfoTableTableFilterComposer
+    extends Composer<_$NostrDatabase, $CashuKeysetInfoTableTable> {
+  $$CashuKeysetInfoTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get mintURL => $composableBuilder(
+      column: $table.mintURL, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get unit => $composableBuilder(
+      column: $table.unit, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get active => $composableBuilder(
+      column: $table.active, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get keysetRaw => $composableBuilder(
+      column: $table.keysetRaw, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get inputFeePPK => $composableBuilder(
+      column: $table.inputFeePPK, builder: (column) => ColumnFilters(column));
+}
+
+class $$CashuKeysetInfoTableTableOrderingComposer
+    extends Composer<_$NostrDatabase, $CashuKeysetInfoTableTable> {
+  $$CashuKeysetInfoTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get mintURL => $composableBuilder(
+      column: $table.mintURL, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+      column: $table.unit, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get active => $composableBuilder(
+      column: $table.active, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get keysetRaw => $composableBuilder(
+      column: $table.keysetRaw, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get inputFeePPK => $composableBuilder(
+      column: $table.inputFeePPK, builder: (column) => ColumnOrderings(column));
+}
+
+class $$CashuKeysetInfoTableTableAnnotationComposer
+    extends Composer<_$NostrDatabase, $CashuKeysetInfoTableTable> {
+  $$CashuKeysetInfoTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get mintURL =>
+      $composableBuilder(column: $table.mintURL, builder: (column) => column);
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<bool> get active =>
+      $composableBuilder(column: $table.active, builder: (column) => column);
+
+  GeneratedColumn<String> get keysetRaw =>
+      $composableBuilder(column: $table.keysetRaw, builder: (column) => column);
+
+  GeneratedColumn<int> get inputFeePPK => $composableBuilder(
+      column: $table.inputFeePPK, builder: (column) => column);
+}
+
+class $$CashuKeysetInfoTableTableTableManager extends RootTableManager<
+    _$NostrDatabase,
+    $CashuKeysetInfoTableTable,
+    CashuKeysetInfoTableData,
+    $$CashuKeysetInfoTableTableFilterComposer,
+    $$CashuKeysetInfoTableTableOrderingComposer,
+    $$CashuKeysetInfoTableTableAnnotationComposer,
+    $$CashuKeysetInfoTableTableCreateCompanionBuilder,
+    $$CashuKeysetInfoTableTableUpdateCompanionBuilder,
+    (
+      CashuKeysetInfoTableData,
+      BaseReferences<_$NostrDatabase, $CashuKeysetInfoTableTable,
+          CashuKeysetInfoTableData>
+    ),
+    CashuKeysetInfoTableData,
+    PrefetchHooks Function()> {
+  $$CashuKeysetInfoTableTableTableManager(
+      _$NostrDatabase db, $CashuKeysetInfoTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CashuKeysetInfoTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CashuKeysetInfoTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CashuKeysetInfoTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> mintURL = const Value.absent(),
+            Value<String> unit = const Value.absent(),
+            Value<bool> active = const Value.absent(),
+            Value<String> keysetRaw = const Value.absent(),
+            Value<int> inputFeePPK = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CashuKeysetInfoTableCompanion(
+            id: id,
+            mintURL: mintURL,
+            unit: unit,
+            active: active,
+            keysetRaw: keysetRaw,
+            inputFeePPK: inputFeePPK,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String mintURL,
+            required String unit,
+            required bool active,
+            Value<String> keysetRaw = const Value.absent(),
+            Value<int> inputFeePPK = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CashuKeysetInfoTableCompanion.insert(
+            id: id,
+            mintURL: mintURL,
+            unit: unit,
+            active: active,
+            keysetRaw: keysetRaw,
+            inputFeePPK: inputFeePPK,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$CashuKeysetInfoTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$NostrDatabase,
+        $CashuKeysetInfoTableTable,
+        CashuKeysetInfoTableData,
+        $$CashuKeysetInfoTableTableFilterComposer,
+        $$CashuKeysetInfoTableTableOrderingComposer,
+        $$CashuKeysetInfoTableTableAnnotationComposer,
+        $$CashuKeysetInfoTableTableCreateCompanionBuilder,
+        $$CashuKeysetInfoTableTableUpdateCompanionBuilder,
+        (
+          CashuKeysetInfoTableData,
+          BaseReferences<_$NostrDatabase, $CashuKeysetInfoTableTable,
+              CashuKeysetInfoTableData>
+        ),
+        CashuKeysetInfoTableData,
+        PrefetchHooks Function()>;
+typedef $$CashuInvoiceTableTableCreateCompanionBuilder
+    = CashuInvoiceTableCompanion Function({
+  required String id,
+  required String quote,
+  required String request,
+  required bool paid,
+  required String amount,
+  required int expiry,
+  required String mintURL,
+  Value<int> rowid,
+});
+typedef $$CashuInvoiceTableTableUpdateCompanionBuilder
+    = CashuInvoiceTableCompanion Function({
+  Value<String> id,
+  Value<String> quote,
+  Value<String> request,
+  Value<bool> paid,
+  Value<String> amount,
+  Value<int> expiry,
+  Value<String> mintURL,
+  Value<int> rowid,
+});
+
+class $$CashuInvoiceTableTableFilterComposer
+    extends Composer<_$NostrDatabase, $CashuInvoiceTableTable> {
+  $$CashuInvoiceTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get quote => $composableBuilder(
+      column: $table.quote, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get request => $composableBuilder(
+      column: $table.request, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get paid => $composableBuilder(
+      column: $table.paid, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get expiry => $composableBuilder(
+      column: $table.expiry, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get mintURL => $composableBuilder(
+      column: $table.mintURL, builder: (column) => ColumnFilters(column));
+}
+
+class $$CashuInvoiceTableTableOrderingComposer
+    extends Composer<_$NostrDatabase, $CashuInvoiceTableTable> {
+  $$CashuInvoiceTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get quote => $composableBuilder(
+      column: $table.quote, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get request => $composableBuilder(
+      column: $table.request, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get paid => $composableBuilder(
+      column: $table.paid, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get expiry => $composableBuilder(
+      column: $table.expiry, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get mintURL => $composableBuilder(
+      column: $table.mintURL, builder: (column) => ColumnOrderings(column));
+}
+
+class $$CashuInvoiceTableTableAnnotationComposer
+    extends Composer<_$NostrDatabase, $CashuInvoiceTableTable> {
+  $$CashuInvoiceTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get quote =>
+      $composableBuilder(column: $table.quote, builder: (column) => column);
+
+  GeneratedColumn<String> get request =>
+      $composableBuilder(column: $table.request, builder: (column) => column);
+
+  GeneratedColumn<bool> get paid =>
+      $composableBuilder(column: $table.paid, builder: (column) => column);
+
+  GeneratedColumn<String> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<int> get expiry =>
+      $composableBuilder(column: $table.expiry, builder: (column) => column);
+
+  GeneratedColumn<String> get mintURL =>
+      $composableBuilder(column: $table.mintURL, builder: (column) => column);
+}
+
+class $$CashuInvoiceTableTableTableManager extends RootTableManager<
+    _$NostrDatabase,
+    $CashuInvoiceTableTable,
+    CashuInvoiceTableData,
+    $$CashuInvoiceTableTableFilterComposer,
+    $$CashuInvoiceTableTableOrderingComposer,
+    $$CashuInvoiceTableTableAnnotationComposer,
+    $$CashuInvoiceTableTableCreateCompanionBuilder,
+    $$CashuInvoiceTableTableUpdateCompanionBuilder,
+    (
+      CashuInvoiceTableData,
+      BaseReferences<_$NostrDatabase, $CashuInvoiceTableTable,
+          CashuInvoiceTableData>
+    ),
+    CashuInvoiceTableData,
+    PrefetchHooks Function()> {
+  $$CashuInvoiceTableTableTableManager(
+      _$NostrDatabase db, $CashuInvoiceTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CashuInvoiceTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CashuInvoiceTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CashuInvoiceTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> quote = const Value.absent(),
+            Value<String> request = const Value.absent(),
+            Value<bool> paid = const Value.absent(),
+            Value<String> amount = const Value.absent(),
+            Value<int> expiry = const Value.absent(),
+            Value<String> mintURL = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CashuInvoiceTableCompanion(
+            id: id,
+            quote: quote,
+            request: request,
+            paid: paid,
+            amount: amount,
+            expiry: expiry,
+            mintURL: mintURL,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String quote,
+            required String request,
+            required bool paid,
+            required String amount,
+            required int expiry,
+            required String mintURL,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CashuInvoiceTableCompanion.insert(
+            id: id,
+            quote: quote,
+            request: request,
+            paid: paid,
+            amount: amount,
+            expiry: expiry,
+            mintURL: mintURL,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$CashuInvoiceTableTableProcessedTableManager = ProcessedTableManager<
+    _$NostrDatabase,
+    $CashuInvoiceTableTable,
+    CashuInvoiceTableData,
+    $$CashuInvoiceTableTableFilterComposer,
+    $$CashuInvoiceTableTableOrderingComposer,
+    $$CashuInvoiceTableTableAnnotationComposer,
+    $$CashuInvoiceTableTableCreateCompanionBuilder,
+    $$CashuInvoiceTableTableUpdateCompanionBuilder,
+    (
+      CashuInvoiceTableData,
+      BaseReferences<_$NostrDatabase, $CashuInvoiceTableTable,
+          CashuInvoiceTableData>
+    ),
+    CashuInvoiceTableData,
+    PrefetchHooks Function()>;
+typedef $$CashuUnblindingDataTableTableCreateCompanionBuilder
+    = CashuUnblindingDataTableCompanion Function({
+  required String mintURL,
+  required String unit,
+  required int actionTypeRaw,
+  required String actionValue,
+  required String id,
+  required String amount,
+  required String C_,
+  Value<String> dleqPlainText,
+  required String r,
+  required String secret,
+  Value<int> rowid,
+});
+typedef $$CashuUnblindingDataTableTableUpdateCompanionBuilder
+    = CashuUnblindingDataTableCompanion Function({
+  Value<String> mintURL,
+  Value<String> unit,
+  Value<int> actionTypeRaw,
+  Value<String> actionValue,
+  Value<String> id,
+  Value<String> amount,
+  Value<String> C_,
+  Value<String> dleqPlainText,
+  Value<String> r,
+  Value<String> secret,
+  Value<int> rowid,
+});
+
+class $$CashuUnblindingDataTableTableFilterComposer
+    extends Composer<_$NostrDatabase, $CashuUnblindingDataTableTable> {
+  $$CashuUnblindingDataTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get mintURL => $composableBuilder(
+      column: $table.mintURL, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get unit => $composableBuilder(
+      column: $table.unit, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get actionTypeRaw => $composableBuilder(
+      column: $table.actionTypeRaw, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get actionValue => $composableBuilder(
+      column: $table.actionValue, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get C_ => $composableBuilder(
+      column: $table.C_, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get dleqPlainText => $composableBuilder(
+      column: $table.dleqPlainText, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get r => $composableBuilder(
+      column: $table.r, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get secret => $composableBuilder(
+      column: $table.secret, builder: (column) => ColumnFilters(column));
+}
+
+class $$CashuUnblindingDataTableTableOrderingComposer
+    extends Composer<_$NostrDatabase, $CashuUnblindingDataTableTable> {
+  $$CashuUnblindingDataTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get mintURL => $composableBuilder(
+      column: $table.mintURL, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+      column: $table.unit, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get actionTypeRaw => $composableBuilder(
+      column: $table.actionTypeRaw,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get actionValue => $composableBuilder(
+      column: $table.actionValue, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get C_ => $composableBuilder(
+      column: $table.C_, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get dleqPlainText => $composableBuilder(
+      column: $table.dleqPlainText,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get r => $composableBuilder(
+      column: $table.r, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get secret => $composableBuilder(
+      column: $table.secret, builder: (column) => ColumnOrderings(column));
+}
+
+class $$CashuUnblindingDataTableTableAnnotationComposer
+    extends Composer<_$NostrDatabase, $CashuUnblindingDataTableTable> {
+  $$CashuUnblindingDataTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get mintURL =>
+      $composableBuilder(column: $table.mintURL, builder: (column) => column);
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<int> get actionTypeRaw => $composableBuilder(
+      column: $table.actionTypeRaw, builder: (column) => column);
+
+  GeneratedColumn<String> get actionValue => $composableBuilder(
+      column: $table.actionValue, builder: (column) => column);
+
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get C_ =>
+      $composableBuilder(column: $table.C_, builder: (column) => column);
+
+  GeneratedColumn<String> get dleqPlainText => $composableBuilder(
+      column: $table.dleqPlainText, builder: (column) => column);
+
+  GeneratedColumn<String> get r =>
+      $composableBuilder(column: $table.r, builder: (column) => column);
+
+  GeneratedColumn<String> get secret =>
+      $composableBuilder(column: $table.secret, builder: (column) => column);
+}
+
+class $$CashuUnblindingDataTableTableTableManager extends RootTableManager<
+    _$NostrDatabase,
+    $CashuUnblindingDataTableTable,
+    CashuUnblindingDataTableData,
+    $$CashuUnblindingDataTableTableFilterComposer,
+    $$CashuUnblindingDataTableTableOrderingComposer,
+    $$CashuUnblindingDataTableTableAnnotationComposer,
+    $$CashuUnblindingDataTableTableCreateCompanionBuilder,
+    $$CashuUnblindingDataTableTableUpdateCompanionBuilder,
+    (
+      CashuUnblindingDataTableData,
+      BaseReferences<_$NostrDatabase, $CashuUnblindingDataTableTable,
+          CashuUnblindingDataTableData>
+    ),
+    CashuUnblindingDataTableData,
+    PrefetchHooks Function()> {
+  $$CashuUnblindingDataTableTableTableManager(
+      _$NostrDatabase db, $CashuUnblindingDataTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CashuUnblindingDataTableTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CashuUnblindingDataTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CashuUnblindingDataTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> mintURL = const Value.absent(),
+            Value<String> unit = const Value.absent(),
+            Value<int> actionTypeRaw = const Value.absent(),
+            Value<String> actionValue = const Value.absent(),
+            Value<String> id = const Value.absent(),
+            Value<String> amount = const Value.absent(),
+            Value<String> C_ = const Value.absent(),
+            Value<String> dleqPlainText = const Value.absent(),
+            Value<String> r = const Value.absent(),
+            Value<String> secret = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CashuUnblindingDataTableCompanion(
+            mintURL: mintURL,
+            unit: unit,
+            actionTypeRaw: actionTypeRaw,
+            actionValue: actionValue,
+            id: id,
+            amount: amount,
+            C_: C_,
+            dleqPlainText: dleqPlainText,
+            r: r,
+            secret: secret,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String mintURL,
+            required String unit,
+            required int actionTypeRaw,
+            required String actionValue,
+            required String id,
+            required String amount,
+            required String C_,
+            Value<String> dleqPlainText = const Value.absent(),
+            required String r,
+            required String secret,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CashuUnblindingDataTableCompanion.insert(
+            mintURL: mintURL,
+            unit: unit,
+            actionTypeRaw: actionTypeRaw,
+            actionValue: actionValue,
+            id: id,
+            amount: amount,
+            C_: C_,
+            dleqPlainText: dleqPlainText,
+            r: r,
+            secret: secret,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$CashuUnblindingDataTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$NostrDatabase,
+        $CashuUnblindingDataTableTable,
+        CashuUnblindingDataTableData,
+        $$CashuUnblindingDataTableTableFilterComposer,
+        $$CashuUnblindingDataTableTableOrderingComposer,
+        $$CashuUnblindingDataTableTableAnnotationComposer,
+        $$CashuUnblindingDataTableTableCreateCompanionBuilder,
+        $$CashuUnblindingDataTableTableUpdateCompanionBuilder,
+        (
+          CashuUnblindingDataTableData,
+          BaseReferences<_$NostrDatabase, $CashuUnblindingDataTableTable,
+              CashuUnblindingDataTableData>
+        ),
+        CashuUnblindingDataTableData,
+        PrefetchHooks Function()>;
+typedef $$CashuMintInfoTableTableCreateCompanionBuilder
+    = CashuMintInfoTableCompanion Function({
+  required String mintURL,
+  Value<String> name,
+  Value<String> iconUrl,
+  Value<String> pubkey,
+  Value<String> version,
+  Value<String> description,
+  Value<String> descriptionLong,
+  required List<Map<String, String>> contact,
+  Value<String> motd,
+  Value<String> nutsJson,
+  Value<int> rowid,
+});
+typedef $$CashuMintInfoTableTableUpdateCompanionBuilder
+    = CashuMintInfoTableCompanion Function({
+  Value<String> mintURL,
+  Value<String> name,
+  Value<String> iconUrl,
+  Value<String> pubkey,
+  Value<String> version,
+  Value<String> description,
+  Value<String> descriptionLong,
+  Value<List<Map<String, String>>> contact,
+  Value<String> motd,
+  Value<String> nutsJson,
+  Value<int> rowid,
+});
+
+class $$CashuMintInfoTableTableFilterComposer
+    extends Composer<_$NostrDatabase, $CashuMintInfoTableTable> {
+  $$CashuMintInfoTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get mintURL => $composableBuilder(
+      column: $table.mintURL, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get iconUrl => $composableBuilder(
+      column: $table.iconUrl, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get pubkey => $composableBuilder(
+      column: $table.pubkey, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get version => $composableBuilder(
+      column: $table.version, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get descriptionLong => $composableBuilder(
+      column: $table.descriptionLong,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<List<Map<String, String>>,
+          List<Map<String, String>>, String>
+      get contact => $composableBuilder(
+          column: $table.contact,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<String> get motd => $composableBuilder(
+      column: $table.motd, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get nutsJson => $composableBuilder(
+      column: $table.nutsJson, builder: (column) => ColumnFilters(column));
+}
+
+class $$CashuMintInfoTableTableOrderingComposer
+    extends Composer<_$NostrDatabase, $CashuMintInfoTableTable> {
+  $$CashuMintInfoTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get mintURL => $composableBuilder(
+      column: $table.mintURL, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get iconUrl => $composableBuilder(
+      column: $table.iconUrl, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get pubkey => $composableBuilder(
+      column: $table.pubkey, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get version => $composableBuilder(
+      column: $table.version, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get descriptionLong => $composableBuilder(
+      column: $table.descriptionLong,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get contact => $composableBuilder(
+      column: $table.contact, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get motd => $composableBuilder(
+      column: $table.motd, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get nutsJson => $composableBuilder(
+      column: $table.nutsJson, builder: (column) => ColumnOrderings(column));
+}
+
+class $$CashuMintInfoTableTableAnnotationComposer
+    extends Composer<_$NostrDatabase, $CashuMintInfoTableTable> {
+  $$CashuMintInfoTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get mintURL =>
+      $composableBuilder(column: $table.mintURL, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get iconUrl =>
+      $composableBuilder(column: $table.iconUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get pubkey =>
+      $composableBuilder(column: $table.pubkey, builder: (column) => column);
+
+  GeneratedColumn<String> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => column);
+
+  GeneratedColumn<String> get descriptionLong => $composableBuilder(
+      column: $table.descriptionLong, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<Map<String, String>>, String>
+      get contact => $composableBuilder(
+          column: $table.contact, builder: (column) => column);
+
+  GeneratedColumn<String> get motd =>
+      $composableBuilder(column: $table.motd, builder: (column) => column);
+
+  GeneratedColumn<String> get nutsJson =>
+      $composableBuilder(column: $table.nutsJson, builder: (column) => column);
+}
+
+class $$CashuMintInfoTableTableTableManager extends RootTableManager<
+    _$NostrDatabase,
+    $CashuMintInfoTableTable,
+    CashuMintInfoTableData,
+    $$CashuMintInfoTableTableFilterComposer,
+    $$CashuMintInfoTableTableOrderingComposer,
+    $$CashuMintInfoTableTableAnnotationComposer,
+    $$CashuMintInfoTableTableCreateCompanionBuilder,
+    $$CashuMintInfoTableTableUpdateCompanionBuilder,
+    (
+      CashuMintInfoTableData,
+      BaseReferences<_$NostrDatabase, $CashuMintInfoTableTable,
+          CashuMintInfoTableData>
+    ),
+    CashuMintInfoTableData,
+    PrefetchHooks Function()> {
+  $$CashuMintInfoTableTableTableManager(
+      _$NostrDatabase db, $CashuMintInfoTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CashuMintInfoTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CashuMintInfoTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CashuMintInfoTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> mintURL = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> iconUrl = const Value.absent(),
+            Value<String> pubkey = const Value.absent(),
+            Value<String> version = const Value.absent(),
+            Value<String> description = const Value.absent(),
+            Value<String> descriptionLong = const Value.absent(),
+            Value<List<Map<String, String>>> contact = const Value.absent(),
+            Value<String> motd = const Value.absent(),
+            Value<String> nutsJson = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CashuMintInfoTableCompanion(
+            mintURL: mintURL,
+            name: name,
+            iconUrl: iconUrl,
+            pubkey: pubkey,
+            version: version,
+            description: description,
+            descriptionLong: descriptionLong,
+            contact: contact,
+            motd: motd,
+            nutsJson: nutsJson,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String mintURL,
+            Value<String> name = const Value.absent(),
+            Value<String> iconUrl = const Value.absent(),
+            Value<String> pubkey = const Value.absent(),
+            Value<String> version = const Value.absent(),
+            Value<String> description = const Value.absent(),
+            Value<String> descriptionLong = const Value.absent(),
+            required List<Map<String, String>> contact,
+            Value<String> motd = const Value.absent(),
+            Value<String> nutsJson = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CashuMintInfoTableCompanion.insert(
+            mintURL: mintURL,
+            name: name,
+            iconUrl: iconUrl,
+            pubkey: pubkey,
+            version: version,
+            description: description,
+            descriptionLong: descriptionLong,
+            contact: contact,
+            motd: motd,
+            nutsJson: nutsJson,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$CashuMintInfoTableTableProcessedTableManager = ProcessedTableManager<
+    _$NostrDatabase,
+    $CashuMintInfoTableTable,
+    CashuMintInfoTableData,
+    $$CashuMintInfoTableTableFilterComposer,
+    $$CashuMintInfoTableTableOrderingComposer,
+    $$CashuMintInfoTableTableAnnotationComposer,
+    $$CashuMintInfoTableTableCreateCompanionBuilder,
+    $$CashuMintInfoTableTableUpdateCompanionBuilder,
+    (
+      CashuMintInfoTableData,
+      BaseReferences<_$NostrDatabase, $CashuMintInfoTableTable,
+          CashuMintInfoTableData>
+    ),
+    CashuMintInfoTableData,
+    PrefetchHooks Function()>;
+typedef $$CashuLightningInvoiceTableTableCreateCompanionBuilder
+    = CashuLightningInvoiceTableCompanion Function({
+  required String id,
+  required String pr,
+  required String hash,
+  required String amount,
+  required String mintURL,
+  Value<int> rowid,
+});
+typedef $$CashuLightningInvoiceTableTableUpdateCompanionBuilder
+    = CashuLightningInvoiceTableCompanion Function({
+  Value<String> id,
+  Value<String> pr,
+  Value<String> hash,
+  Value<String> amount,
+  Value<String> mintURL,
+  Value<int> rowid,
+});
+
+class $$CashuLightningInvoiceTableTableFilterComposer
+    extends Composer<_$NostrDatabase, $CashuLightningInvoiceTableTable> {
+  $$CashuLightningInvoiceTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get pr => $composableBuilder(
+      column: $table.pr, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get hash => $composableBuilder(
+      column: $table.hash, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get mintURL => $composableBuilder(
+      column: $table.mintURL, builder: (column) => ColumnFilters(column));
+}
+
+class $$CashuLightningInvoiceTableTableOrderingComposer
+    extends Composer<_$NostrDatabase, $CashuLightningInvoiceTableTable> {
+  $$CashuLightningInvoiceTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get pr => $composableBuilder(
+      column: $table.pr, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get hash => $composableBuilder(
+      column: $table.hash, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get mintURL => $composableBuilder(
+      column: $table.mintURL, builder: (column) => ColumnOrderings(column));
+}
+
+class $$CashuLightningInvoiceTableTableAnnotationComposer
+    extends Composer<_$NostrDatabase, $CashuLightningInvoiceTableTable> {
+  $$CashuLightningInvoiceTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get pr =>
+      $composableBuilder(column: $table.pr, builder: (column) => column);
+
+  GeneratedColumn<String> get hash =>
+      $composableBuilder(column: $table.hash, builder: (column) => column);
+
+  GeneratedColumn<String> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get mintURL =>
+      $composableBuilder(column: $table.mintURL, builder: (column) => column);
+}
+
+class $$CashuLightningInvoiceTableTableTableManager extends RootTableManager<
+    _$NostrDatabase,
+    $CashuLightningInvoiceTableTable,
+    CashuLightningInvoiceTableData,
+    $$CashuLightningInvoiceTableTableFilterComposer,
+    $$CashuLightningInvoiceTableTableOrderingComposer,
+    $$CashuLightningInvoiceTableTableAnnotationComposer,
+    $$CashuLightningInvoiceTableTableCreateCompanionBuilder,
+    $$CashuLightningInvoiceTableTableUpdateCompanionBuilder,
+    (
+      CashuLightningInvoiceTableData,
+      BaseReferences<_$NostrDatabase, $CashuLightningInvoiceTableTable,
+          CashuLightningInvoiceTableData>
+    ),
+    CashuLightningInvoiceTableData,
+    PrefetchHooks Function()> {
+  $$CashuLightningInvoiceTableTableTableManager(
+      _$NostrDatabase db, $CashuLightningInvoiceTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CashuLightningInvoiceTableTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CashuLightningInvoiceTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CashuLightningInvoiceTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> pr = const Value.absent(),
+            Value<String> hash = const Value.absent(),
+            Value<String> amount = const Value.absent(),
+            Value<String> mintURL = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CashuLightningInvoiceTableCompanion(
+            id: id,
+            pr: pr,
+            hash: hash,
+            amount: amount,
+            mintURL: mintURL,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String pr,
+            required String hash,
+            required String amount,
+            required String mintURL,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CashuLightningInvoiceTableCompanion.insert(
+            id: id,
+            pr: pr,
+            hash: hash,
+            amount: amount,
+            mintURL: mintURL,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$CashuLightningInvoiceTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$NostrDatabase,
+        $CashuLightningInvoiceTableTable,
+        CashuLightningInvoiceTableData,
+        $$CashuLightningInvoiceTableTableFilterComposer,
+        $$CashuLightningInvoiceTableTableOrderingComposer,
+        $$CashuLightningInvoiceTableTableAnnotationComposer,
+        $$CashuLightningInvoiceTableTableCreateCompanionBuilder,
+        $$CashuLightningInvoiceTableTableUpdateCompanionBuilder,
+        (
+          CashuLightningInvoiceTableData,
+          BaseReferences<_$NostrDatabase, $CashuLightningInvoiceTableTable,
+              CashuLightningInvoiceTableData>
+        ),
+        CashuLightningInvoiceTableData,
+        PrefetchHooks Function()>;
+typedef $$CashuTokensTableTableCreateCompanionBuilder
+    = CashuTokensTableCompanion Function({
+  required String id,
+  required String mintUrl,
+  required String unit,
+  required String pubkey,
+  required int createdAt,
+  required List<String> proofs,
+  required List<String> deletedTokensIds,
+  Value<int> rowid,
+});
+typedef $$CashuTokensTableTableUpdateCompanionBuilder
+    = CashuTokensTableCompanion Function({
+  Value<String> id,
+  Value<String> mintUrl,
+  Value<String> unit,
+  Value<String> pubkey,
+  Value<int> createdAt,
+  Value<List<String>> proofs,
+  Value<List<String>> deletedTokensIds,
+  Value<int> rowid,
+});
+
+class $$CashuTokensTableTableFilterComposer
+    extends Composer<_$NostrDatabase, $CashuTokensTableTable> {
+  $$CashuTokensTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get mintUrl => $composableBuilder(
+      column: $table.mintUrl, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get unit => $composableBuilder(
+      column: $table.unit, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get pubkey => $composableBuilder(
+      column: $table.pubkey, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+      get proofs => $composableBuilder(
+          column: $table.proofs,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+      get deletedTokensIds => $composableBuilder(
+          column: $table.deletedTokensIds,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+}
+
+class $$CashuTokensTableTableOrderingComposer
+    extends Composer<_$NostrDatabase, $CashuTokensTableTable> {
+  $$CashuTokensTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get mintUrl => $composableBuilder(
+      column: $table.mintUrl, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+      column: $table.unit, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get pubkey => $composableBuilder(
+      column: $table.pubkey, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get proofs => $composableBuilder(
+      column: $table.proofs, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get deletedTokensIds => $composableBuilder(
+      column: $table.deletedTokensIds,
+      builder: (column) => ColumnOrderings(column));
+}
+
+class $$CashuTokensTableTableAnnotationComposer
+    extends Composer<_$NostrDatabase, $CashuTokensTableTable> {
+  $$CashuTokensTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get mintUrl =>
+      $composableBuilder(column: $table.mintUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<String> get pubkey =>
+      $composableBuilder(column: $table.pubkey, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>, String> get proofs =>
+      $composableBuilder(column: $table.proofs, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>, String> get deletedTokensIds =>
+      $composableBuilder(
+          column: $table.deletedTokensIds, builder: (column) => column);
+}
+
+class $$CashuTokensTableTableTableManager extends RootTableManager<
+    _$NostrDatabase,
+    $CashuTokensTableTable,
+    CashuTokensTableData,
+    $$CashuTokensTableTableFilterComposer,
+    $$CashuTokensTableTableOrderingComposer,
+    $$CashuTokensTableTableAnnotationComposer,
+    $$CashuTokensTableTableCreateCompanionBuilder,
+    $$CashuTokensTableTableUpdateCompanionBuilder,
+    (
+      CashuTokensTableData,
+      BaseReferences<_$NostrDatabase, $CashuTokensTableTable,
+          CashuTokensTableData>
+    ),
+    CashuTokensTableData,
+    PrefetchHooks Function()> {
+  $$CashuTokensTableTableTableManager(
+      _$NostrDatabase db, $CashuTokensTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CashuTokensTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CashuTokensTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CashuTokensTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> mintUrl = const Value.absent(),
+            Value<String> unit = const Value.absent(),
+            Value<String> pubkey = const Value.absent(),
+            Value<int> createdAt = const Value.absent(),
+            Value<List<String>> proofs = const Value.absent(),
+            Value<List<String>> deletedTokensIds = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CashuTokensTableCompanion(
+            id: id,
+            mintUrl: mintUrl,
+            unit: unit,
+            pubkey: pubkey,
+            createdAt: createdAt,
+            proofs: proofs,
+            deletedTokensIds: deletedTokensIds,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String mintUrl,
+            required String unit,
+            required String pubkey,
+            required int createdAt,
+            required List<String> proofs,
+            required List<String> deletedTokensIds,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CashuTokensTableCompanion.insert(
+            id: id,
+            mintUrl: mintUrl,
+            unit: unit,
+            pubkey: pubkey,
+            createdAt: createdAt,
+            proofs: proofs,
+            deletedTokensIds: deletedTokensIds,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$CashuTokensTableTableProcessedTableManager = ProcessedTableManager<
+    _$NostrDatabase,
+    $CashuTokensTableTable,
+    CashuTokensTableData,
+    $$CashuTokensTableTableFilterComposer,
+    $$CashuTokensTableTableOrderingComposer,
+    $$CashuTokensTableTableAnnotationComposer,
+    $$CashuTokensTableTableCreateCompanionBuilder,
+    $$CashuTokensTableTableUpdateCompanionBuilder,
+    (
+      CashuTokensTableData,
+      BaseReferences<_$NostrDatabase, $CashuTokensTableTable,
+          CashuTokensTableData>
+    ),
+    CashuTokensTableData,
+    PrefetchHooks Function()>;
+typedef $$CashuSpendingTableTableCreateCompanionBuilder
+    = CashuSpendingTableCompanion Function({
+  required String id,
+  required String pubkey,
+  required int createdAt,
+  required int kind,
+  required List<List<String>> content,
+  required List<List<String>> tags,
+  Value<int> rowid,
+});
+typedef $$CashuSpendingTableTableUpdateCompanionBuilder
+    = CashuSpendingTableCompanion Function({
+  Value<String> id,
+  Value<String> pubkey,
+  Value<int> createdAt,
+  Value<int> kind,
+  Value<List<List<String>>> content,
+  Value<List<List<String>>> tags,
+  Value<int> rowid,
+});
+
+class $$CashuSpendingTableTableFilterComposer
+    extends Composer<_$NostrDatabase, $CashuSpendingTableTable> {
+  $$CashuSpendingTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get pubkey => $composableBuilder(
+      column: $table.pubkey, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get kind => $composableBuilder(
+      column: $table.kind, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<List<List<String>>, List<List<String>>, String>
+      get content => $composableBuilder(
+          column: $table.content,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<List<List<String>>, List<List<String>>, String>
+      get tags => $composableBuilder(
+          column: $table.tags,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+}
+
+class $$CashuSpendingTableTableOrderingComposer
+    extends Composer<_$NostrDatabase, $CashuSpendingTableTable> {
+  $$CashuSpendingTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get pubkey => $composableBuilder(
+      column: $table.pubkey, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get kind => $composableBuilder(
+      column: $table.kind, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get content => $composableBuilder(
+      column: $table.content, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get tags => $composableBuilder(
+      column: $table.tags, builder: (column) => ColumnOrderings(column));
+}
+
+class $$CashuSpendingTableTableAnnotationComposer
+    extends Composer<_$NostrDatabase, $CashuSpendingTableTable> {
+  $$CashuSpendingTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get pubkey =>
+      $composableBuilder(column: $table.pubkey, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<List<String>>, String> get content =>
+      $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<List<String>>, String> get tags =>
+      $composableBuilder(column: $table.tags, builder: (column) => column);
+}
+
+class $$CashuSpendingTableTableTableManager extends RootTableManager<
+    _$NostrDatabase,
+    $CashuSpendingTableTable,
+    CashuSpendingTableData,
+    $$CashuSpendingTableTableFilterComposer,
+    $$CashuSpendingTableTableOrderingComposer,
+    $$CashuSpendingTableTableAnnotationComposer,
+    $$CashuSpendingTableTableCreateCompanionBuilder,
+    $$CashuSpendingTableTableUpdateCompanionBuilder,
+    (
+      CashuSpendingTableData,
+      BaseReferences<_$NostrDatabase, $CashuSpendingTableTable,
+          CashuSpendingTableData>
+    ),
+    CashuSpendingTableData,
+    PrefetchHooks Function()> {
+  $$CashuSpendingTableTableTableManager(
+      _$NostrDatabase db, $CashuSpendingTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CashuSpendingTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CashuSpendingTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CashuSpendingTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> pubkey = const Value.absent(),
+            Value<int> createdAt = const Value.absent(),
+            Value<int> kind = const Value.absent(),
+            Value<List<List<String>>> content = const Value.absent(),
+            Value<List<List<String>>> tags = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CashuSpendingTableCompanion(
+            id: id,
+            pubkey: pubkey,
+            createdAt: createdAt,
+            kind: kind,
+            content: content,
+            tags: tags,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String pubkey,
+            required int createdAt,
+            required int kind,
+            required List<List<String>> content,
+            required List<List<String>> tags,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CashuSpendingTableCompanion.insert(
+            id: id,
+            pubkey: pubkey,
+            createdAt: createdAt,
+            kind: kind,
+            content: content,
+            tags: tags,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$CashuSpendingTableTableProcessedTableManager = ProcessedTableManager<
+    _$NostrDatabase,
+    $CashuSpendingTableTable,
+    CashuSpendingTableData,
+    $$CashuSpendingTableTableFilterComposer,
+    $$CashuSpendingTableTableOrderingComposer,
+    $$CashuSpendingTableTableAnnotationComposer,
+    $$CashuSpendingTableTableCreateCompanionBuilder,
+    $$CashuSpendingTableTableUpdateCompanionBuilder,
+    (
+      CashuSpendingTableData,
+      BaseReferences<_$NostrDatabase, $CashuSpendingTableTable,
+          CashuSpendingTableData>
+    ),
+    CashuSpendingTableData,
+    PrefetchHooks Function()>;
+typedef $$CashuWalletTableTableCreateCompanionBuilder
+    = CashuWalletTableCompanion Function({
+  required String id,
+  required int createdAt,
+  required String pubkey,
+  required String signSecret,
+  required List<String> mints,
+  Value<int> rowid,
+});
+typedef $$CashuWalletTableTableUpdateCompanionBuilder
+    = CashuWalletTableCompanion Function({
+  Value<String> id,
+  Value<int> createdAt,
+  Value<String> pubkey,
+  Value<String> signSecret,
+  Value<List<String>> mints,
+  Value<int> rowid,
+});
+
+class $$CashuWalletTableTableFilterComposer
+    extends Composer<_$NostrDatabase, $CashuWalletTableTable> {
+  $$CashuWalletTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get pubkey => $composableBuilder(
+      column: $table.pubkey, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get signSecret => $composableBuilder(
+      column: $table.signSecret, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+      get mints => $composableBuilder(
+          column: $table.mints,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+}
+
+class $$CashuWalletTableTableOrderingComposer
+    extends Composer<_$NostrDatabase, $CashuWalletTableTable> {
+  $$CashuWalletTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get pubkey => $composableBuilder(
+      column: $table.pubkey, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get signSecret => $composableBuilder(
+      column: $table.signSecret, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get mints => $composableBuilder(
+      column: $table.mints, builder: (column) => ColumnOrderings(column));
+}
+
+class $$CashuWalletTableTableAnnotationComposer
+    extends Composer<_$NostrDatabase, $CashuWalletTableTable> {
+  $$CashuWalletTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get pubkey =>
+      $composableBuilder(column: $table.pubkey, builder: (column) => column);
+
+  GeneratedColumn<String> get signSecret => $composableBuilder(
+      column: $table.signSecret, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>, String> get mints =>
+      $composableBuilder(column: $table.mints, builder: (column) => column);
+}
+
+class $$CashuWalletTableTableTableManager extends RootTableManager<
+    _$NostrDatabase,
+    $CashuWalletTableTable,
+    CashuWalletTableData,
+    $$CashuWalletTableTableFilterComposer,
+    $$CashuWalletTableTableOrderingComposer,
+    $$CashuWalletTableTableAnnotationComposer,
+    $$CashuWalletTableTableCreateCompanionBuilder,
+    $$CashuWalletTableTableUpdateCompanionBuilder,
+    (
+      CashuWalletTableData,
+      BaseReferences<_$NostrDatabase, $CashuWalletTableTable,
+          CashuWalletTableData>
+    ),
+    CashuWalletTableData,
+    PrefetchHooks Function()> {
+  $$CashuWalletTableTableTableManager(
+      _$NostrDatabase db, $CashuWalletTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CashuWalletTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CashuWalletTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CashuWalletTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<int> createdAt = const Value.absent(),
+            Value<String> pubkey = const Value.absent(),
+            Value<String> signSecret = const Value.absent(),
+            Value<List<String>> mints = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CashuWalletTableCompanion(
+            id: id,
+            createdAt: createdAt,
+            pubkey: pubkey,
+            signSecret: signSecret,
+            mints: mints,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required int createdAt,
+            required String pubkey,
+            required String signSecret,
+            required List<String> mints,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CashuWalletTableCompanion.insert(
+            id: id,
+            createdAt: createdAt,
+            pubkey: pubkey,
+            signSecret: signSecret,
+            mints: mints,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$CashuWalletTableTableProcessedTableManager = ProcessedTableManager<
+    _$NostrDatabase,
+    $CashuWalletTableTable,
+    CashuWalletTableData,
+    $$CashuWalletTableTableFilterComposer,
+    $$CashuWalletTableTableOrderingComposer,
+    $$CashuWalletTableTableAnnotationComposer,
+    $$CashuWalletTableTableCreateCompanionBuilder,
+    $$CashuWalletTableTableUpdateCompanionBuilder,
+    (
+      CashuWalletTableData,
+      BaseReferences<_$NostrDatabase, $CashuWalletTableTable,
+          CashuWalletTableData>
+    ),
+    CashuWalletTableData,
+    PrefetchHooks Function()>;
 
 class $NostrDatabaseManager {
   final _$NostrDatabase _db;
@@ -9510,4 +14836,25 @@ class $NostrDatabaseManager {
       $$WotScoreTableTableTableManager(_db, _db.wotScoreTable);
   $$RelayInfoListTableTableTableManager get relayInfoListTable =>
       $$RelayInfoListTableTableTableManager(_db, _db.relayInfoListTable);
+  $$CashuMintTableTableTableManager get cashuMintTable =>
+      $$CashuMintTableTableTableManager(_db, _db.cashuMintTable);
+  $$CashuKeysetInfoTableTableTableManager get cashuKeysetInfoTable =>
+      $$CashuKeysetInfoTableTableTableManager(_db, _db.cashuKeysetInfoTable);
+  $$CashuInvoiceTableTableTableManager get cashuInvoiceTable =>
+      $$CashuInvoiceTableTableTableManager(_db, _db.cashuInvoiceTable);
+  $$CashuUnblindingDataTableTableTableManager get cashuUnblindingDataTable =>
+      $$CashuUnblindingDataTableTableTableManager(
+          _db, _db.cashuUnblindingDataTable);
+  $$CashuMintInfoTableTableTableManager get cashuMintInfoTable =>
+      $$CashuMintInfoTableTableTableManager(_db, _db.cashuMintInfoTable);
+  $$CashuLightningInvoiceTableTableTableManager
+      get cashuLightningInvoiceTable =>
+          $$CashuLightningInvoiceTableTableTableManager(
+              _db, _db.cashuLightningInvoiceTable);
+  $$CashuTokensTableTableTableManager get cashuTokensTable =>
+      $$CashuTokensTableTableTableManager(_db, _db.cashuTokensTable);
+  $$CashuSpendingTableTableTableManager get cashuSpendingTable =>
+      $$CashuSpendingTableTableTableManager(_db, _db.cashuSpendingTable);
+  $$CashuWalletTableTableTableManager get cashuWalletTable =>
+      $$CashuWalletTableTableTableManager(_db, _db.cashuWalletTable);
 }

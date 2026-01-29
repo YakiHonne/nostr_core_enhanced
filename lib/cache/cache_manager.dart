@@ -1,3 +1,12 @@
+import 'package:nostr_core_enhanced/cashu/models/cashu_spending_data.dart';
+import 'package:nostr_core_enhanced/cashu/models/cashu_token_data.dart';
+import 'package:nostr_core_enhanced/cashu/models/cashu_wallet.dart';
+import 'package:nostr_core_enhanced/cashu/models/invoice.dart';
+import 'package:nostr_core_enhanced/cashu/models/keyset_info.dart';
+import 'package:nostr_core_enhanced/cashu/models/lightning_invoice.dart';
+import 'package:nostr_core_enhanced/cashu/models/mint_info.dart';
+import 'package:nostr_core_enhanced/cashu/models/mint_model.dart';
+import 'package:nostr_core_enhanced/cashu/models/unblinding_data.dart';
 import 'package:nostr_core_enhanced/db/db_wrapper.dart';
 import 'package:nostr_core_enhanced/models/app_shared_settings.dart';
 import 'package:nostr_core_enhanced/models/models.dart';
@@ -28,6 +37,7 @@ abstract class CacheManager {
   Future<void> flushEventsSeenRelays(DbWrapper dbWrapper);
 
   Future<void> removeEvent(String id);
+  Future<void> removeEvents(List<String> ids);
   Future<void> removeAllEventsByPubKey(String pubkey);
   Future<void> removeAllEvents();
   Future<void> removeAllEventsByKinds(List<int> kinds);
@@ -148,6 +158,114 @@ abstract class CacheManager {
   Future<WotModel?> loadUserWot(String pubkey);
   Future<void> removeUserWot(String pubkey);
   Future<void> removeAllWot();
+
+  // Cashu Proof operations
+  // Future<void> saveProof(Proof proof);
+  // Future<void> saveProofs(List<Proof> proofs);
+  // Future<Proof?> loadProof(String id, String secret);
+  // Future<List<Proof>> loadProofsByMint(String mintURL);
+  // Future<List<Proof>> loadAllProofs();
+  // Future<List<Proof>> loadProofs(List<String> ids, String c);
+  // Future<void> removeProof(String id, String secret);
+  // Future<void> removeProofs(List<Proof> delProofs);
+  // Future<void> removeAllProofs();
+
+  // Cashu Mint operations
+  Future<void> saveMint(IMint mint);
+  Future<void> saveMints(List<IMint> mints);
+  Future<void> saveMintsWithoutUpdate(List<IMint> mints);
+  Future<IMint?> loadMint(String mintURL);
+  Future<List<IMint>> loadMintsByPubkey(String pubkey);
+  Future<List<IMint>> loadAllMints();
+  Future<void> removeMint(String mintURL, String pubkey);
+  Future<void> removeAllMints();
+
+  // Cashu KeysetInfo operations
+  Future<void> saveKeysetInfo(KeysetInfo keysetInfo);
+  Future<void> saveKeysetInfos(List<KeysetInfo> keysetInfos);
+  Future<KeysetInfo?> loadKeysetInfo(String id, String mintURL);
+  Future<List<KeysetInfo>> loadKeysetInfosByMint(String mintURL);
+  Future<List<KeysetInfo>> loadKeysetInfos({
+    String? mintURL,
+    String? id,
+    String? unit,
+    bool? active,
+  });
+  Future<List<KeysetInfo>> loadAllKeysetInfos();
+  Future<void> removeKeysetInfo(String id, String mintURL);
+  Future<void> removeAllKeysetInfos();
+
+  // Cashu HistoryEntry operations
+  // Future<void> saveHistoryEntry(IHistoryEntry entry);
+  // Future<void> saveHistoryEntries(List<IHistoryEntry> entries);
+  // Future<IHistoryEntry?> loadHistoryEntry(String id);
+  // Future<List<IHistoryEntry>> loadHistoryEntries(List<String> values);
+  // Future<List<IHistoryEntry>> loadAllHistoryEntries();
+  // Future<bool> hasReceiptRedeemHistory(Receipt receipt);
+  // Future<void> removeHistoryEntry(String id);
+  // Future<void> removeHistoryEntries(List<IHistoryEntry> entries);
+  // Future<void> removeAllHistoryEntries();
+
+  // Cashu Invoice operations
+  Future<void> saveInvoice(IInvoice invoice);
+  Future<void> saveInvoices(List<IInvoice> invoices);
+  Future<IInvoice?> loadInvoice(String mintURL, String quote);
+  Future<List<IInvoice>> loadInvoicesByMint(String mintURL);
+  Future<List<IInvoice>> loadAllInvoices();
+  Future<void> removeInvoice(String mintURL, String quote);
+  Future<void> removeAllInvoices();
+
+  // Cashu UnblindingData operations
+  Future<void> saveUnblindingData(UnblindingData data);
+  Future<void> saveUnblindingDataList(List<UnblindingData> dataList);
+  Future<UnblindingData?> loadUnblindingData(String id, String secret);
+  Future<List<UnblindingData>> loadAllUnblindingData();
+  Future<void> removeUnblindingData(String id, String secret);
+  Future<void> removeAllUnblindingData();
+  Future<void> removeUnblindingDataList(List<UnblindingData> delData);
+
+  // Cashu MintInfo operations
+  Future<void> saveMintInfo(MintInfo mintInfo);
+  Future<void> saveMintInfos(List<MintInfo> mintInfos);
+  Future<MintInfo?> loadMintInfo(String mintURL);
+  Future<List<MintInfo>> loadAllMintInfos();
+  Future<void> removeMintInfo(String mintURL);
+  Future<void> removeAllMintInfos();
+
+  // Cashu LightningInvoice operations
+  Future<void> saveLightningInvoice(LightningInvoice invoice);
+  Future<void> saveLightningInvoices(List<LightningInvoice> invoices);
+  Future<LightningInvoice?> loadLightningInvoice(String mintURL, String hash);
+  Future<List<LightningInvoice>> loadAllLightningInvoices();
+  Future<int> removeInvoices(List<String> invoiceIds);
+  Future<int> removeLightningInvoices(List<String> lightningInvoiceIds);
+  Future<void> removeAllLightningInvoices();
+
+  // Cashu Token Data
+  Future<void> saveCashuToken(CashuTokenData token);
+  Future<void> saveCashuTokens(List<CashuTokenData> tokens);
+  Future<void> removeCashuTokens(List<String> ids);
+  Future<CashuTokenData?> getCashuTokenById(String id);
+  Future<List<CashuTokenData>> getCashuTokensByFilter({
+    String? mintURL,
+    String? pubkey,
+  });
+  Future<int?> getLatestCashuTokenCreatedAt(String pubkey);
+  Future<void> removeAllCashuTokens();
+
+  // Cashu Spending Data
+  Future<void> saveCashuSpending(CashuSpendingData spending);
+  Future<void> saveCashuSpendingList(List<CashuSpendingData> spendings);
+  Future<CashuSpendingData?> getCashuSpendingById(String id);
+  Future<List<CashuSpendingData>> getCashuSpendingsByPubkey(String pubkey);
+  Future<void> removeCashuSpending(String id);
+  Future<void> removeCashuSpendingList(List<CashuSpendingData> delData);
+  Future<void> removeAllCashuSpendings();
+
+  // Cashu Wallet operations
+  Future<void> saveCashuWallet(CashuWallet wallet);
+  Future<CashuWallet?> getCashuWallet(String pubkey);
+  Future<void> removeCashuWallet(String pubkey);
 
   Future<void> clearCache();
 }

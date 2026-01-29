@@ -68,35 +68,37 @@ class ContactList {
 
     for (var tag in event.tags) {
       final length = tag.length;
-      final name = tag[0];
-      final contact = tag[1];
+      if (length > 1) {
+        final name = tag[0];
+        final contact = tag[1];
 
-      if (name == "p" && isHexadecimal(contact)) {
-        String relay = '';
-        // String petname = '';
-        if (length > 2) {
-          relay = tag[2];
-          // if (length > 3) {
-          //   petname = tag[3];
-          // }
+        if (name == "p" && isHexadecimal(contact)) {
+          String relay = '';
+          // String petname = '';
+          if (length > 2) {
+            relay = tag[2];
+            // if (length > 3) {
+            //   petname = tag[3];
+            // }
+          }
+          contacts.add(contact);
+          final r = Relay.clean(relay);
+
+          if (r != null) {
+            contactRelays.add(r);
+          }
+
+          // petnames.add(petname);
+        } else if (name == "t" && length > 1) {
+          var tagName = tag[1];
+          followedTags.add(tagName);
+        } else if (name == "a" && length > 1) {
+          var id = tag[1];
+          followedCommunities.add(id);
+        } else if (name == "e" && length > 1) {
+          var id = tag[1];
+          followedEvents.add(id);
         }
-        contacts.add(contact);
-        final r = Relay.clean(relay);
-
-        if (r != null) {
-          contactRelays.add(r);
-        }
-
-        // petnames.add(petname);
-      } else if (name == "t" && length > 1) {
-        var tagName = tag[1];
-        followedTags.add(tagName);
-      } else if (name == "a" && length > 1) {
-        var id = tag[1];
-        followedCommunities.add(id);
-      } else if (name == "e" && length > 1) {
-        var id = tag[1];
-        followedEvents.add(id);
       }
     }
 

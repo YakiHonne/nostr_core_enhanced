@@ -39,6 +39,14 @@ class EventKind {
 
   static const int POLL = 6969;
 
+  static const int CASHU_REDEEMING_QUOTE = 7374;
+
+  static const int CASHU_TOKEN = 7375;
+
+  static const int CASHU_SPENDING = 7376;
+
+  static const int CASHU_NUTZAP = 9321;
+
   static const int ZAP_REQUEST = 9734;
 
   static const int ZAP = 9735;
@@ -55,11 +63,15 @@ class EventKind {
 
   static const int INTEREST_SET = 10015;
 
+  static const int CASHU_NUTZAP_INFORMATION = 10019;
+
   static const int DM_RELAYS = 10050;
 
   static const int BLOSSOM_SET = 10063;
 
   static const int NWC_INFO = 13194;
+
+  static const int CASHU_WALLET = 17375;
 
   static const int AUTHENTICATION = 22242;
 
@@ -89,6 +101,8 @@ class EventKind {
 
   static const int SMART_WIDGET_ENH = 30033;
 
+  static const int APP_CUSTOM = 30078;
+
   static const int RELAY_DISCOVERY = 30166;
 
   static const int LEGACY_VIDEO_HORIZONTAL = 34235;
@@ -97,7 +111,11 @@ class EventKind {
 
   static const int VIDEO_VIEW = 34237;
 
-  static const int APP_CUSTOM = 30078;
+  static const int ECASH_MINT_RECOMMENDATION = 38000;
+
+  static const int ECASH_MINT_INFO = 38172;
+
+  static const int ECASH_MINT_DISCOVERY = 38173;
 
   static const int APPLICATION_INFO = 31990;
 }

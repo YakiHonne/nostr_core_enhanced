@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:nostr_core_enhanced/utils/enums.dart';
 
 class StringListConverter extends TypeConverter<List<String>, String> {
   const StringListConverter();
@@ -80,6 +81,24 @@ class StringListOfListConverter
   }
 }
 
+class StringListOfMapConverter
+    extends TypeConverter<List<Map<String, String>>, String> {
+  const StringListOfMapConverter();
+
+  @override
+  List<Map<String, String>> fromSql(String fromDb) {
+    if (fromDb.isEmpty || fromDb == '[]') return [];
+    return (jsonDecode(fromDb) as List)
+        .map((e) => (e as Map).cast<String, String>())
+        .toList();
+  }
+
+  @override
+  String toSql(List<Map<String, String>> value) {
+    return jsonEncode(value);
+  }
+}
+
 class NestedMapIntConverter
     extends TypeConverter<Map<String, Map<String, int>>, String> {
   const NestedMapIntConverter();
@@ -99,5 +118,29 @@ class NestedMapIntConverter
   @override
   String toSql(Map<String, Map<String, int>> value) {
     return jsonEncode(value);
+  }
+}
+
+class CashuTokenStatusMapConverter
+    extends TypeConverter<Map<String, CashuTokenStatus>, String> {
+  const CashuTokenStatusMapConverter();
+
+  @override
+  Map<String, CashuTokenStatus> fromSql(String fromDb) {
+    if (fromDb.isEmpty || fromDb == '{}') return {};
+    final decoded = jsonDecode(fromDb) as Map<String, dynamic>;
+    return decoded.map((key, value) {
+      final status = CashuTokenStatus.values.firstWhere(
+        (e) => e.name == value,
+        orElse: () => CashuTokenStatus.created,
+      );
+      return MapEntry(key, status);
+    });
+  }
+
+  @override
+  String toSql(Map<String, CashuTokenStatus> value) {
+    final map = value.map((key, value) => MapEntry(key, value.name));
+    return jsonEncode(map);
   }
 }

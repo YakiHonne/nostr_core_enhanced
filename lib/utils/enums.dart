@@ -40,3 +40,21 @@ enum CurationTypes { all, videos, articles }
 enum VideoSourceTypes { all, youtube, vimeo, others }
 
 enum EventsSource { cache, cacheFirst, relays, all }
+
+enum CashuSpendingDirection { incoming, outgoing }
+
+enum CashuTokenStatus { created, destroyed, redeemed }
+
+enum CashuActionsStatus {
+  selectingTokens,
+  mintInfo,
+  generatingInvoice,
+  requestingMeltQuote,
+  melting,
+  broadcastingSpent,
+  requestingMintQuote,
+  minting,
+  broadcastingNew,
+  checkingProofs,
+  finalizing,
+}

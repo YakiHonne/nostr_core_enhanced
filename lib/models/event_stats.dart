@@ -374,6 +374,14 @@ class EventStats extends Equatable {
     );
   }
 
+  EventStats removeReply(String eventId) {
+    final updatedReplies = Map<String, String>.from(replies)..remove(eventId);
+
+    return copyWith(
+      replies: updatedReplies,
+    );
+  }
+
   double getZapEvent(Event event) {
     try {
       final ZapReceipt receipt = Nip57.getZapReceipt(event);

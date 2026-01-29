@@ -13,6 +13,10 @@ class Bip340EventSigner implements EventSigner {
 
   Bip340EventSigner(this.privateKey, this.publicKey);
 
+  String signMessage(String message) {
+    return Bip340.sign(message, privateKey!);
+  }
+
   @override
   Future<void> sign(Event event) async {
     if (StringUtil.isNotBlank(privateKey)) {

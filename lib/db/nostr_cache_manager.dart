@@ -1,5 +1,13 @@
 import 'package:drift/drift.dart';
 import 'package:nostr_core_enhanced/cache/cache_manager.dart';
+import 'package:nostr_core_enhanced/cashu/models/cashu_spending_data.dart';
+import 'package:nostr_core_enhanced/cashu/models/cashu_token_data.dart';
+import 'package:nostr_core_enhanced/cashu/models/cashu_wallet.dart';
+import 'package:nostr_core_enhanced/cashu/models/invoice.dart';
+import 'package:nostr_core_enhanced/cashu/models/keyset_info.dart';
+import 'package:nostr_core_enhanced/cashu/models/mint_info.dart';
+import 'package:nostr_core_enhanced/cashu/models/mint_model.dart';
+import 'package:nostr_core_enhanced/cashu/models/unblinding_data.dart';
 import 'package:nostr_core_enhanced/db/db_wrapper.dart';
 import 'package:nostr_core_enhanced/models/app_shared_settings.dart';
 import 'package:nostr_core_enhanced/models/event_stats.dart';
@@ -11,6 +19,7 @@ import 'package:nostr_core_enhanced/models/wot_models.dart';
 import 'package:nostr_core_enhanced/nostr/event.dart';
 import 'package:nostr_core_enhanced/nostr/filter.dart';
 
+import '../cashu/models/lightning_invoice.dart';
 import '../utils/helpers.dart';
 import 'drift_database.dart';
 
@@ -438,7 +447,7 @@ class NostrDB extends CacheManager {
   }) async {
     return await _retryOnLocked(
       () async {
-        String tagPattern(String type, String value) => '%["$type","$value"%';
+        // String tagPattern(String type, String value) => '%["$type","$value"%';
 
         final query = _database.select(_database.eventTable)
           ..where((tbl) {
@@ -447,17 +456,21 @@ class NostrDB extends CacheManager {
             if (kind != null) {
               conditions.add(tbl.kind.equals(kind));
             }
-            if (Helpers.isNotBlank(kTag)) {
-              conditions.add(tbl.tags.like(tagPattern('k', kTag!)));
-            }
-            if (Helpers.isNotBlank(e)) {
-              conditions.add(tbl.tags.like(tagPattern('e', e!)));
-            }
-            if (Helpers.isNotBlank(pTag)) {
-              conditions.add(tbl.tags.like(tagPattern('p', pTag!)));
-            }
+
             if (Helpers.isNotBlank(pubkey)) {
               conditions.add(tbl.pubkey.equals(pubkey!));
+            }
+
+            if (Helpers.isNotBlank(kTag)) {
+              conditions.add(tbl.kTags.contains('"$kTag"'));
+            }
+
+            if (Helpers.isNotBlank(e)) {
+              conditions.add(tbl.eTags.contains('"$e"'));
+            }
+
+            if (Helpers.isNotBlank(pTag)) {
+              conditions.add(tbl.pTags.contains('"$pTag"'));
             }
 
             if (conditions.isEmpty) {
@@ -636,6 +649,19 @@ class NostrDB extends CacheManager {
         await (_database.delete(_database.eventTable)
               ..where(
                 (tbl) => tbl.id.equals(id),
+              ))
+            .go();
+      },
+    );
+  }
+
+  @override
+  Future<void> removeEvents(List<String> ids) async {
+    await _retryOnLocked(
+      () async {
+        await (_database.delete(_database.eventTable)
+              ..where(
+                (tbl) => tbl.id.isIn(ids),
               ))
             .go();
       },
@@ -1628,8 +1654,1137 @@ class NostrDB extends CacheManager {
   }
 
   // =====================================================================
+  // MARK: CASHU PROOF OPERATIONS
+  // =====================================================================
+
+  // @override
+  // Future<void> saveProof(Proof proof) async {
+  //   await _retryOnLocked(
+  //     () async {
+  //       await _database.into(_database.cashuProofTable).insertOnConflictUpdate(
+  //             proof.toCompanion(),
+  //           );
+  //     },
+  //   );
+  // }
+
+  // @override
+  // Future<void> saveProofs(List<Proof> proofs) async {
+  //   await _retryOnLocked(
+  //     () async {
+  //       await _database.batch(
+  //         (batch) {
+  //           batch.insertAllOnConflictUpdate(
+  //             _database.cashuProofTable,
+  //             proofs.map((e) => e.toCompanion()),
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
+
+  // @override
+  // Future<Proof?> loadProof(String id, String secret) async {
+  //   return await _retryOnLocked(
+  //     () async {
+  //       final query = _database.select(_database.cashuProofTable)
+  //         ..where((tbl) => tbl.id.equals(id) & tbl.secret.equals(secret))
+  //         ..limit(1);
+
+  //       final p = await query.getSingleOrNull();
+
+  //       return p != null ? ProofDriftExtension.fromTableData(p) : null;
+  //     },
+  //   );
+  // }
+
+  // @override
+  // Future<List<Proof>> loadProofs(List<String> ids, String c) async {
+  //   return await _retryOnLocked(
+  //     () async {
+  //       final query = _database.select(_database.cashuProofTable)
+  //         ..where((tbl) => tbl.id.isIn(ids) & tbl.C.equals(c));
+
+  //       final proofs = await query.get();
+
+  //       return proofs.map((p) => ProofDriftExtension.fromTableData(p)).toList();
+  //     },
+  //   );
+  // }
+
+  // @override
+  // Future<List<Proof>> loadProofsByMint(String mintURL) async {
+  //   return await _retryOnLocked(
+  //     () async {
+  //       final query = _database.select(_database.cashuProofTable)
+  //         ..where((tbl) => tbl.id.contains(mintURL));
+
+  //       final proofs = await query.get();
+
+  //       return proofs.map((p) => ProofDriftExtension.fromTableData(p)).toList();
+  //     },
+  //   );
+  // }
+
+  // @override
+  // Future<List<Proof>> loadAllProofs() async {
+  //   return await _retryOnLocked(
+  //     () async {
+  //       final proofs = await _database.select(_database.cashuProofTable).get();
+
+  //       return proofs.map((p) => ProofDriftExtension.fromTableData(p)).toList();
+  //     },
+  //   );
+  // }
+
+  // @override
+  // Future<void> removeProof(String id, String secret) async {
+  //   await _retryOnLocked(
+  //     () async {
+  //       await (_database.delete(_database.cashuProofTable)
+  //             ..where((tbl) => tbl.id.equals(id) & tbl.secret.equals(secret)))
+  //           .go();
+  //     },
+  //   );
+  // }
+
+  // @override
+  // Future<void> removeProofs(List<Proof> delProofs) async {
+  //   await _retryOnLocked(
+  //     () async {
+  //       final ids = delProofs.map((p) => p.id).toList();
+  //       await (_database.delete(_database.cashuProofTable)
+  //             ..where((tbl) => tbl.id.isIn(ids)))
+  //           .go();
+  //     },
+  //   );
+  // }
+
+  // @override
+  // Future<void> removeAllProofs() async {
+  //   await _retryOnLocked(
+  //     () async {
+  //       await _database.delete(_database.cashuProofTable).go();
+  //     },
+  //   );
+  // }
+
+  // =====================================================================
+  // MARK: CASHU MINT OPERATIONS
+  // =====================================================================
+
+  @override
+  Future<void> saveMint(IMint mint) async {
+    await _retryOnLocked(
+      () async {
+        await _database.into(_database.cashuMintTable).insertOnConflictUpdate(
+              mint.toCompanion(),
+            );
+      },
+    );
+  }
+
+  @override
+  Future<void> saveMints(List<IMint> mints) async {
+    await _retryOnLocked(
+      () async {
+        await _database.batch(
+          (batch) {
+            batch.insertAllOnConflictUpdate(
+              _database.cashuMintTable,
+              mints.map((e) => e.toCompanion()),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  Future<void> saveMintsWithoutUpdate(List<IMint> mints) async {
+    await _retryOnLocked(
+      () async {
+        await _database.batch(
+          (batch) {
+            batch.insertAll(
+              _database.cashuMintTable,
+              mints.map((e) => e.toCompanion()),
+              mode: InsertMode.insertOrIgnore,
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  Future<IMint?> loadMint(String mintURL) async {
+    return await _retryOnLocked(
+      () async {
+        final query = _database.select(_database.cashuMintTable)
+          ..where((tbl) => tbl.mintURL.equals(mintURL))
+          ..limit(1);
+
+        final m = await query.getSingleOrNull();
+
+        return m != null ? MintDriftExtension.fromTableData(m) : null;
+      },
+    );
+  }
+
+  @override
+  Future<List<IMint>> loadMintsByPubkey(String pubkey) async {
+    return await _retryOnLocked(
+      () async {
+        final mints = await (_database.select(_database.cashuMintTable)
+              ..where((tbl) => tbl.pubkey.equals(pubkey)))
+            .get();
+
+        return mints.map((m) => MintDriftExtension.fromTableData(m)).toList();
+      },
+    );
+  }
+
+  @override
+  Future<List<IMint>> loadAllMints() async {
+    return await _retryOnLocked(
+      () async {
+        final mints = await _database.select(_database.cashuMintTable).get();
+
+        return mints.map((m) => MintDriftExtension.fromTableData(m)).toList();
+      },
+    );
+  }
+
+  @override
+  Future<void> removeMint(String mintURL, String pubkey) async {
+    await _retryOnLocked(
+      () async {
+        await (_database.delete(_database.cashuMintTable)
+              ..where((tbl) =>
+                  tbl.mintURL.equals(mintURL) & tbl.pubkey.equals(pubkey)))
+            .go();
+      },
+    );
+  }
+
+  @override
+  Future<void> removeAllMints() async {
+    await _retryOnLocked(
+      () async {
+        await _database.delete(_database.cashuMintTable).go();
+      },
+    );
+  }
+
+  // =====================================================================
+  // MARK: CASHU KEYSET INFO OPERATIONS
+  // =====================================================================
+
+  @override
+  Future<void> saveKeysetInfo(KeysetInfo keysetInfo) async {
+    await _retryOnLocked(
+      () async {
+        await _database
+            .into(_database.cashuKeysetInfoTable)
+            .insertOnConflictUpdate(
+              keysetInfo.toCompanion(),
+            );
+      },
+    );
+  }
+
+  @override
+  Future<void> saveKeysetInfos(List<KeysetInfo> keysetInfos) async {
+    await _retryOnLocked(
+      () async {
+        await _database.batch(
+          (batch) {
+            batch.insertAllOnConflictUpdate(
+              _database.cashuKeysetInfoTable,
+              keysetInfos.map((e) => e.toCompanion()),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  Future<KeysetInfo?> loadKeysetInfo(String id, String mintURL) async {
+    return await _retryOnLocked(
+      () async {
+        final query = _database.select(_database.cashuKeysetInfoTable)
+          ..where((tbl) => tbl.id.equals(id) & tbl.mintURL.equals(mintURL))
+          ..limit(1);
+
+        final k = await query.getSingleOrNull();
+
+        return k != null ? KeysetInfoDriftExtension.fromTableData(k) : null;
+      },
+    );
+  }
+
+  @override
+  Future<List<KeysetInfo>> loadKeysetInfos({
+    String? mintURL,
+    String? id,
+    String? unit,
+    bool? active,
+  }) async {
+    return await _retryOnLocked(
+      () async {
+        final query = _database.select(_database.cashuKeysetInfoTable)
+          ..where((tbl) {
+            final conditions = <Expression<bool>>[];
+
+            if (mintURL != null && mintURL.isNotEmpty) {
+              conditions.add(tbl.mintURL.equals(mintURL));
+            }
+            if (id != null && id.isNotEmpty) {
+              conditions.add(tbl.id.equals(id));
+            }
+            if (unit != null && unit.isNotEmpty) {
+              conditions.add(tbl.unit.equals(unit));
+            }
+            if (active != null) {
+              conditions.add(tbl.active.equals(active));
+            }
+
+            // If no conditions, return all
+            if (conditions.isEmpty) {
+              return const Constant(true);
+            }
+
+            // Combine all conditions with AND
+            return conditions.reduce((a, b) => a & b);
+          });
+
+        final keysets = await query.get();
+
+        return keysets
+            .map((k) => KeysetInfoDriftExtension.fromTableData(k))
+            .toList();
+      },
+    );
+  }
+
+  @override
+  Future<List<KeysetInfo>> loadKeysetInfosByMint(String mintURL) async {
+    return await _retryOnLocked(
+      () async {
+        final query = _database.select(_database.cashuKeysetInfoTable)
+          ..where((tbl) => tbl.mintURL.equals(mintURL));
+
+        final keysets = await query.get();
+
+        return keysets
+            .map((k) => KeysetInfoDriftExtension.fromTableData(k))
+            .toList();
+      },
+    );
+  }
+
+  @override
+  Future<List<KeysetInfo>> loadAllKeysetInfos() async {
+    return await _retryOnLocked(
+      () async {
+        final keysets =
+            await _database.select(_database.cashuKeysetInfoTable).get();
+
+        return keysets
+            .map((k) => KeysetInfoDriftExtension.fromTableData(k))
+            .toList();
+      },
+    );
+  }
+
+  @override
+  Future<void> removeKeysetInfo(String id, String mintURL) async {
+    await _retryOnLocked(
+      () async {
+        await (_database.delete(_database.cashuKeysetInfoTable)
+              ..where((tbl) => tbl.id.equals(id) & tbl.mintURL.equals(mintURL)))
+            .go();
+      },
+    );
+  }
+
+  @override
+  Future<void> removeAllKeysetInfos() async {
+    await _retryOnLocked(
+      () async {
+        await _database.delete(_database.cashuKeysetInfoTable).go();
+      },
+    );
+  }
+
+  // =====================================================================
+  // MARK: CASHU HISTORY ENTRY OPERATIONS
+  // =====================================================================
+
+  // @override
+  // Future<void> saveHistoryEntry(IHistoryEntry entry) async {
+  //   await _retryOnLocked(
+  //     () async {
+  //       await _database
+  //           .into(_database.cashuHistoryEntryTable)
+  //           .insertOnConflictUpdate(
+  //             entry.toCompanion(),
+  //           );
+  //     },
+  //   );
+  // }
+
+  // @override
+  // Future<void> saveHistoryEntries(List<IHistoryEntry> entries) async {
+  //   await _retryOnLocked(
+  //     () async {
+  //       await _database.batch(
+  //         (batch) {
+  //           batch.insertAllOnConflictUpdate(
+  //             _database.cashuHistoryEntryTable,
+  //             entries.map((e) => e.toCompanion()),
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
+
+  // @override
+  // Future<IHistoryEntry?> loadHistoryEntry(String id) async {
+  //   return await _retryOnLocked(
+  //     () async {
+  //       final query = _database.select(_database.cashuHistoryEntryTable)
+  //         ..where((tbl) => tbl.id.equals(id))
+  //         ..limit(1);
+
+  //       final h = await query.getSingleOrNull();
+
+  //       return h != null ? LnHistoryEntryEx.fromTableData(h) : null;
+  //     },
+  //   );
+  // }
+
+  // @override
+  // Future<List<IHistoryEntry>> loadHistoryEntries(List<String> values) async {
+  //   return await _retryOnLocked(
+  //     () async {
+  //       final query = _database.select(_database.cashuHistoryEntryTable)
+  //         ..where((tbl) => tbl.value.isIn(values));
+
+  //       final entries = await query.get();
+
+  //       return entries.map((h) => LnHistoryEntryEx.fromTableData(h)).toList();
+  //     },
+  //   );
+  // }
+
+  // @override
+  // Future<List<IHistoryEntry>> loadAllHistoryEntries() async {
+  //   return await _retryOnLocked(
+  //     () async {
+  //       final entries =
+  //           await _database.select(_database.cashuHistoryEntryTable).get();
+
+  //       return entries.map((h) => LnHistoryEntryEx.fromTableData(h)).toList();
+  //     },
+  //   );
+  // }
+
+  // @override
+  // Future<bool> hasReceiptRedeemHistory(Receipt receipt) async {
+  //   return await _retryOnLocked(
+  //     () async {
+  //       final query = _database.select(_database.cashuHistoryEntryTable)
+  //         ..where((tbl) =>
+  //             tbl.value.equals(receipt.paymentKey) &
+  //             tbl.amount.isBiggerThanValue(0))
+  //         ..limit(1);
+
+  //       final h = await query.getSingleOrNull();
+
+  //       return h != null;
+  //     },
+  //   );
+  // }
+
+  // @override
+  // Future<void> removeHistoryEntry(String id) async {
+  //   await _retryOnLocked(
+  //     () async {
+  //       await (_database.delete(_database.cashuHistoryEntryTable)
+  //             ..where((tbl) => tbl.id.equals(id)))
+  //           .go();
+  //     },
+  //   );
+  // }
+
+  // @override
+  // Future<void> removeHistoryEntries(List<IHistoryEntry> entries) async {
+  //   await _retryOnLocked(
+  //     () async {
+  //       final ids = entries.map((e) => e.id).toList();
+
+  //       await _database.batch(
+  //         (batch) {
+  //           batch.deleteWhere(
+  //             _database.cashuHistoryEntryTable,
+  //             (tbl) => tbl.id.isIn(ids),
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
+
+  // @override
+  // Future<void> removeAllHistoryEntries() async {
+  //   await _retryOnLocked(
+  //     () async {
+  //       await _database.delete(_database.cashuHistoryEntryTable).go();
+  //     },
+  //   );
+  // }
+
+  // =====================================================================
+  // MARK: CASHU INVOICE OPERATIONS
+  // =====================================================================
+
+  @override
+  Future<void> saveInvoice(IInvoice invoice) async {
+    await _retryOnLocked(
+      () async {
+        await _database
+            .into(_database.cashuInvoiceTable)
+            .insertOnConflictUpdate(
+              invoice.toCompanion(),
+            );
+      },
+    );
+  }
+
+  @override
+  Future<void> saveInvoices(List<IInvoice> invoices) async {
+    await _retryOnLocked(
+      () async {
+        await _database.batch(
+          (batch) {
+            batch.insertAllOnConflictUpdate(
+              _database.cashuInvoiceTable,
+              invoices.map((e) => e.toCompanion()),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  Future<IInvoice?> loadInvoice(String mintURL, String quote) async {
+    return await _retryOnLocked(
+      () async {
+        final query = _database.select(_database.cashuInvoiceTable)
+          ..where(
+              (tbl) => tbl.mintURL.equals(mintURL) & tbl.quote.equals(quote))
+          ..limit(1);
+
+        final i = await query.getSingleOrNull();
+
+        return i != null ? InvoiceDriftExtension.fromTableData(i) : null;
+      },
+    );
+  }
+
+  @override
+  Future<List<IInvoice>> loadInvoicesByMint(String mintURL) async {
+    return await _retryOnLocked(
+      () async {
+        final query = _database.select(_database.cashuInvoiceTable)
+          ..where((tbl) => tbl.mintURL.equals(mintURL));
+
+        final invoices = await query.get();
+
+        return invoices
+            .map((i) => InvoiceDriftExtension.fromTableData(i))
+            .toList();
+      },
+    );
+  }
+
+  @override
+  Future<List<IInvoice>> loadAllInvoices() async {
+    return await _retryOnLocked(
+      () async {
+        final invoices =
+            await _database.select(_database.cashuInvoiceTable).get();
+
+        return invoices
+            .map((i) => InvoiceDriftExtension.fromTableData(i))
+            .toList();
+      },
+    );
+  }
+
+  @override
+  Future<void> removeInvoice(String mintURL, String quote) async {
+    await _retryOnLocked(
+      () async {
+        await (_database.delete(_database.cashuInvoiceTable)
+              ..where((tbl) =>
+                  tbl.mintURL.equals(mintURL) & tbl.quote.equals(quote)))
+            .go();
+      },
+    );
+  }
+
+  @override
+  Future<void> removeAllInvoices() async {
+    await _retryOnLocked(
+      () async {
+        await _database.delete(_database.cashuInvoiceTable).go();
+      },
+    );
+  }
+
+  // =====================================================================
+  // MARK: CASHU UNBLINDING DATA OPERATIONS
+  // =====================================================================
+
+  @override
+  Future<void> saveUnblindingData(UnblindingData data) async {
+    await _retryOnLocked(
+      () async {
+        await _database
+            .into(_database.cashuUnblindingDataTable)
+            .insertOnConflictUpdate(
+              data.toCompanion(),
+            );
+      },
+    );
+  }
+
+  @override
+  Future<void> saveUnblindingDataList(List<UnblindingData> dataList) async {
+    await _retryOnLocked(
+      () async {
+        await _database.batch(
+          (batch) {
+            batch.insertAllOnConflictUpdate(
+              _database.cashuUnblindingDataTable,
+              dataList.map((e) => e.toCompanion()),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  Future<UnblindingData?> loadUnblindingData(String id, String secret) async {
+    return await _retryOnLocked(
+      () async {
+        final query = _database.select(_database.cashuUnblindingDataTable)
+          ..where((tbl) => tbl.id.equals(id) & tbl.secret.equals(secret))
+          ..limit(1);
+
+        final u = await query.getSingleOrNull();
+
+        return u != null ? UnblindingDataDriftExtension.fromTableData(u) : null;
+      },
+    );
+  }
+
+  @override
+  Future<List<UnblindingData>> loadAllUnblindingData() async {
+    return await _retryOnLocked(
+      () async {
+        final data =
+            await _database.select(_database.cashuUnblindingDataTable).get();
+
+        return data
+            .map((u) => UnblindingDataDriftExtension.fromTableData(u))
+            .toList();
+      },
+    );
+  }
+
+  @override
+  Future<void> removeUnblindingData(String id, String secret) async {
+    await _retryOnLocked(
+      () async {
+        await (_database.delete(_database.cashuUnblindingDataTable)
+              ..where((tbl) => tbl.id.equals(id) & tbl.secret.equals(secret)))
+            .go();
+      },
+    );
+  }
+
+  @override
+  Future<void> removeAllUnblindingData() async {
+    await _retryOnLocked(
+      () async {
+        await _database.delete(_database.cashuUnblindingDataTable).go();
+      },
+    );
+  }
+
+  @override
+  Future<void> removeUnblindingDataList(List<UnblindingData> delData) async {
+    await _retryOnLocked(
+      () async {
+        final ids = delData.map((p) => p.id).toList();
+        await (_database.delete(_database.cashuUnblindingDataTable)
+              ..where((tbl) => tbl.id.isIn(ids)))
+            .go();
+      },
+    );
+  }
+
+  // =====================================================================
+  // MARK: CASHU MINT INFO OPERATIONS
+  // =====================================================================
+
+  @override
+  Future<void> saveMintInfo(MintInfo mintInfo) async {
+    await _retryOnLocked(
+      () async {
+        await _database
+            .into(_database.cashuMintInfoTable)
+            .insertOnConflictUpdate(
+              mintInfo.toCompanion(),
+            );
+      },
+    );
+  }
+
+  @override
+  Future<void> saveMintInfos(List<MintInfo> mintInfos) async {
+    await _retryOnLocked(
+      () async {
+        await _database.batch(
+          (batch) {
+            batch.insertAllOnConflictUpdate(
+              _database.cashuMintInfoTable,
+              mintInfos.map((e) => e.toCompanion()),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  Future<MintInfo?> loadMintInfo(String mintURL) async {
+    return await _retryOnLocked(
+      () async {
+        final query = _database.select(_database.cashuMintInfoTable)
+          ..where((tbl) => tbl.mintURL.equals(mintURL))
+          ..limit(1);
+
+        final m = await query.getSingleOrNull();
+
+        return m != null ? MintInfoDriftExtension.fromTableData(m) : null;
+      },
+    );
+  }
+
+  @override
+  Future<List<MintInfo>> loadAllMintInfos() async {
+    return await _retryOnLocked(
+      () async {
+        final mintInfos =
+            await _database.select(_database.cashuMintInfoTable).get();
+
+        return mintInfos
+            .map((m) => MintInfoDriftExtension.fromTableData(m))
+            .toList();
+      },
+    );
+  }
+
+  @override
+  Future<void> removeMintInfo(String mintURL) async {
+    await _retryOnLocked(
+      () async {
+        await (_database.delete(_database.cashuMintInfoTable)
+              ..where((tbl) => tbl.mintURL.equals(mintURL)))
+            .go();
+      },
+    );
+  }
+
+  @override
+  Future<void> removeAllMintInfos() async {
+    await _retryOnLocked(
+      () async {
+        await _database.delete(_database.cashuMintInfoTable).go();
+      },
+    );
+  }
+
+  // =====================================================================
+  // MARK: CASHU LIGHTNING INVOICE OPERATIONS
+  // =====================================================================
+
+  @override
+  Future<void> saveLightningInvoice(LightningInvoice invoice) async {
+    await _retryOnLocked(
+      () async {
+        await _database
+            .into(_database.cashuLightningInvoiceTable)
+            .insertOnConflictUpdate(
+              invoice.toCompanion(),
+            );
+      },
+    );
+  }
+
+  @override
+  Future<void> saveLightningInvoices(List<LightningInvoice> invoices) async {
+    await _retryOnLocked(
+      () async {
+        await _database.batch(
+          (batch) {
+            batch.insertAllOnConflictUpdate(
+              _database.cashuLightningInvoiceTable,
+              invoices.map((e) => e.toCompanion()),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  Future<LightningInvoice?> loadLightningInvoice(
+      String mintURL, String hash) async {
+    return await _retryOnLocked(
+      () async {
+        final query = _database.select(_database.cashuLightningInvoiceTable)
+          ..where((tbl) => tbl.mintURL.equals(mintURL) & tbl.hash.equals(hash))
+          ..limit(1);
+
+        final i = await query.getSingleOrNull();
+
+        return i != null
+            ? LightningInvoiceDriftExtension.fromTableData(i)
+            : null;
+      },
+    );
+  }
+
+  @override
+  Future<List<LightningInvoice>> loadAllLightningInvoices() async {
+    return await _retryOnLocked(
+      () async {
+        final invoices =
+            await _database.select(_database.cashuLightningInvoiceTable).get();
+
+        return invoices
+            .map((i) => LightningInvoiceDriftExtension.fromTableData(i))
+            .toList();
+      },
+    );
+  }
+
+  @override
+  Future<int> removeInvoices(List<String> invoiceIds) async {
+    return await _retryOnLocked(
+      () async {
+        final deleted = await (_database.delete(_database.cashuInvoiceTable)
+              ..where((tbl) => tbl.id.isIn(invoiceIds)))
+            .go();
+        return deleted;
+      },
+    );
+  }
+
+  @override
+  Future<int> removeLightningInvoices(List<String> lightningInvoiceIds) async {
+    return await _retryOnLocked(
+      () async {
+        final deleted =
+            await (_database.delete(_database.cashuLightningInvoiceTable)
+                  ..where((tbl) => tbl.id.isIn(lightningInvoiceIds)))
+                .go();
+        return deleted;
+      },
+    );
+  }
+
+  @override
+  Future<void> removeAllLightningInvoices() async {
+    await _retryOnLocked(
+      () async {
+        await _database.delete(_database.cashuLightningInvoiceTable).go();
+      },
+    );
+  }
+
+  // =====================================================================
+  // MARK: CASHU TOKEN OPERATIONS
+  // =====================================================================
+
+  @override
+  Future<void> saveCashuToken(CashuTokenData token) async {
+    await _retryOnLocked(
+      () async {
+        await _database.into(_database.cashuTokensTable).insertOnConflictUpdate(
+              token.toCompanion(),
+            );
+      },
+    );
+  }
+
+  @override
+  Future<void> saveCashuTokens(List<CashuTokenData> tokens) async {
+    await _retryOnLocked(
+      () async {
+        await _database.batch(
+          (batch) {
+            batch.insertAllOnConflictUpdate(
+              _database.cashuTokensTable,
+              tokens.map((e) => e.toCompanion()),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  Future<void> removeCashuTokens(List<String> ids) async {
+    await _retryOnLocked(
+      () async {
+        await (_database.delete(_database.cashuTokensTable)
+              ..where((tbl) => tbl.id.isIn(ids)))
+            .go();
+      },
+    );
+  }
+
+  @override
+  Future<CashuTokenData?> getCashuTokenById(String id) async {
+    return await _retryOnLocked(
+      () async {
+        final query = _database.select(_database.cashuTokensTable)
+          ..where((tbl) => tbl.id.equals(id))
+          ..limit(1);
+
+        final result = await query.getSingleOrNull();
+
+        return result != null
+            ? CashuTokenDataDriftHelper.fromTableData(result)
+            : null;
+      },
+    );
+  }
+
+  @override
+  Future<List<CashuTokenData>> getCashuTokensByFilter({
+    String? mintURL,
+    String? pubkey,
+  }) async {
+    return await _retryOnLocked(
+      () async {
+        final query = _database.select(_database.cashuTokensTable);
+
+        if (mintURL != null) {
+          query.where((tbl) => tbl.mintUrl.equals(mintURL));
+        }
+
+        if (pubkey != null) {
+          query.where((tbl) => tbl.pubkey.equals(pubkey));
+        }
+
+        final result = await query.get();
+
+        return result
+            .map((e) => CashuTokenDataDriftHelper.fromTableData(e))
+            .toList();
+      },
+    );
+  }
+
+  @override
+  Future<int?> getLatestCashuTokenCreatedAt(String pubkey) async {
+    return await _retryOnLocked(
+      () async {
+        final query = _database.select(_database.cashuTokensTable)
+          ..where((tbl) => tbl.pubkey.equals(pubkey))
+          ..orderBy([
+            (tbl) => OrderingTerm(
+                  expression: tbl.createdAt,
+                  mode: OrderingMode.desc,
+                )
+          ])
+          ..limit(1);
+
+        final result = await query.getSingleOrNull();
+
+        return result?.createdAt;
+      },
+    );
+  }
+
+  @override
+  Future<void> removeAllCashuTokens() async {
+    await _retryOnLocked(
+      () async {
+        await _database.delete(_database.cashuTokensTable).go();
+      },
+    );
+  }
+
+  // =====================================================================
   // MARK: CACHE MANAGEMENT
   // =====================================================================
+
+  @override
+  Future<void> saveCashuSpending(CashuSpendingData spending) async {
+    await _retryOnLocked(
+      () async {
+        await _database
+            .into(_database.cashuSpendingTable)
+            .insertOnConflictUpdate(
+              spending.toCompanion(),
+            );
+      },
+    );
+  }
+
+  @override
+  Future<void> saveCashuSpendingList(List<CashuSpendingData> spendings) async {
+    await _retryOnLocked(
+      () async {
+        await _database.batch(
+          (batch) {
+            batch.insertAllOnConflictUpdate(
+              _database.cashuSpendingTable,
+              spendings.map((e) => e.toCompanion()),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  Future<CashuSpendingData?> getCashuSpendingById(String id) async {
+    return await _retryOnLocked(
+      () async {
+        final query = _database.select(_database.cashuSpendingTable)
+          ..where((tbl) => tbl.id.equals(id))
+          ..limit(1);
+
+        final result = await query.getSingleOrNull();
+
+        return result != null
+            ? CashuSpendingDataDriftHelper.fromTableData(result)
+            : null;
+      },
+    );
+  }
+
+  @override
+  Future<List<CashuSpendingData>> getCashuSpendingsByPubkey(
+      String pubkey) async {
+    return await _retryOnLocked(
+      () async {
+        final query = _database.select(_database.cashuSpendingTable)
+          ..where((tbl) => tbl.pubkey.equals(pubkey))
+          ..orderBy([
+            (tbl) => OrderingTerm(
+                  expression: tbl.createdAt,
+                  mode: OrderingMode.desc,
+                )
+          ]);
+
+        final result = await query.get();
+
+        return result
+            .map((e) => CashuSpendingDataDriftHelper.fromTableData(e))
+            .toList();
+      },
+    );
+  }
+
+  @override
+  Future<void> removeCashuSpending(String id) async {
+    await _retryOnLocked(
+      () async {
+        _database.delete(_database.cashuSpendingTable)
+          ..where((tbl) => tbl.id.equals(id))
+          ..go();
+      },
+    );
+  }
+
+  @override
+  Future<void> removeCashuSpendingList(List<CashuSpendingData> delData) async {
+    await _retryOnLocked(
+      () async {
+        _database.delete(_database.cashuSpendingTable)
+          ..where((tbl) => tbl.id.isIn(delData.map((e) => e.id)))
+          ..go();
+      },
+    );
+  }
+
+  @override
+  Future<void> removeAllCashuSpendings() async {
+    await _retryOnLocked(
+      () async {
+        await _database.delete(_database.cashuSpendingTable).go();
+      },
+    );
+  }
+
+  // =====================================================================
+  // MARK: CASHU WALLET OPERATIONS
+  // =====================================================================
+
+  @override
+  Future<void> saveCashuWallet(CashuWallet wallet) async {
+    await _retryOnLocked(
+      () async {
+        await _database.into(_database.cashuWalletTable).insertOnConflictUpdate(
+              wallet.toCompanion(),
+            );
+      },
+    );
+  }
+
+  @override
+  Future<CashuWallet?> getCashuWallet(String pubkey) async {
+    return await _retryOnLocked(
+      () async {
+        final query = _database.select(_database.cashuWalletTable)
+          ..where((tbl) => tbl.pubkey.equals(pubkey))
+          ..limit(1);
+
+        final result = await query.getSingleOrNull();
+
+        return result != null
+            ? CashuWalletDriftExtension.fromTableData(result)
+            : null;
+      },
+    );
+  }
+
+  @override
+  Future<void> removeCashuWallet(String pubkey) async {
+    await _retryOnLocked(
+      () async {
+        await (_database.delete(_database.cashuWalletTable)
+              ..where((tbl) => tbl.pubkey.equals(pubkey)))
+            .go();
+      },
+    );
+  }
 
   @override
   Future<void> clearCache() async {

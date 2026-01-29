@@ -66,6 +66,11 @@ class EventTable extends Table {
         Index('idx_events_pubkey', [pubkey.name] as String),
         Index('idx_events_kind', [kind.name] as String),
         Index('idx_events_created_at', [createdAt.name] as String),
-        Index('idx_events_current_user', [currentUser.name] as String),
+        Index('idx_events_current_user',
+            'CREATE INDEX idx_events_current_user ON event_table (${currentUser.name})'),
+        Index('idx_events_d_tag',
+            'CREATE INDEX idx_events_d_tag ON event_table (${dTag.name})'),
+        Index('idx_events_pk_kind_created',
+            'CREATE INDEX idx_events_pk_kind_created ON event_table (${pubkey.name}, ${kind.name}, ${createdAt.name} DESC)'),
       ];
 }

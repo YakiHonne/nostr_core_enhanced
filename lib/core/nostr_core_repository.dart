@@ -51,7 +51,6 @@ const List<String> DEFAULT_DM_RELAYS = [
 
 const List<String> DEFAULT_SEARCH_RELAYS = [
   'wss://search.nos.today',
-  'wss://relay.nostr.band',
   'wss://relay.ditto.pub',
   'wss://nostr.polyserv.xyz',
 ];
@@ -59,12 +58,12 @@ const List<String> DEFAULT_SEARCH_RELAYS = [
 class NostrCore {
   late NostrDB db;
   late DbWrapper dbWrapper;
-
   late RemoteCacheService remoteCacheService;
 
   NostrCore({
     NostrDB? db,
     bool loadRemoteCache = true,
+    bool loadCashu = false,
   }) {
     this.db = db ?? NostrDB();
     dbWrapper = DbWrapper(this.db);
