@@ -21,7 +21,7 @@ class HTTPClient {
     String url, {
     Map<String, String>? query,
     T? Function(dynamic json)? modelBuilder,
-    int? timeOut = 15,
+    int? timeOut = 25,
   }) async {
     return HTTPClient.shared._get(
       url,
@@ -36,7 +36,7 @@ class HTTPClient {
     Map<String, String>? query,
     Map<String, dynamic>? params,
     T? Function(dynamic json)? modelBuilder,
-    int? timeOut = 15,
+    int? timeOut = 25,
   }) async {
     return HTTPClient.shared._post(
       url,
