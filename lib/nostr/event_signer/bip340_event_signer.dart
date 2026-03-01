@@ -96,8 +96,9 @@ class Bip340EventSigner implements EventSigner {
     Event event,
     String destPubKey, {
     String? id,
+    int? kind,
   }) async {
-    return await Nip17.encode(event, destPubKey, this);
+    return await Nip17.encode(event, destPubKey, this, kind: kind);
   }
 
   @override

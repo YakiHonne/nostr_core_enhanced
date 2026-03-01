@@ -22,7 +22,12 @@ abstract class EventSigner {
 
   Future<Event?> decrypt44Event(Event event, {String? id});
 
-  Future<Event?> encrypt44Event(Event event, String destPubKey, {String? id});
+  Future<Event?> encrypt44Event(
+    Event event,
+    String destPubKey, {
+    String? id,
+    int? kind,
+  });
 
   bool canSign();
 

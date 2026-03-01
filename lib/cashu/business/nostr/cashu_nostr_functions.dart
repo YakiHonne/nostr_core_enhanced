@@ -29,13 +29,19 @@ class NostrCashuFunctions {
     this.pubkey = pubkey;
   }
 
-  Future<void> initializeData() async {
-    final tokens = await nc.db.getCashuTokensByFilter(pubkey: pubkey);
-    final spendings = await nc.db.getCashuSpendingsByPubkey(pubkey);
-
+  Future<void> initializeData({Function(String)? log}) async {
+    log?.call('[Cashu - initializeData] starting');
+    final initialData = await Future.wait([
+      nc.db.getCashuTokensByFilter(pubkey: pubkey),
+      nc.db.getCashuSpendingsByPubkey(pubkey),
+    ]);
+    final tokens = initialData[0] as List<CashuTokenData>;
+    final spendings = initialData[1] as List<CashuSpendingData>;
+    log?.call('[Cashu - initializeData] fetched tokens and spendings');
     final tokensMap = <String, Event>{};
     final spendingsMap = <String, Event>{};
 
+    log?.call('[Cashu - initializeData] fetching events');
     await nc.doQuery(
       [
         Filter(
@@ -60,6 +66,7 @@ class NostrCashuFunctions {
         ),
       ],
       [],
+      timeOut: 2,
       eventCallBack: (e, r) {
         if (e.kind == EventKind.CASHU_TOKEN) {
           tokensMap[e.id] = e;
@@ -70,6 +77,7 @@ class NostrCashuFunctions {
         }
       },
     );
+    log?.call('[Cashu - initializeData] fetched events');
 
     // broadcastDeletion(tokensMap.values.map((e) => e.id).toList());
 
@@ -77,7 +85,40 @@ class NostrCashuFunctions {
       tokensMap: tokensMap,
       savedTokens: tokens,
       spendingsMap: spendingsMap,
+      log: log,
     );
+  }
+
+  Future<bool> deleteWallet() async {
+    CashuWallet? wallet = await nc.db.getCashuWallet(pubkey);
+
+    if (wallet != null) {
+      final ev = await Event.genEvent(
+        kind: EventKind.EVENT_DELETION,
+        tags: [
+          ['e', wallet.id]
+        ],
+        content: 'wallet',
+        signer: nc.currentSigner,
+      );
+
+      logger.i(ev);
+
+      if (ev != null) {
+        final isSuccessful = await nc.sendEventAsync(
+          event: ev,
+          setProgress: false,
+        );
+
+        if (isSuccessful) {
+          await nc.db.removeCashuWallet(pubkey);
+
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   Future<void> syncMintTokens(String mintURL) async {
@@ -123,12 +164,13 @@ class NostrCashuFunctions {
 
     await handleEvents(
       tokensMap: tokensMap,
-      savedTokens: currentTokens, // Use filtered current tokens
+      savedTokens: currentTokens,
       spendingsMap: spendingsMap,
     );
   }
 
   Future<CashuWallet?> initializeWallet() async {
+    // return null;
     CashuWallet? wallet = await nc.db.getCashuWallet(pubkey);
 
     int? walletCreatedAt = wallet?.createdAt;
@@ -154,19 +196,25 @@ class NostrCashuFunctions {
 
     if (walletEvent != null) {
       wallet = await CashuWallet.fromEvent(walletEvent!, nc);
+      if (wallet != null) {
+        await nc.db.saveCashuWallet(wallet);
+      }
     }
 
     return wallet;
   }
 
-  Future<CashuWallet?> createWallet({List<String>? mints}) async {
+  Future<CashuWallet?> createWallet({
+    required List<String> mints,
+  }) async {
     final privkey = Keychain.generate().private;
 
     final content = await nc.currentSigner!.encrypt44(
       jsonEncode([
         ['privkey', privkey],
-        ...mints?.map((mint) => ['mint', mint]) ??
-            defaultMints.map((mint) => ['mint', mint]),
+        ...mints.isNotEmpty
+            ? mints.map((mint) => ['mint', mint])
+            : defaultMints.map((mint) => ['mint', mint]),
       ]),
       pubkey,
     );
@@ -193,7 +241,7 @@ class NostrCashuFunctions {
             createdAt: ev.createdAt,
             pubkey: pubkey,
             signSecret: privkey,
-            mints: mints ?? defaultMints,
+            mints: mints.isNotEmpty ? mints : defaultMints,
           );
 
           setNutzapInformationEvent(w);
@@ -609,8 +657,17 @@ class NostrCashuFunctions {
     required Map<String, Event> tokensMap,
     required List<CashuTokenData> savedTokens,
     required Map<String, Event> spendingsMap,
+    Function(String)? log,
   }) async {
-    final tokensData = await computeData(tokensMap.values.toList());
+    log?.call('[Cashu - handleEvents] handling tokens and spendings starting');
+    final data = await Future.wait([
+      computeData(tokensMap.values.toList()),
+      computeData(spendingsMap.values.toList()),
+    ]);
+
+    final tokensData = data[0];
+    final spendingsData = data[1];
+    log?.call('[Cashu - handleEvents] handling tokens and spendings computed');
 
     if (tokensData.isNotEmpty) {
       final tokens = <CashuTokenData>[];
@@ -674,9 +731,8 @@ class NostrCashuFunctions {
       }
     }
 
-    final spendingsData = await computeData(spendingsMap.values.toList());
-
     if (spendingsData.isNotEmpty) {
+      log?.call('[Cashu - handleEvents] saving spendings');
       await nc.db.saveCashuSpendingList(
         spendingsData.entries
             .map(
@@ -688,6 +744,7 @@ class NostrCashuFunctions {
             )
             .toList(),
       );
+      log?.call('[Cashu - handleEvents] spendings saved');
     }
   }
 
@@ -716,14 +773,17 @@ class NostrCashuFunctions {
   ) async {
     final processedEvents = <String, String>{};
 
-    for (final event in events) {
+    final results = await Future.wait(events.map((event) async {
       final decryptedEvent = await signer.decrypt44(
         event.content,
         event.pubkey,
       );
+      return {'id': event.id, 'decrypted': decryptedEvent};
+    }));
 
-      if (decryptedEvent != null) {
-        processedEvents[event.id] = decryptedEvent;
+    for (final res in results) {
+      if (res['decrypted'] != null) {
+        processedEvents[res['id'] as String] = res['decrypted'] as String;
       }
     }
 
@@ -733,13 +793,34 @@ class NostrCashuFunctions {
   Future<Map<String, String>> computeData(
     List<Event> toBeProcessedEvents,
   ) async {
-    return await compute(
-      _handleEventsDecryptionInIsolate,
-      {
-        'events': toBeProcessedEvents.map((e) => e.toJson()).toList(),
-        'signerData': _getCurrentSignerData(),
-      },
-    );
+    try {
+      if (toBeProcessedEvents.isEmpty) return {};
+
+      final currentSigner = nc.currentSigner!;
+
+      // AmberEventSigner uses platform channels, which cannot be used in a background isolate
+      // created by compute() unless initialized, but Amber sdk doesn't support it yet easily.
+
+      if (currentSigner is AmberEventSigner) {
+        logger
+            .i('[Cashu - computeData] bypassing compute for AmberEventSigner');
+        return _handleDecryption(toBeProcessedEvents, currentSigner);
+      }
+
+      logger.i('[Cashu - computeData] using compute isolate for decryption');
+      return await compute(
+        _handleEventsDecryptionInIsolate,
+        {
+          'events': toBeProcessedEvents.map((e) => e.toJson()).toList(),
+          'signerData': _getCurrentSignerData(),
+        },
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('======> ${e.toString()}');
+      }
+      return {};
+    }
   }
 
   Map<String, dynamic> _getCurrentSignerData() {

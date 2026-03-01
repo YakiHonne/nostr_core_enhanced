@@ -38,6 +38,8 @@ abstract class CacheManager {
 
   Future<void> removeEvent(String id);
   Future<void> removeEvents(List<String> ids);
+  Future<void> removeEventByDTag(String dTag);
+  Future<void> removeEventsByDTag(List<String> dTags);
   Future<void> removeAllEventsByPubKey(String pubkey);
   Future<void> removeAllEvents();
   Future<void> removeAllEventsByKinds(List<int> kinds);

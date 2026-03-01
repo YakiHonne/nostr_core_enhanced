@@ -16,6 +16,7 @@ import 'package:nostr_core_enhanced/models/models.dart';
 import 'package:nostr_core_enhanced/models/tor_socket_reader.dart';
 import 'package:nostr_core_enhanced/nostr/event_signer/remote_event_signer.dart';
 import 'package:nostr_core_enhanced/nostr/nostr.dart';
+import 'package:nostr_core_enhanced/utils/regex.dart';
 import 'package:nostr_core_enhanced/utils/utils.dart';
 import 'package:uuid/uuid.dart';
 
@@ -35,7 +36,7 @@ const int BATCH_SIZE = 100;
 
 const Duration REFRESH_USER_RELAY_DURATION = Duration(minutes: 10);
 
-const List<String> DEFAULT_BOOTSTRAP_RELAYS = [
+const DEFAULT_BOOTSTRAP_RELAYS = <String>[
   "wss://relay.damus.io",
   'wss://nostr-01.yakihonne.com',
   'wss://nos.lol',
@@ -43,17 +44,31 @@ const List<String> DEFAULT_BOOTSTRAP_RELAYS = [
   'wss://purplepag.es',
 ];
 
-const List<String> DEFAULT_DM_RELAYS = [
-  "wss://relay.damus.io",
-  'wss://nostr-01.yakihonne.com',
+const DEFAULT_DM_RELAYS = <String>[
+  "wss://auth.nostr1.com",
+  "wss://nostr-01.uid.ovh",
   'wss://relay.0xchat.com',
 ];
 
-const List<String> DEFAULT_SEARCH_RELAYS = [
+const DEFAULT_SEARCH_RELAYS = <String>[
   'wss://search.nos.today',
   'wss://relay.ditto.pub',
   'wss://nostr.polyserv.xyz',
 ];
+
+const DEFAULT_TRENDING_RELAYS = <String>[
+  'wss://pyramid.fiatjaf.com/popular',
+  'wss://pyramid.fiatjaf.com/uppermost',
+  'wss://spatia-arcana.com/lux',
+  'wss://trending.relays.land',
+];
+
+const DEFAULT_SCHEDULE_DVM_PUBKEY =
+    'fb04b2aadb3cf9d3b97af52d3f544e1159ee1a4b8548334549d13b7cac4f8769';
+
+const DEFAULT_SCHEDULE_DVM_MASTER_REQUEST = 'pidgeon-master-request';
+
+const DEFAULT_SCHEDULE_DVM_MASTER_TAG = 'pidgeon-master-v3';
 
 class NostrCore {
   late NostrDB db;
@@ -291,7 +306,7 @@ class NostrCore {
   // MARK: QUERIES AND SUBSCRIPTIONS
   // =====================================================================
 
-  void setTimerAndApply({
+  Timer? setTimerAndApply({
     required Timer? timer,
     required int timeOut,
     required bool shouldClose,
@@ -303,8 +318,9 @@ class NostrCore {
 
     if (shouldClose) {
       onClose.call();
+      return null;
     } else {
-      timer = Timer(
+      return Timer(
         Duration(seconds: timeOut),
         onClose,
       );
@@ -376,7 +392,7 @@ class NostrCore {
         eoseCallBack: (requestId, ok, relay, unCompletedRelays) {
           closeSubscription(requestId, relay);
 
-          setTimerAndApply(
+          timer = setTimerAndApply(
             timer: timer,
             timeOut: timeOut,
             shouldClose: unCompletedRelays.isEmpty,
@@ -399,8 +415,19 @@ class NostrCore {
         },
       );
 
+      // Fallback timeout to ensure completion
+      Timer(Duration(seconds: timeOut + 10), () {
+        if (!completer.isCompleted) {
+          closeRequests(<String>[id]);
+          completer.complete(id);
+          if (nonConnectedRelays.isNotEmpty) {
+            closeConnect(nonConnectedRelays);
+          }
+        }
+      });
+
       if (startingTimeout != null) {
-        setTimerAndApply(
+        timer = setTimerAndApply(
           timer: timer,
           timeOut: startingTimeout,
           shouldClose: false,
@@ -470,7 +497,7 @@ class NostrCore {
         eoseCallBack: (requestId, ok, relay, unCompletedRelays) {
           eoseCallBack?.call(requestId, ok, relay, unCompletedRelays);
 
-          setTimerAndApply(
+          timer = setTimerAndApply(
             timer: timer,
             timeOut: 5,
             shouldClose: unCompletedRelays.isEmpty,
@@ -1026,7 +1053,11 @@ class NostrCore {
       if (isOnion) {
         ws = await _connectTorSocket(uri);
       } else {
-        ws = await WebSocket.connect(relay).timeout(Duration(seconds: 2));
+        if (rRegExp.hasMatch(relay)) {
+          ws = await WebSocket.connect(relay).timeout(Duration(seconds: 2));
+        } else {
+          ws = null;
+        }
       }
 
       if (ws == null) {

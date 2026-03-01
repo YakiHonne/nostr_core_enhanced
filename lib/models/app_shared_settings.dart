@@ -13,6 +13,7 @@ const SOURCE_TOP = 'top';
 const SOURCE_GLOBAL = 'global';
 const SOURCE_RECENT = 'recent';
 const SOURCE_RECENT_WITH_REPLIES = 'recent_with_replies';
+const SOURCE_TRENDING = 'trending';
 const SOURCE_PAID = 'paid';
 const SOURCE_WIDGETS = 'widgets';
 
@@ -681,22 +682,28 @@ class ContentSources {
             index: 1,
             id: uuid.v4(),
           ),
+          trending: CommunityFeedOption(
+            name: SOURCE_TRENDING,
+            enabled: true,
+            index: 2,
+            id: uuid.v4(),
+          ),
           global: CommunityFeedOption(
             name: SOURCE_GLOBAL,
             enabled: true,
-            index: 2,
+            index: 3,
             id: uuid.v4(),
           ),
           paid: CommunityFeedOption(
             name: SOURCE_PAID,
             enabled: true,
-            index: 3,
+            index: 4,
             id: uuid.v4(),
           ),
           widgets: CommunityFeedOption(
             name: SOURCE_WIDGETS,
             enabled: true,
-            index: 4,
+            index: 5,
             id: uuid.v4(),
           ),
           index: 0,
@@ -761,22 +768,28 @@ class ContentSources {
             index: 1,
             id: uuid.v4(),
           ),
+          trending: CommunityFeedOption(
+            name: SOURCE_TRENDING,
+            enabled: true,
+            index: 2,
+            id: uuid.v4(),
+          ),
           global: CommunityFeedOption(
             name: SOURCE_GLOBAL,
             enabled: true,
-            index: 2,
+            index: 3,
             id: uuid.v4(),
           ),
           paid: CommunityFeedOption(
             name: SOURCE_PAID,
             enabled: true,
-            index: 3,
+            index: 4,
             id: uuid.v4(),
           ),
           widgets: CommunityFeedOption(
             name: SOURCE_WIDGETS,
             enabled: true,
-            index: 4,
+            index: 5,
             id: uuid.v4(),
           ),
           index: 0,
@@ -885,22 +898,28 @@ class NotesSources {
           index: 1,
           id: uuid.v4(),
         ),
+        trending: CommunityFeedOption(
+          name: SOURCE_TRENDING,
+          enabled: true,
+          index: 2,
+          id: uuid.v4(),
+        ),
         global: CommunityFeedOption(
           name: SOURCE_GLOBAL,
           enabled: true,
-          index: 2,
+          index: 3,
           id: uuid.v4(),
         ),
         paid: CommunityFeedOption(
           name: SOURCE_PAID,
           enabled: true,
-          index: 3,
+          index: 4,
           id: uuid.v4(),
         ),
         widgets: CommunityFeedOption(
           name: SOURCE_WIDGETS,
           enabled: true,
-          index: 4,
+          index: 5,
           id: uuid.v4(),
         ),
         index: 0,
@@ -1282,6 +1301,7 @@ class BaseFeed {
 class NotesCommunityFeed extends BaseFeed {
   CommunityFeedOption recent;
   CommunityFeedOption recentWithReplies;
+  CommunityFeedOption trending;
   CommunityFeedOption global;
   CommunityFeedOption paid;
   CommunityFeedOption widgets;
@@ -1289,6 +1309,7 @@ class NotesCommunityFeed extends BaseFeed {
   NotesCommunityFeed({
     required this.recent,
     required this.recentWithReplies,
+    required this.trending,
     required this.global,
     required this.paid,
     required this.widgets,
@@ -1300,6 +1321,7 @@ class NotesCommunityFeed extends BaseFeed {
       index: index,
       recent: recent.deepCopy(),
       recentWithReplies: recentWithReplies.deepCopy(),
+      trending: trending.deepCopy(),
       global: global.deepCopy(),
       paid: paid.deepCopy(),
       widgets: widgets.deepCopy(),
@@ -1310,6 +1332,7 @@ class NotesCommunityFeed extends BaseFeed {
     List<CommunityFeedOption> options = [
       recent,
       recentWithReplies,
+      trending,
       global,
       paid,
       widgets
@@ -1323,6 +1346,7 @@ class NotesCommunityFeed extends BaseFeed {
   bool isDisabled() {
     return !recent.enabled &&
         !recentWithReplies.enabled &&
+        !trending.enabled &&
         !global.enabled &&
         !paid.enabled &&
         !widgets.enabled;
@@ -1332,6 +1356,7 @@ class NotesCommunityFeed extends BaseFeed {
     List<CommunityFeedOption> options = [
       recent,
       recentWithReplies,
+      trending,
       global,
       paid,
       widgets
@@ -1353,6 +1378,7 @@ class NotesCommunityFeed extends BaseFeed {
     List<CommunityFeedOption> options = [
       recent,
       recentWithReplies,
+      trending,
       global,
       paid,
       widgets
@@ -1386,24 +1412,31 @@ class NotesCommunityFeed extends BaseFeed {
       id: uuid.v4(),
     );
 
+    CommunityFeedOption trending = CommunityFeedOption(
+      name: SOURCE_TRENDING,
+      enabled: true,
+      index: 2,
+      id: uuid.v4(),
+    );
+
     CommunityFeedOption global = CommunityFeedOption(
       name: SOURCE_GLOBAL,
       enabled: true,
-      index: 2,
+      index: 3,
       id: uuid.v4(),
     );
 
     CommunityFeedOption paid = CommunityFeedOption(
       name: SOURCE_PAID,
       enabled: true,
-      index: 3,
+      index: 4,
       id: uuid.v4(),
     );
 
     CommunityFeedOption widgets = CommunityFeedOption(
       name: SOURCE_WIDGETS,
       enabled: true,
-      index: 4,
+      index: 5,
       id: uuid.v4(),
     );
 
@@ -1422,6 +1455,15 @@ class NotesCommunityFeed extends BaseFeed {
 
           if (item.first == SOURCE_RECENT_WITH_REPLIES) {
             recentWithReplies = CommunityFeedOption(
+              name: item.first,
+              enabled: item[1] as bool,
+              index: i,
+              id: uuid.v4(),
+            );
+          }
+
+          if (item.first == SOURCE_TRENDING) {
+            trending = CommunityFeedOption(
               name: item.first,
               enabled: item[1] as bool,
               index: i,
@@ -1463,6 +1505,7 @@ class NotesCommunityFeed extends BaseFeed {
       index: map['index'],
       recent: recent,
       recentWithReplies: recentWithReplies,
+      trending: trending,
       global: global,
       paid: paid,
       widgets: widgets,
@@ -1477,6 +1520,7 @@ class NotesCommunityFeed extends BaseFeed {
   NotesCommunityFeed copyWith({
     CommunityFeedOption? recent,
     CommunityFeedOption? recentWithReplies,
+    CommunityFeedOption? trending,
     CommunityFeedOption? global,
     CommunityFeedOption? paid,
     CommunityFeedOption? widgets,
@@ -1486,6 +1530,7 @@ class NotesCommunityFeed extends BaseFeed {
       index: index ?? this.index,
       recent: recent ?? this.recent,
       recentWithReplies: recentWithReplies ?? this.recentWithReplies,
+      trending: trending ?? this.trending,
       global: global ?? this.global,
       paid: paid ?? this.paid,
       widgets: widgets ?? this.widgets,

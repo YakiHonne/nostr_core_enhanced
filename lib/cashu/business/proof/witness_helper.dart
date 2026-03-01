@@ -100,23 +100,23 @@ class WitnessHelper {
     }
   }
 
-  static String _constructSigAllMessage(
-    List<Proof> inputs,
-    List<BlindedMessage> outputs,
-  ) {
-    String msg = '';
-    // inputs: secret0 || C0 || secret1 || C1 ...
-    for (var proof in inputs) {
-      msg += proof.secret;
-      msg += proof.C;
-    }
-    // outputs: amount0 || B_0 || amount1 || B_1 ...
-    for (var output in outputs) {
-      msg += output.amount.toString();
-      msg += output.B_;
-    }
-    return msg;
-  }
+  // static String _constructSigAllMessage(
+  //   List<Proof> inputs,
+  //   List<BlindedMessage> outputs,
+  // ) {
+  //   String msg = '';
+  //   // inputs: secret0 || C0 || secret1 || C1 ...
+  //   for (var proof in inputs) {
+  //     msg += proof.secret;
+  //     msg += proof.C;
+  //   }
+  //   // outputs: amount0 || B_0 || amount1 || B_1 ...
+  //   for (var output in outputs) {
+  //     msg += output.amount.toString();
+  //     msg += output.B_;
+  //   }
+  //   return msg;
+  // }
 }
 
 abstract class WitnessParam {}

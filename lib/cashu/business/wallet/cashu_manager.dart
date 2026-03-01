@@ -13,6 +13,7 @@ import 'package:nostr_core_enhanced/cashu/core/nuts/v1/nut_17.dart';
 import 'package:nostr_core_enhanced/cashu/models/cashu_wallet.dart';
 import 'package:nostr_core_enhanced/cashu/models/invoice_listener.dart';
 import 'package:nostr_core_enhanced/cashu/models/lightning_invoice.dart';
+import 'package:nostr_core_enhanced/cashu/models/mint_info.dart';
 import 'package:nostr_core_enhanced/cashu/models/mint_model.dart';
 import 'package:nostr_core_enhanced/cashu/models/proof.dart';
 import 'package:nostr_core_enhanced/cashu/models/token_model.dart';
@@ -111,12 +112,6 @@ class CashuManager {
         await setupBalance();
       }
 
-      // await ProofHelper.tryParseProofsToNewestVersion();
-      // await invoiceHandler.initialize();
-      // await ProofBlindingManager.shared.initialize();
-      // await IsolateWorker.cashuWorker.init();
-      // invoiceHandler.invoiceOnPaidCallback = notifyListenerForPaidSuccess;
-
       _initDefaultSigning();
 
       setupFinish.complete();
@@ -159,40 +154,56 @@ class CashuManager {
     };
   }
 
-  Future<bool> createWallet({List<String>? mints}) async {
+  Future<bool> createWallet({
+    required List<String> mints,
+    Function(String)? log,
+  }) async {
     wallet = await NostrCashuFunctions.shared.createWallet(mints: mints);
 
     if (wallet != null) {
       _initDefaultSigning();
     }
 
+    log?.call('[Cashu - createWallet] wallet: $wallet');
     if (wallet != null && wallet!.mints.isNotEmpty) {
-      final mints = <IMint>[];
+      final fetchedMints = await Future.wait(wallet!.mints.map((mint) async {
+        final data = await Future.wait([
+          MintHelper.getMaxNutsVersion(mint),
+          MintHelper.getMintInfo(mint),
+        ]);
 
-      for (final mint in wallet!.mints) {
-        final maxNutsVersion = await MintHelper.getMaxNutsVersion(mint);
-        final info = await MintHelper.getMintInfo(mint);
+        final maxNutsVersion = data[0] as int;
+        final info = data[1] as MintInfo?;
 
-        mints.add(IMint(
+        return IMint(
           pubkey: pubkey,
           mintURL: mint,
           maxNutsVersion: maxNutsVersion,
           name: info?.name ?? '',
-        ));
-      }
+        );
+      }));
 
-      await db.saveMints(mints);
+      log?.call('[Cashu - createWallet] fetchedMints: $fetchedMints');
+      await db.saveMints(fetchedMints);
       await db.saveCashuWallet(wallet!);
 
-      await NostrCashuFunctions.shared.initializeData();
+      log?.call('[Cashu - createWallet] initializeData');
+      await NostrCashuFunctions.shared.initializeData(log: log);
 
+      log?.call('[Cashu - createWallet] setupMints');
       await setupMints();
+
+      log?.call('[Cashu - createWallet] setupBalance');
       await setupBalance();
 
       return true;
     }
 
     return false;
+  }
+
+  Future<bool> deleteWallet() async {
+    return await NostrCashuFunctions.shared.deleteWallet();
   }
 
   Future<void> clean({bool clearData = false}) async {
@@ -324,40 +335,40 @@ class CashuManager {
   }
 
   Future<List<IMint>> addMints(List<String> mintURLs) async {
-    final result = <IMint>[];
+    final urls = mintURLs.map((e) => MintHelper.getMintURL(e)).toList();
 
-    for (final mintURL in mintURLs) {
-      final url = MintHelper.getMintURL(mintURL);
-
+    final mintsList = await Future.wait(urls.map((url) async {
       if (mints.containsKey(url)) {
-        result.add(mints[url]!);
+        return mints[url]!;
       }
 
-      if (!mintURLQueue.add(url)) continue;
+      if (!mintURLQueue.add(url)) return null;
 
-      final maxNutsVersion = await MintHelper.getMaxNutsVersion(url);
+      try {
+        final maxNutsVersion = await MintHelper.getMaxNutsVersion(url);
 
-      final mint = IMint(
-        pubkey: pubkey,
-        mintURL: url,
-        maxNutsVersion: maxNutsVersion,
-      );
+        final mint = IMint(
+          pubkey: pubkey,
+          mintURL: url,
+          maxNutsVersion: maxNutsVersion,
+        );
 
-      final fetchSuccess = await MintHelper.updateMintInfoFromRemote(mint);
-      if (!fetchSuccess) {
+        final fetchSuccess = await MintHelper.updateMintInfoFromRemote(mint);
+        if (!fetchSuccess) {
+          return null;
+        }
+        mint.name = mint.info?.name ?? mint.info?.mintURL ?? '';
+
+        mints[url] = mint;
+        MintHelper.updateMintKeysetFromRemote(mint);
+        notifyListenerForMintListChanged();
+        return mint;
+      } finally {
         mintURLQueue.remove(url);
-        continue;
       }
-      mint.name = mint.info?.name ?? mint.info?.mintURL ?? '';
+    }));
 
-      mints[url] = mint;
-      mintURLQueue.remove(url);
-      MintHelper.updateMintKeysetFromRemote(mint);
-      notifyListenerForMintListChanged();
-      result.add(mint);
-    }
-
-    return result;
+    return mintsList.whereType<IMint>().toList();
   }
 
   Future<IMint?> addMint(String mintURL) async {

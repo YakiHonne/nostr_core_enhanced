@@ -35,6 +35,12 @@ class EventKind {
 
   static const int DVM_CONTENT_FEED = 5300;
 
+  static const int DVM_SCHEDULE_MASTER_RESPONSE = 5900;
+
+  static const int DVM_SCHEDULE_MASTER_REQUEST = 5901;
+
+  static const int DVM_SCHEDULE_POST = 5905;
+
   static const int DVM_CONTENT_FEED_RESPONSE = 6300;
 
   static const int POLL = 6969;
@@ -118,6 +124,10 @@ class EventKind {
   static const int ECASH_MINT_DISCOVERY = 38173;
 
   static const int APPLICATION_INFO = 31990;
+
+  static const int STARTER_PACKS = 39089;
+
+  static const int MEDIA_PACKS = 39092;
 }
 
 class CacheEventKind {

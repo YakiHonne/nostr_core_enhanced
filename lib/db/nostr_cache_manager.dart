@@ -669,6 +669,32 @@ class NostrDB extends CacheManager {
   }
 
   @override
+  Future<void> removeEventByDTag(String dTag) async {
+    await _retryOnLocked(
+      () async {
+        await (_database.delete(_database.eventTable)
+              ..where(
+                (tbl) => tbl.dTag.equals(dTag),
+              ))
+            .go();
+      },
+    );
+  }
+
+  @override
+  Future<void> removeEventsByDTag(List<String> dTags) async {
+    await _retryOnLocked(
+      () async {
+        await (_database.delete(_database.eventTable)
+              ..where(
+                (tbl) => tbl.dTag.isIn(dTags),
+              ))
+            .go();
+      },
+    );
+  }
+
+  @override
   Future<void> removeAllEvents() async {
     await _retryOnLocked(
       () async {

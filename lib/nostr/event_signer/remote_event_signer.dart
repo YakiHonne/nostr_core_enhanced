@@ -686,6 +686,7 @@ class RemoteEventSigner implements EventSigner {
     Event event,
     String destPubKey, {
     String? id,
+    int? kind,
   }) async {
     final encode = json.encode(event.toJson());
     final encrypt = await encrypt44(encode, destPubKey);

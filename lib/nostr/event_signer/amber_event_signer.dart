@@ -153,6 +153,7 @@ class AmberEventSigner implements EventSigner {
     Event event,
     String destPubKey, {
     String? id,
+    int? kind,
   }) async {
     final encode = json.encode(event.toJson());
 

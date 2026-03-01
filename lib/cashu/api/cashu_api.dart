@@ -9,6 +9,7 @@ import 'package:nostr_core_enhanced/cashu/models/token_model.dart';
 import 'package:nostr_core_enhanced/cashu/utils/network/response.dart';
 import 'package:nostr_core_enhanced/nostr/event.dart';
 import 'package:nostr_core_enhanced/utils/enums.dart';
+import 'package:nostr_core_enhanced/utils/spider_util.dart';
 
 import '../business/mint/mint_helper.dart';
 import '../business/transaction/hitstory_store.dart';
@@ -38,9 +39,16 @@ class CashuAPI {
   /**************************** Wallet ****************************/
 
   /// Creates a new wallet with the given mints.
-  Future<bool> createWallet(List<String> mints) async {
+  Future<bool> createWallet(List<String> mints, {Function(String)? log}) async {
+    logger.i('message');
     await CashuManager.shared.setupFinish.future;
-    return await CashuManager.shared.createWallet(mints: mints);
+    logger.i('message2');
+    return await CashuManager.shared.createWallet(mints: mints, log: log);
+  }
+
+  Future<bool> deleteWallet() async {
+    await CashuManager.shared.setupFinish.future;
+    return await CashuManager.shared.deleteWallet();
   }
 
   /// Retrieves mint information from the specified mint.
