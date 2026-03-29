@@ -77,6 +77,8 @@ class EventKind {
 
   static const int NWC_INFO = 13194;
 
+  static const int RELAY_MEMBERSHIP_LIST = 13534;
+
   static const int CASHU_WALLET = 17375;
 
   static const int AUTHENTICATION = 22242;
@@ -92,6 +94,12 @@ class EventKind {
   static const int BLOSSOM_HTTP_AUTH = 24242;
 
   static const int HTTP_AUTH = 27235;
+
+  static const int RELAY_JOIN_REQUEST = 28934;
+
+  static const int RELAY_INVITE_REQUEST = 28935;
+
+  static const int RELAY_LEAVE_REQUEST = 28936;
 
   static const int RELAY_SET = 30002;
 
@@ -110,6 +118,8 @@ class EventKind {
   static const int APP_CUSTOM = 30078;
 
   static const int RELAY_DISCOVERY = 30166;
+
+  static const int RELAY_REVIEW = 31987;
 
   static const int LEGACY_VIDEO_HORIZONTAL = 34235;
 
@@ -207,3 +217,8 @@ class Pastables {
 
   static const VIDEO_FORMAT_MP4 = '.mp4';
 }
+
+const yakihonneHexCore =
+    '20986fb83e775d96d188ca5c9df10ce6d613e0eb7e5768a0f0b12b37cdac21b3';
+
+const FN_SEARCH_VALUE_CORE = 'FLASH NEWS';

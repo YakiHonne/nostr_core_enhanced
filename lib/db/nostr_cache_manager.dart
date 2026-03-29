@@ -538,6 +538,7 @@ class NostrDB extends CacheManager {
   @override
   Future<List<Event>> loadEvents({
     required Filter f,
+    bool includeExpired = true,
     String? currentUser,
     List<String>? relays,
   }) async {
@@ -608,6 +609,13 @@ class NostrDB extends CacheManager {
       }
 
       final events = await query.get();
+
+      if (!includeExpired) {
+        return events
+            .map(Event.fromEventTableData)
+            .where((e) => !e.hasExpired())
+            .toList();
+      }
 
       return events.map(Event.fromEventTableData).toList();
     });

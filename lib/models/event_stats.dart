@@ -249,10 +249,17 @@ class EventStats extends Equatable {
         reposts: Map<String, String>.from(reposts)..addAll({ev.id: ev.pubkey}),
       );
     } else if (ev.kind == EventKind.ZAP && !hasZapId(ev.id)) {
+      logger.i(ev.toJson());
       final p = getZapPubkey(ev.tags).first;
+      final amount = getZapEvent(ev).toInt();
+
+      if (p == yakihonneHexCore && amount == 800) {
+        return this;
+      }
+
       final zp = p.isNotEmpty ? p : ev.pubkey;
       final newZaps = Map<String, Map<String, int>>.from(zaps);
-      newZaps[zp] = {...zaps[zp] ?? {}, ev.id: getZapEvent(ev).toInt()};
+      newZaps[zp] = {...zaps[zp] ?? {}, ev.id: amount};
 
       return copyWith(
         zaps: newZaps,
@@ -339,8 +346,15 @@ class EventStats extends Equatable {
         createdAt = getNewestCreatedAt(ev.createdAt);
       } else if (ev.kind == EventKind.ZAP && !hasZapId(ev.id)) {
         final p = getZapPubkey(ev.tags).first;
-        final zp = p.isNotEmpty ? p : ev.pubkey;
         final amount = getZapEvent(ev).toInt();
+        final hasLTag = ev.tags.any((tag) =>
+            tag.length >= 2 && tag[0] == 'l' && tag[1] == FN_SEARCH_VALUE_CORE);
+
+        if (p == yakihonneHexCore && amount == 800 && hasLTag) {
+          continue;
+        }
+
+        final zp = p.isNotEmpty ? p : ev.pubkey;
 
         updatedZaps[zp] = {...updatedZaps[zp] ?? {}, ev.id: amount};
         createdAt = getNewestCreatedAt(ev.createdAt);

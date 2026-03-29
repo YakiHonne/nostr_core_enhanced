@@ -31,6 +31,7 @@ abstract class CacheManager {
   });
   Future<List<Event>> loadEvents({
     required Filter f,
+    bool includeExpired = true,
     String? currentUser,
     List<String> relays,
   });

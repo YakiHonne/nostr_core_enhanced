@@ -305,6 +305,23 @@ class Event implements BaseEvent {
   // GETTER METHODS
   // ============================================================================
 
+  bool hasExpired() {
+    final expTag = tags.firstWhere(
+      (element) => element.first == 'expiration',
+      orElse: () => [],
+    );
+
+    if (expTag.isNotEmpty && expTag.length >= 2) {
+      final expTime = int.tryParse(expTag[1]);
+      if (expTime != null) {
+        return DateTime.fromMillisecondsSinceEpoch(expTime * 1000)
+            .isBefore(DateTime.now());
+      }
+    }
+
+    return false;
+  }
+
   bool canBeRepublished(EventSigner? signer) {
     if (signer != null && signer.getPublicKey() != pubkey && isProtected()) {
       return false;

@@ -50,6 +50,7 @@ class DbWrapper {
     required List<Filter> filters,
     required List<String> relays,
     required NostrDB db,
+    bool includeExpired = true,
   }) async {
     final events = <Event>[];
 
@@ -57,6 +58,7 @@ class DbWrapper {
       final evs = await db.loadEvents(
         f: filter,
         relays: relays,
+        includeExpired: includeExpired,
       );
 
       events.addAll(evs);

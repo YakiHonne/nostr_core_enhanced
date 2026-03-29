@@ -331,6 +331,7 @@ class NostrCore {
     List<Filter> filters,
     List<String> relays, {
     int timeOut = 5,
+    bool includeExpired = true,
     EventsSource source = EventsSource.cacheFirst,
     void Function()? onFinished,
     void Function(Event, String)? eventCallBack,
@@ -346,6 +347,7 @@ class NostrCore {
         filters: filters,
         relays: relays,
         db: db,
+        includeExpired: includeExpired,
       );
 
       if (source == EventsSource.cacheFirst) {
@@ -410,6 +412,10 @@ class NostrCore {
           }
         },
         eventCallBack: (event, relay) {
+          if (!includeExpired && event.hasExpired()) {
+            return;
+          }
+
           dbWrapper.markEvent(event, relay);
           eventCallBack?.call(event, relay);
         },
