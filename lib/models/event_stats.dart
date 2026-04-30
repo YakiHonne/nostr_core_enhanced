@@ -229,7 +229,7 @@ class EventStats extends Equatable {
         reactions: Map<String, String>.from(reactions)
           ..addAll({ev.id: ev.pubkey}),
       );
-    } else if (ev.kind == EventKind.TEXT_NOTE) {
+    } else if (ev.kind == EventKind.TEXT_NOTE || ev.kind == EventKind.COMMENT) {
       if (ev.isQuote() && !quotes.containsKey(ev.id)) {
         return copyWith(
           quotes: Map<String, String>.from(quotes)..addAll({ev.id: ev.pubkey}),
@@ -329,7 +329,8 @@ class EventStats extends Equatable {
       if (ev.kind == EventKind.REACTION && !reactions.containsKey(ev.id)) {
         updatedReactions[ev.id] = ev.pubkey;
         createdAt = getNewestCreatedAt(ev.createdAt);
-      } else if (ev.kind == EventKind.TEXT_NOTE) {
+      } else if (ev.kind == EventKind.TEXT_NOTE ||
+          ev.kind == EventKind.COMMENT) {
         if (ev.isQuote() && !quotes.containsKey(ev.id)) {
           updatedQuotes[ev.id] = ev.pubkey;
           createdAt = getNewestCreatedAt(ev.createdAt);

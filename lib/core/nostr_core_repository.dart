@@ -119,9 +119,7 @@ class NostrCore {
     await dotenv.load();
     final remoteCache = dotenv.env['REMOTE_CACHE']!;
 
-    remoteCacheService = RemoteCacheService(
-      cacheUrl: remoteCache,
-    );
+    remoteCacheService = RemoteCacheService(cacheUrl: remoteCache);
   }
   // =====================================================================
   // MARK: SIGNER
@@ -155,17 +153,12 @@ class NostrCore {
     remoteCacheService.reconnect();
 
     final nostrConnectRelays = List<String>.from(
-      relays()
-        ..remove(
-          remoteSignerRelays.first,
-        ),
+      relays()..remove(remoteSignerRelays.first),
     );
 
     await closeConnect(nostrConnectRelays);
 
-    await Future.wait(
-      nostrConnectRelays.map((e) => connect(e)).toList(),
-    );
+    await Future.wait(nostrConnectRelays.map((e) => connect(e)).toList());
   }
 
   void _setConnectStatus(String relay, int status) {
@@ -198,18 +191,12 @@ class NostrCore {
   }
 
   List<String> activeRelays() {
-    return webSockets.keys
-        .where(
-          (key) => webSockets[key] != null,
-        )
-        .toList();
+    return webSockets.keys.where((key) => webSockets[key] != null).toList();
   }
 
   List<String> currentUserActiveRelays(List<String> rs) {
     final keys = webSockets.keys
-        .where(
-          (key) => rs.contains(key) && webSockets[key] != null,
-        )
+        .where((key) => rs.contains(key) && webSockets[key] != null)
         .toList();
 
     return keys.map((e) => Relay.clean(e)!).toList();
@@ -217,9 +204,7 @@ class NostrCore {
 
   List<String> missingRelays(List<String> currentRelays) {
     return currentRelays
-        .where(
-          (element) => !relays().contains(element),
-        )
+        .where((element) => !relays().contains(element))
         .toList();
   }
 
@@ -273,9 +258,7 @@ class NostrCore {
       return relay != null && !this.relays().contains(relay);
     }).toList();
 
-    await Future.wait(
-      rs.map((e) => connect(e)).toList(),
-    );
+    await Future.wait(rs.map((e) => connect(e)).toList());
   }
 
   Future<void> connectNonConnectedRelays(Set<String> relays) async {
@@ -286,9 +269,7 @@ class NostrCore {
           (webSockets[relay] == null || connectStatus[relay] != 1);
     }).toList();
 
-    await Future.wait(
-      rs.map((e) => connect(e)).toList(),
-    );
+    await Future.wait(rs.map((e) => connect(e)).toList());
   }
 
   Future closeConnect(List<String> relays) async {
@@ -320,10 +301,7 @@ class NostrCore {
       onClose.call();
       return null;
     } else {
-      return Timer(
-        Duration(seconds: timeOut),
-        onClose,
-      );
+      return Timer(Duration(seconds: timeOut), onClose);
     }
   }
 
@@ -661,15 +639,12 @@ class NostrCore {
       },
     );
 
-    Timer.periodic(
-      const Duration(milliseconds: 500),
-      (timer) {
-        if (isSuccessful || timer.tick > TIMER_TICKS) {
-          completer.complete(isSuccessful);
-          timer.cancel();
-        }
-      },
-    );
+    Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      if (isSuccessful || timer.tick > TIMER_TICKS) {
+        completer.complete(isSuccessful);
+        timer.cancel();
+      }
+    });
 
     return completer.future;
   }
@@ -693,15 +668,12 @@ class NostrCore {
       },
     );
 
-    Timer.periodic(
-      const Duration(milliseconds: 500),
-      (timer) {
-        if (isSuccessful || timer.tick > (timeout ?? TIMER_TICKS)) {
-          completer.complete(isSuccessful);
-          timer.cancel();
-        }
-      },
-    );
+    Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      if (isSuccessful || timer.tick > (timeout ?? TIMER_TICKS)) {
+        completer.complete(isSuccessful);
+        timer.cancel();
+      }
+    });
 
     return completer.future;
   }
@@ -755,13 +727,11 @@ class NostrCore {
           }
         }
       } else {
-        webSockets.forEach(
-          (url, socket) {
-            if (connectStatus[url] == 1 && socket != null) {
-              socket.add(data);
-            }
-          },
-        );
+        webSockets.forEach((url, socket) {
+          if (connectStatus[url] == 1 && socket != null) {
+            socket.add(data);
+          }
+        });
       }
     } catch (_) {}
   }
@@ -805,10 +775,7 @@ class NostrCore {
     return completer.future;
   }
 
-  void _handleMessage(
-    String message,
-    String relay,
-  ) {
+  void _handleMessage(String message, String relay) {
     try {
       var m = Message.deserialize(message);
 
@@ -893,19 +860,28 @@ class NostrCore {
 
   void _listenEvent(WebSocket socket, String relay) {
     try {
-      socket.listen((message) {
-        _handleMessage(message, relay);
-      }, onDone: () {
-        printLog('connect aborted');
-        _setConnectStatus(relay, 3);
-        if (!closedRelays.contains(relay)) {
+      socket.listen(
+        (message) {
+          if (message is! String) {
+            printLog('receive invalid message $message in $relay');
+            return;
+          }
+
+          _handleMessage(message, relay);
+        },
+        onDone: () {
+          printLog('connect aborted');
+          _setConnectStatus(relay, 3);
+          if (!closedRelays.contains(relay)) {
+            connect(relay);
+          }
+        },
+        onError: (e) {
+          printLog('Server error: $e');
+          _setConnectStatus(relay, 3);
           connect(relay);
-        }
-      }, onError: (e) {
-        printLog('Server error: $e');
-        _setConnectStatus(relay, 3);
-        connect(relay);
-      });
+        },
+      );
     } catch (_) {}
   }
 
@@ -921,9 +897,9 @@ class NostrCore {
         return _connectTorSocket(uri);
       } else {
         // Regular WebSocket connection for non-onion relays
-        return await WebSocket.connect(relay).timeout(
-          const Duration(seconds: 5),
-        );
+        return await WebSocket.connect(
+          relay,
+        ).timeout(const Duration(seconds: 5));
       }
     } catch (e) {
       _setConnectStatus(relay, 3);
@@ -943,10 +919,14 @@ class NostrCore {
     TorByteStream? byteStream;
 
     try {
-      socket = await Socket.connect('127.0.0.1', 9050,
-          timeout: Duration(seconds: 10));
+      socket = await Socket.connect(
+        '127.0.0.1',
+        9050,
+        timeout: Duration(seconds: 10),
+      );
       printLog(
-          'Connected to Tor proxy: ${socket.remoteAddress}:${socket.remotePort}');
+        'Connected to Tor proxy: ${socket.remoteAddress}:${socket.remotePort}',
+      );
 
       byteStream = TorByteStream(socket);
 
@@ -1113,22 +1093,24 @@ class NostrCore {
   Future<ContactList> ensureUpToDateContactListOrEmpty(
     EventSigner signer,
   ) async {
-    ContactList? contactList = await db.loadContactList(
-      signer.getPublicKey(),
-    );
+    ContactList? contactList = await db.loadContactList(signer.getPublicKey());
 
-    int sometimeAgo = DateTime.now()
+    int sometimeAgo =
+        DateTime.now()
             .subtract(REFRESH_CONTACT_LIST_DURATION)
             .millisecondsSinceEpoch ~/
         1000;
 
-    bool refresh = contactList == null ||
+    bool refresh =
+        contactList == null ||
         contactList.loadedTimestamp == null ||
         contactList.loadedTimestamp! < sometimeAgo;
 
     if (refresh) {
-      contactList =
-          await loadContactList(signer.getPublicKey(), forceRefresh: true);
+      contactList = await loadContactList(
+        signer.getPublicKey(),
+        forceRefresh: true,
+      );
     }
 
     contactList ??= ContactList(pubkey: signer.getPublicKey(), contacts: []);
@@ -1150,11 +1132,7 @@ class NostrCore {
 
       final id = await doQuery(
         [
-          Filter(
-            kinds: [EventKind.CONTACT_LIST],
-            authors: [pubkey],
-            limit: 1,
-          ),
+          Filter(kinds: [EventKind.CONTACT_LIST], authors: [pubkey], limit: 1),
         ],
         [],
         timeOut: 2,
@@ -1211,10 +1189,7 @@ class NostrCore {
     if (toFetch.isNotEmpty) {
       final id = await doQuery(
         [
-          Filter(
-            kinds: [EventKind.CONTACT_LIST],
-            authors: toFetch,
-          ),
+          Filter(kinds: [EventKind.CONTACT_LIST], authors: toFetch),
         ],
         [],
         timeOut: 3,
@@ -1242,7 +1217,8 @@ class NostrCore {
 
     // Merge local and fetched, keeping freshest per pubkey
     final merged = {
-      for (final cl in [...localMap.values, ...fetchedMap.values]) cl.pubkey: cl
+      for (final cl in [...localMap.values, ...fetchedMap.values])
+        cl.pubkey: cl,
     }.values.toList();
 
     return merged;
@@ -1262,11 +1238,7 @@ class NostrCore {
 
       final id = await doQuery(
         [
-          Filter(
-            kinds: [EventKind.CONTACT_LIST],
-            authors: [pubkey],
-            limit: 1,
-          ),
+          Filter(kinds: [EventKind.CONTACT_LIST], authors: [pubkey], limit: 1),
         ],
         [],
         timeOut: 2,
@@ -1440,13 +1412,15 @@ class NostrCore {
       for (final pubkey in needCalculation) {
         if (contacts.contains(pubkey)) {
           scores[pubkey] = 10;
-          newScores.add(WotScore(
-            id: uuid.v4(),
-            pubkey: pubkey,
-            score: 10,
-            createdAt: currentUnixTimestampSeconds(),
-            originPubkey: originPubkey,
-          ));
+          newScores.add(
+            WotScore(
+              id: uuid.v4(),
+              pubkey: pubkey,
+              score: 10,
+              createdAt: currentUnixTimestampSeconds(),
+              originPubkey: originPubkey,
+            ),
+          );
         } else {
           needWotCalculation.add(pubkey);
         }
@@ -1473,13 +1447,15 @@ class NostrCore {
             final calculatedScore = (baseScore - mutesPenalty).clamp(0.0, 8.0);
 
             scores[pubkey] = calculatedScore;
-            newScores.add(WotScore(
-              id: uuid.v4(),
-              pubkey: pubkey,
-              score: calculatedScore,
-              createdAt: currentUnixTimestampSeconds(),
-              originPubkey: originPubkey,
-            ));
+            newScores.add(
+              WotScore(
+                id: uuid.v4(),
+                pubkey: pubkey,
+                score: calculatedScore,
+                createdAt: currentUnixTimestampSeconds(),
+                originPubkey: originPubkey,
+              ),
+            );
           }
         }
       }
@@ -1502,11 +1478,11 @@ class NostrCore {
     final scores = <String, num?>{};
 
     for (final pubkey in peerPubkeys) {
-      scores[pubkey] = (await calculatePeerPubkeyWot(
+      scores[pubkey] =
+          (await calculatePeerPubkeyWot(
             peerPubkey: pubkey,
             originPubkey: originPubkey,
-          ))
-              ?.score ??
+          ))?.score ??
           0;
     }
 
@@ -1603,28 +1579,26 @@ class NostrCore {
 
       final responsePort = ReceivePort();
 
-      responsePort.listen(
-        (message) {
-          if (message is Map<String, dynamic>) {
-            if (message.containsKey('error')) {
-              logger.e('Error in isolate: ${message['error']}');
-              completer.complete({});
-            } else {
-              db.saveUserWot(
-                WotModel(
-                  pubkey: pubkey,
-                  wot: Map<String, double>.from(message),
-                  createdAt: DateTime.now().toSecondsSinceEpoch(),
-                ),
-              );
+      responsePort.listen((message) {
+        if (message is Map<String, dynamic>) {
+          if (message.containsKey('error')) {
+            logger.e('Error in isolate: ${message['error']}');
+            completer.complete({});
+          } else {
+            db.saveUserWot(
+              WotModel(
+                pubkey: pubkey,
+                wot: Map<String, double>.from(message),
+                createdAt: DateTime.now().toSecondsSinceEpoch(),
+              ),
+            );
 
-              completer.complete(message.cast<String, double>());
-            }
-            responsePort.close();
-            isolate.kill(priority: Isolate.immediate);
+            completer.complete(message.cast<String, double>());
           }
-        },
-      );
+          responsePort.close();
+          isolate.kill(priority: Isolate.immediate);
+        }
+      });
 
       sendPort.send({...serializedData, 'responsePort': responsePort.sendPort});
 
@@ -1638,7 +1612,7 @@ class NostrCore {
     }
   }
 
-// Placeholder for loadContactListByBatch
+  // Placeholder for loadContactListByBatch
   Future<Map<String, List<String>>> loadContactDataByBatch(
     List<String> pubkeys, {
     bool forceRefresh = false,
@@ -1763,10 +1737,7 @@ class NostrCore {
         return null;
       }
 
-      final isSuccessful = await publish(
-        e,
-        relays,
-      );
+      final isSuccessful = await publish(e, relays);
 
       if (isSuccessful) {
         calculateWot(
@@ -1806,7 +1777,7 @@ class NostrCore {
     if (missingPubKeys.isNotEmpty) {
       final id = await doQuery(
         [
-          Filter(authors: missingPubKeys, kinds: [EventKind.METADATA])
+          Filter(authors: missingPubKeys, kinds: [EventKind.METADATA]),
         ],
         relays,
         eventCallBack: (event, relay) async {
@@ -1913,7 +1884,9 @@ class NostrCore {
         map[relay] = pubKeys
             .map(
               (pubKey) => PubkeyMapping(
-                  pubKey: pubKey, rwMarker: ReadWriteMarker.readWrite),
+                pubKey: pubKey,
+                rwMarker: ReadWriteMarker.readWrite,
+              ),
             )
             .toList();
       }
@@ -1953,10 +1926,12 @@ class NostrCore {
     }
 
     for (String url in pubKeysByRelayUrl.keys) {
-      if (!pubKeysByRelayUrl[url]!.any((pubKey) =>
-          minimumRelaysCoverageByPubkey[pubKey.pubKey] == null ||
-          minimumRelaysCoverageByPubkey[pubKey.pubKey]!.length <
-              relayMinCountPerPubKey)) {
+      if (!pubKeysByRelayUrl[url]!.any(
+        (pubKey) =>
+            minimumRelaysCoverageByPubkey[pubKey.pubKey] == null ||
+            minimumRelaysCoverageByPubkey[pubKey.pubKey]!.length <
+                relayMinCountPerPubKey,
+      )) {
         continue;
       }
 
@@ -2043,30 +2018,30 @@ class NostrCore {
     );
 
     List<MapEntry<String, Set<PubkeyMapping>>> sortedEntries =
-        pubKeysByRelayUrl.entries.toList()
-          ..sort((a, b) {
-            int rr = b.value.length.compareTo(a.value.length);
-            if (rr == 0) {
-              bool aC = isWebSocketOpen(a.key);
-              bool bC = isWebSocketOpen(b.key);
+        pubKeysByRelayUrl.entries.toList()..sort((a, b) {
+          int rr = b.value.length.compareTo(a.value.length);
+          if (rr == 0) {
+            bool aC = isWebSocketOpen(a.key);
+            bool bC = isWebSocketOpen(b.key);
 
-              if (aC != bC) {
-                return aC ? -1 : 1;
-              }
-              return 0;
+            if (aC != bC) {
+              return aC ? -1 : 1;
             }
-            return rr;
-          });
+            return 0;
+          }
+          return rr;
+        });
 
     return Map<String, Set<PubkeyMapping>>.fromEntries(sortedEntries);
   }
 
   _handleRelayUrlForPubKey(
-      String pubKey,
-      RelayDirection direction,
-      String url,
-      ReadWriteMarker marker,
-      Map<String, Set<PubkeyMapping>> pubKeysByRelayUrl) {
+    String pubKey,
+    RelayDirection direction,
+    String url,
+    ReadWriteMarker marker,
+    Map<String, Set<PubkeyMapping>> pubKeysByRelayUrl,
+  ) {
     String? cleanUrl = Relay.clean(url);
 
     if (cleanUrl != null) {
@@ -2075,8 +2050,9 @@ class NostrCore {
         if (set == null) {
           pubKeysByRelayUrl[cleanUrl] = {};
         }
-        pubKeysByRelayUrl[cleanUrl]!
-            .add(PubkeyMapping(pubKey: pubKey, rwMarker: marker));
+        pubKeysByRelayUrl[cleanUrl]!.add(
+          PubkeyMapping(pubKey: pubKey, rwMarker: marker),
+        );
       }
     }
   }
@@ -2086,7 +2062,8 @@ class NostrCore {
       signer.getPublicKey(),
     );
 
-    int sometimeAgo = DateTime.now()
+    int sometimeAgo =
+        DateTime.now()
             .subtract(REFRESH_USER_RELAY_DURATION)
             .millisecondsSinceEpoch ~/
         1000;
@@ -2095,8 +2072,10 @@ class NostrCore {
         userRelayList == null || userRelayList.refreshedTimestamp < sometimeAgo;
 
     if (refresh) {
-      userRelayList = await getSingleUserRelayList(signer.getPublicKey(),
-          forceRefresh: true);
+      userRelayList = await getSingleUserRelayList(
+        signer.getPublicKey(),
+        forceRefresh: true,
+      );
     }
 
     return userRelayList;
@@ -2109,10 +2088,9 @@ class NostrCore {
     UserRelayList? userRelayList = await db.loadUserRelayList(pubKey);
 
     if (userRelayList == null || forceRefresh) {
-      await loadMissingRelayListsFromNip65OrNip02(
-        [pubKey],
-        forceRefresh: forceRefresh,
-      );
+      await loadMissingRelayListsFromNip65OrNip02([
+        pubKey,
+      ], forceRefresh: forceRefresh);
 
       userRelayList = await db.loadUserRelayList(pubKey);
     }
@@ -2137,10 +2115,7 @@ class NostrCore {
     final event = await userRelayList.toNip65().toEvent(signer);
 
     if (event != null) {
-      final isSuccessful = await publish(
-        event,
-        relays,
-      );
+      final isSuccessful = await publish(event, relays);
 
       if (isSuccessful) {
         await db.saveUserRelayList(userRelayList);
@@ -2155,11 +2130,7 @@ class NostrCore {
 
   Future<void> loadMissingRelayListsFromNip65OrNip02(
     List<String> pubKeys, {
-    Function(
-      String stepName,
-      int count,
-      int total,
-    )? onProgress,
+    Function(String stepName, int count, int total)? onProgress,
     bool forceRefresh = false,
   }) async {
     Set<String> missingPubKeys = {};
@@ -2180,17 +2151,17 @@ class NostrCore {
       print("loading missing relay lists ${missingPubKeys.length}");
       if (onProgress != null) {
         onProgress.call(
-            "loading missing relay lists", 0, missingPubKeys.length);
+          "loading missing relay lists",
+          0,
+          missingPubKeys.length,
+        );
       }
 
       final id = await doQuery(
         [
           Filter(
             authors: missingPubKeys.toList(),
-            kinds: [
-              EventKind.RELAY_LIST_METADATA,
-              EventKind.CONTACT_LIST,
-            ],
+            kinds: [EventKind.RELAY_LIST_METADATA, EventKind.CONTACT_LIST],
           ),
         ],
         DEFAULT_BOOTSTRAP_RELAYS,
@@ -2206,8 +2177,11 @@ class NostrCore {
                 }
                 if (onProgress != null) {
                   found.add(event.pubkey);
-                  onProgress.call("loading missing relay lists", found.length,
-                      missingPubKeys.length);
+                  onProgress.call(
+                    "loading missing relay lists",
+                    found.length,
+                    missingPubKeys.length,
+                  );
                 }
               }
             case EventKind.CONTACT_LIST:
@@ -2222,8 +2196,11 @@ class NostrCore {
                 }
                 if (onProgress != null) {
                   found.add(event.pubkey);
-                  onProgress.call("loading missing relay lists", found.length,
-                      missingPubKeys.length);
+                  onProgress.call(
+                    "loading missing relay lists",
+                    found.length,
+                    missingPubKeys.length,
+                  );
                 }
               }
           }
@@ -2255,7 +2232,10 @@ class NostrCore {
 
       if (onProgress != null) {
         onProgress.call(
-            "loading missing relay lists", found.length, missingPubKeys.length);
+          "loading missing relay lists",
+          found.length,
+          missingPubKeys.length,
+        );
       }
     }
   }
@@ -2263,20 +2243,18 @@ class NostrCore {
 
 typedef NoticeCallBack = void Function(String notice, String relay);
 
-typedef OKCallBack = void Function(
-  OKEvent ok,
-  String relay,
-  List<String> unCompletedRelays,
-);
+typedef OKCallBack =
+    void Function(OKEvent ok, String relay, List<String> unCompletedRelays);
 
 typedef EventCallBack = void Function(Event event, String relay);
 
-typedef EOSECallBack = void Function(
-  String requestId,
-  OKEvent ok,
-  String relay,
-  List<String> unCompletedRelays,
-);
+typedef EOSECallBack =
+    void Function(
+      String requestId,
+      OKEvent ok,
+      String relay,
+      List<String> unCompletedRelays,
+    );
 
 typedef ConnectStatusCallBack = void Function(String relay, int status);
 
@@ -2288,7 +2266,12 @@ class Sends {
   OKCallBack? okCallBack;
 
   Sends(
-      this.sendsId, this.relays, this.sendsTime, this.eventId, this.okCallBack);
+    this.sendsId,
+    this.relays,
+    this.sendsTime,
+    this.eventId,
+    this.okCallBack,
+  );
 }
 
 class Requests {
@@ -2314,66 +2297,61 @@ void calculateWotIsolate(SendPort sendPort) {
   final receivePort = ReceivePort();
   sendPort.send(receivePort.sendPort);
 
-  receivePort.listen(
-    (message) {
-      if (message is Map<String, dynamic>) {
-        try {
-          final wot = <String, double>{};
-          final cs = Set<String>.from(message['contacts']);
-          final followings =
-              Map<String, Set<String>>.from(message['followings']);
-          final mutes = Set<String>.from(message['mutes']);
-          final sp = message['responsePort'] as SendPort;
+  receivePort.listen((message) {
+    if (message is Map<String, dynamic>) {
+      try {
+        final wot = <String, double>{};
+        final cs = Set<String>.from(message['contacts']);
+        final followings = Map<String, Set<String>>.from(message['followings']);
+        final mutes = Set<String>.from(message['mutes']);
+        final sp = message['responsePort'] as SendPort;
 
-          for (final p in cs) {
-            if (!mutes.contains(p)) {
-              int count = 0;
-              for (final f in followings.values) {
-                if (f.contains(p)) {
-                  count++;
-                }
-              }
-
-              final score = cs.isNotEmpty ? (count * 10) / cs.length : 0.0;
-              if (score >= 2) {
-                wot[p] = score.clamp(0, 10);
+        for (final p in cs) {
+          if (!mutes.contains(p)) {
+            int count = 0;
+            for (final f in followings.values) {
+              if (f.contains(p)) {
+                count++;
               }
             }
-          }
 
-          for (final f in followings.values) {
-            if (f.isNotEmpty) {
-              for (final p in f) {
-                if (!mutes.contains(p) && !wot.containsKey(p)) {
-                  int count = 0;
-                  for (final f2 in followings.values) {
-                    if (f2.contains(p)) {
-                      count++;
-                    }
-                  }
-
-                  final score = cs.isNotEmpty ? (count * 10) / cs.length : 0.0;
-                  if (score >= 2) {
-                    wot[p] = score.clamp(0, 10);
-                  }
-                }
-              }
+            final score = cs.isNotEmpty ? (count * 10) / cs.length : 0.0;
+            if (score >= 2) {
+              wot[p] = score.clamp(0, 10);
             }
           }
-
-          final sortedEntries = wot.entries.toList()
-            ..sort((a, b) => b.value.compareTo(a.value));
-
-          final result = Map<String, double>.fromEntries(
-            sortedEntries.take(100),
-          );
-
-          sp.send(result);
-        } catch (e) {
-          // Send back the error as a string
-          sendPort.send({'error': e.toString()});
         }
+
+        for (final f in followings.values) {
+          if (f.isNotEmpty) {
+            for (final p in f) {
+              if (!mutes.contains(p) && !wot.containsKey(p)) {
+                int count = 0;
+                for (final f2 in followings.values) {
+                  if (f2.contains(p)) {
+                    count++;
+                  }
+                }
+
+                final score = cs.isNotEmpty ? (count * 10) / cs.length : 0.0;
+                if (score >= 2) {
+                  wot[p] = score.clamp(0, 10);
+                }
+              }
+            }
+          }
+        }
+
+        final sortedEntries = wot.entries.toList()
+          ..sort((a, b) => b.value.compareTo(a.value));
+
+        final result = Map<String, double>.fromEntries(sortedEntries.take(100));
+
+        sp.send(result);
+      } catch (e) {
+        // Send back the error as a string
+        sendPort.send({'error': e.toString()});
       }
-    },
-  );
+    }
+  });
 }

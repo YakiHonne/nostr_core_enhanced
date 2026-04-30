@@ -19,7 +19,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.6.2
+  sdk: ^3.11.5
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -45,8 +45,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   decimal: ^2.3.3
   dio: ^5.8.0+1
-  drift: ^2.28.1
-  drift_flutter: ^0.2.5
+  drift: ^2.32.1
+  drift_flutter: ^0.3.0
   equatable: ^2.0.7
   flutter:
     sdk: flutter

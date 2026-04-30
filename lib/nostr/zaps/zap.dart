@@ -121,11 +121,7 @@ class Zap {
     if (StringUtil.isNotBlank(comment)) {
       var commentNum = lnurlResponse.commentAllowed;
       if (commentNum != null) {
-        if (commentNum < comment!.length) {
-          comment = comment.substring(0, commentNum);
-        }
-
-        callback += '&comment=${Uri.encodeQueryComponent(comment)}';
+        callback += '&comment=${Uri.encodeQueryComponent(comment!)}';
         eventContent = comment;
       }
     }

@@ -138,6 +138,8 @@ class EventKind {
   static const int STARTER_PACKS = 39089;
 
   static const int MEDIA_PACKS = 39092;
+ 
+  static const int COMMENT = 1111;
 }
 
 class CacheEventKind {
