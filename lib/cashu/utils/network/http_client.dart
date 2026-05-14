@@ -71,7 +71,8 @@ class HTTPClient {
       );
     } catch (e, stackTrace) {
       logger.e(
-          () => '[http - error] uri: ${requestData.uri}, e: $e, $stackTrace');
+        () => '[http - error] uri: ${requestData.uri}, e: $e, $stackTrace',
+      );
       return CashuResponse.fromErrorMsg(e.toString());
     }
   }
@@ -102,7 +103,8 @@ class HTTPClient {
       );
     } catch (e, stackTrace) {
       logger.e(
-          () => '[http - error] uri: ${requestData.uri}, e: $e, $stackTrace');
+        () => '[http - error] uri: ${requestData.uri}, e: $e, $stackTrace',
+      );
       return CashuResponse.fromErrorMsg(e.toString());
     }
   }
@@ -132,17 +134,11 @@ class HTTPClient {
     return requestData;
   }
 
-  Future<http.Response> request(
-    RequestData requestData, {
-    int? timeOut,
-  }) {
+  Future<http.Response> request(RequestData requestData, {int? timeOut}) {
     Future<http.Response> request;
     switch (requestData.method) {
       case RequestMethod.get:
-        request = http.get(
-          requestData.uri,
-          headers: requestData.headers,
-        );
+        request = http.get(requestData.uri, headers: requestData.headers);
         break;
       case RequestMethod.post:
         request = http.post(
@@ -153,10 +149,14 @@ class HTTPClient {
         break;
     }
     if (timeOut != null) {
-      request = request.timeout(Duration(seconds: timeOut), onTimeout: () {
-        throw TimeoutException(
-            'The connection has timed out, Please try again!');
-      });
+      request = request.timeout(
+        Duration(seconds: timeOut),
+        onTimeout: () {
+          throw TimeoutException(
+            'The connection has timed out, Please try again!',
+          );
+        },
+      );
     }
 
     return request;
@@ -170,16 +170,14 @@ class HTTPClient {
     final logPrefix =
         '[http - ${requestData.method.text}] uri: ${requestData.uri}';
     print(
-        '$logPrefix, response: ${response.body}, status: ${response.statusCode}');
+      '$logPrefix, response: ${response.body}, status: ${response.statusCode}',
+    );
 
     if (response.statusCode == HttpStatus.ok) {
       final bodyJson = jsonDecode(response.body);
       final data = modelBuilder?.call(bodyJson);
       if (data != null) {
-        return CashuResponse(
-          code: ResponseCode.success,
-          data: data,
-        );
+        return CashuResponse(code: ResponseCode.success, data: data);
       }
     } else if (response.statusCode == HttpStatus.badRequest) {
       final bodyJson = jsonDecode(response.body);
@@ -191,10 +189,7 @@ class HTTPClient {
         } else if (detail != null) {
           final code = ResponseCodeEx.tryGetCodeWithErrorMsg(detail);
           if (code != null) {
-            return CashuResponse(
-              code: code,
-              errorMsg: detail,
-            );
+            return CashuResponse(code: code, errorMsg: detail);
           }
         }
       }

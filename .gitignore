@@ -45,3 +45,9 @@ app.*.map.json
 /android/app/release
 
 .env
+# Added by code-review-graph
+.code-review-graph/
+.claude
+.mcp.json
+CLAUDE.md
+AGENTS.md
