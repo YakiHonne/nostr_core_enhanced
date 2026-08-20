@@ -47,10 +47,8 @@ import '../transaction/transaction_helper.dart';
 import 'invoice_handler.dart';
 import 'proof_blinding_manager.dart';
 
-typedef SignWithKeyFunction = Future<String> Function(
-  String pubkey,
-  String message,
-);
+typedef SignWithKeyFunction =
+    Future<String> Function(String pubkey, String message);
 
 const defaultMints = [
   'https://mint.cubabitcoin.org',
@@ -166,22 +164,24 @@ class CashuManager {
 
     log?.call('[Cashu - createWallet] wallet: $wallet');
     if (wallet != null && wallet!.mints.isNotEmpty) {
-      final fetchedMints = await Future.wait(wallet!.mints.map((mint) async {
-        final data = await Future.wait([
-          MintHelper.getMaxNutsVersion(mint),
-          MintHelper.getMintInfo(mint),
-        ]);
+      final fetchedMints = await Future.wait(
+        wallet!.mints.map((mint) async {
+          final data = await Future.wait([
+            MintHelper.getMaxNutsVersion(mint),
+            MintHelper.getMintInfo(mint),
+          ]);
 
-        final maxNutsVersion = data[0] as int;
-        final info = data[1] as MintInfo?;
+          final maxNutsVersion = data[0] as int;
+          final info = data[1] as MintInfo?;
 
-        return IMint(
-          pubkey: pubkey,
-          mintURL: mint,
-          maxNutsVersion: maxNutsVersion,
-          name: info?.name ?? '',
-        );
-      }));
+          return IMint(
+            pubkey: pubkey,
+            mintURL: mint,
+            maxNutsVersion: maxNutsVersion,
+            name: info?.name ?? '',
+          );
+        }),
+      );
 
       log?.call('[Cashu - createWallet] fetchedMints: $fetchedMints');
       await db.saveMints(fetchedMints);
@@ -232,8 +232,9 @@ class CashuManager {
       List<IMint> dbMints = await db.loadMintsByPubkey(pubkey);
       final dbMintsUrls = dbMints.map((e) => e.mintURL).toList();
 
-      final newMintsUrls =
-          walletMints.where((mint) => !dbMintsUrls.contains(mint)).toList();
+      final newMintsUrls = walletMints
+          .where((mint) => !dbMintsUrls.contains(mint))
+          .toList();
 
       if (newMintsUrls.isNotEmpty) {
         final newMints = <IMint>[];
@@ -337,36 +338,38 @@ class CashuManager {
   Future<List<IMint>> addMints(List<String> mintURLs) async {
     final urls = mintURLs.map((e) => MintHelper.getMintURL(e)).toList();
 
-    final mintsList = await Future.wait(urls.map((url) async {
-      if (mints.containsKey(url)) {
-        return mints[url]!;
-      }
-
-      if (!mintURLQueue.add(url)) return null;
-
-      try {
-        final maxNutsVersion = await MintHelper.getMaxNutsVersion(url);
-
-        final mint = IMint(
-          pubkey: pubkey,
-          mintURL: url,
-          maxNutsVersion: maxNutsVersion,
-        );
-
-        final fetchSuccess = await MintHelper.updateMintInfoFromRemote(mint);
-        if (!fetchSuccess) {
-          return null;
+    final mintsList = await Future.wait(
+      urls.map((url) async {
+        if (mints.containsKey(url)) {
+          return mints[url]!;
         }
-        mint.name = mint.info?.name ?? mint.info?.mintURL ?? '';
 
-        mints[url] = mint;
-        MintHelper.updateMintKeysetFromRemote(mint);
-        notifyListenerForMintListChanged();
-        return mint;
-      } finally {
-        mintURLQueue.remove(url);
-      }
-    }));
+        if (!mintURLQueue.add(url)) return null;
+
+        try {
+          final maxNutsVersion = await MintHelper.getMaxNutsVersion(url);
+
+          final mint = IMint(
+            pubkey: pubkey,
+            mintURL: url,
+            maxNutsVersion: maxNutsVersion,
+          );
+
+          final fetchSuccess = await MintHelper.updateMintInfoFromRemote(mint);
+          if (!fetchSuccess) {
+            return null;
+          }
+          mint.name = mint.info?.name ?? mint.info?.mintURL ?? '';
+
+          mints[url] = mint;
+          MintHelper.updateMintKeysetFromRemote(mint);
+          notifyListenerForMintListChanged();
+          return mint;
+        } finally {
+          mintURLQueue.remove(url);
+        }
+      }),
+    );
 
     return mintsList.whereType<IMint>().toList();
   }
@@ -414,10 +417,9 @@ class CashuManager {
   }
 
   Future updateMintBalance([IMint? mint]) async {
-    final mints = this
-        .mints
-        .values
-        .where((element) => mint == null || element.mintURL == mint.mintURL);
+    final mints = this.mints.values.where(
+      (element) => mint == null || element.mintURL == mint.mintURL,
+    );
 
     if (mints.isEmpty) {
       return false;
@@ -476,8 +478,11 @@ class CashuManager {
       const maxEmptyBatches = 3;
 
       // Ensure we have keys for this keyset to unblind
-      final keysetInfo =
-          await KeysetHelper.tryGetMintKeysetInfo(mint, keyset.unit, keyset.id);
+      final keysetInfo = await KeysetHelper.tryGetMintKeysetInfo(
+        mint,
+        keyset.unit,
+        keyset.id,
+      );
       if (keysetInfo == null || keysetInfo.keyset.isEmpty) continue;
 
       while (emptyBatches < maxEmptyBatches) {
@@ -502,8 +507,9 @@ class CashuManager {
             final signature = payload.$2;
 
             // Find the original r and secret for this B_
-            final index =
-                blindedData.$1.indexWhere((m) => m.B_ == blindedMessage.B_);
+            final index = blindedData.$1.indexWhere(
+              (m) => m.B_ == blindedMessage.B_,
+            );
             if (index == -1) continue;
 
             final r = blindedData.$3[index];
@@ -515,13 +521,15 @@ class CashuManager {
             final C = Dhke.unblindingSignature(signature.C_, r, K);
             if (C == null) continue;
 
-            recoveredProofs.add(Proof(
-              id: '$secret+${keyset.id}',
-              keysetId: keyset.id,
-              amount: signature.amount,
-              secret: secret,
-              C: C.ecPointToHex(),
-            ));
+            recoveredProofs.add(
+              Proof(
+                id: '$secret+${keyset.id}',
+                keysetId: keyset.id,
+                amount: signature.amount,
+                secret: secret,
+                C: C.ecPointToHex(),
+              ),
+            );
           }
 
           if (recoveredProofs.isNotEmpty) {
@@ -540,7 +548,9 @@ class CashuManager {
   }
 
   Future<int> _processRecoveredProofs(
-      String mintURL, Map<String, List<Proof>> recoveredByUnit) async {
+    String mintURL,
+    Map<String, List<Proof>> recoveredByUnit,
+  ) async {
     if (recoveredByUnit.isEmpty) return 0;
 
     // Get existing proofs to avoid duplicates
@@ -554,8 +564,9 @@ class CashuManager {
       final proofs = entry.value;
 
       // Filter out proofs that already exist
-      final newProofs =
-          proofs.where((p) => !existingSecrets.contains(p.secret)).toList();
+      final newProofs = proofs
+          .where((p) => !existingSecrets.contains(p.secret))
+          .toList();
 
       if (newProofs.isNotEmpty) {
         final eventId = await NostrCashuFunctions.shared.sendTokenEvent(
@@ -602,7 +613,8 @@ class CashuManager {
     );
     if (invoiceReceipt == null) {
       return CashuResponse.fromErrorMsg(
-          'Failed to create invoice at destination mint');
+        'Failed to create invoice at destination mint',
+      );
     }
 
     // 2. Get melt quote at source mint to know fee
@@ -898,7 +910,8 @@ class CashuManager {
       );
       if (tempInvoice == null) {
         return CashuResponse.fromErrorMsg(
-            'Failed to create destination invoice');
+          'Failed to create destination invoice',
+        );
       }
 
       final sourceMint = await getMint(sourceMintURL);
@@ -920,7 +933,8 @@ class CashuManager {
       // Check if we have enough to cover any amount after fees
       if (totalAmount <= estimatedFee) {
         return CashuResponse.fromErrorMsg(
-            'Token amount ($totalAmount sats) too small to cover melt fee ($estimatedFee sats)');
+          'Token amount ($totalAmount sats) too small to cover melt fee ($estimatedFee sats)',
+        );
       }
 
       // Calculate the actual amount we can send to destination after fees
@@ -933,7 +947,8 @@ class CashuManager {
       );
       if (invoiceReceipt == null) {
         return CashuResponse.fromErrorMsg(
-            'Failed to create destination invoice');
+          'Failed to create destination invoice',
+        );
       }
 
       // Get the actual melt quote for the real invoice
@@ -950,7 +965,8 @@ class CashuManager {
       // Verify we have enough to cover the invoice + fee
       if (totalAmount < invoiceAmount + fee) {
         return CashuResponse.fromErrorMsg(
-            'Insufficient funds: need ${invoiceAmount + fee} sats ($invoiceAmount + $fee fee), have $totalAmount sats');
+          'Insufficient funds: need ${invoiceAmount + fee} sats ($invoiceAmount + $fee fee), have $totalAmount sats',
+        );
       }
 
       onStatusUpdate?.call(CashuActionsStatus.melting);
@@ -1187,8 +1203,12 @@ class CashuManager {
     onStatusUpdate?.call(CashuActionsStatus.melting);
 
     // Prepare Blinded Messages
-    final (blindedTarget, secretsTarget, rsTarget, _) =
-        DhkeHelper.createBlindedMessages(
+    final (
+      blindedTarget,
+      secretsTarget,
+      rsTarget,
+      _,
+    ) = DhkeHelper.createBlindedMessages(
       keysetId: keysetInfo.id,
       amount: amount,
     );
@@ -1223,17 +1243,17 @@ class CashuManager {
     if (!swapResponse.isSuccess) return swapResponse.cast<String>();
 
     // Unblind
-    final unblindingResponse =
-        await ProofBlindingManager.shared.unblindingBlindedSignature((
-      mint,
-      unit,
-      swapResponse.data,
-      allSecrets,
-      allRs,
-      [], // options
-      ProofBlindingAction.multiMintSwap,
-      '',
-    ));
+    final unblindingResponse = await ProofBlindingManager.shared
+        .unblindingBlindedSignature((
+          mint,
+          unit,
+          swapResponse.data,
+          allSecrets,
+          allRs,
+          [], // options
+          ProofBlindingAction.multiMintSwap,
+          '',
+        ));
 
     if (!unblindingResponse.isSuccess) return unblindingResponse.cast<String>();
 
@@ -1336,8 +1356,10 @@ class CashuManager {
     await NostrCashuFunctions.shared.syncMintTokens(mintURL);
 
     // 2. Get All Tokens for this Mint
-    final tokens =
-        await db.getCashuTokensByFilter(mintURL: mintURL, pubkey: pubkey);
+    final tokens = await db.getCashuTokensByFilter(
+      mintURL: mintURL,
+      pubkey: pubkey,
+    );
     if (tokens.isEmpty) return CashuResponse.fromSuccessData(null);
 
     final allProofs = tokens.expand((t) => t.proofs).toList();
@@ -1347,8 +1369,10 @@ class CashuManager {
     onStatusUpdate?.call(CashuActionsStatus.checkingProofs);
 
     // We trust the mint's response over any local state.
-    final checkResponse =
-        await mint.tokenCheckAction(mintURL: mintURL, proofs: allProofs);
+    final checkResponse = await mint.tokenCheckAction(
+      mintURL: mintURL,
+      proofs: allProofs,
+    );
     if (!checkResponse.isSuccess) {
       return checkResponse.cast();
     }
@@ -1369,8 +1393,9 @@ class CashuManager {
     final dirtySatTokens = <CashuTokenData>[];
     for (var token in tokens) {
       if (token.unit == 'sat' &&
-          token.proofs
-              .any((p) => proofStateMap[p.secret] == TokenState.burned)) {
+          token.proofs.any(
+            (p) => proofStateMap[p.secret] == TokenState.burned,
+          )) {
         dirtySatTokens.add(token);
       }
     }
@@ -1391,8 +1416,9 @@ class CashuManager {
           burnedAmount += p.amountNum;
         }
 
-        validProofs.addAll(t.proofs
-            .where((p) => proofStateMap[p.secret] != TokenState.burned));
+        validProofs.addAll(
+          t.proofs.where((p) => proofStateMap[p.secret] != TokenState.burned),
+        );
       }
 
       final tokenStates = <String, CashuTokenStatus>{};
@@ -1452,24 +1478,28 @@ class CashuManager {
   }) async {
     // 1. Fetch NutZap Info
     onStatusUpdate?.call(CashuActionsStatus.mintInfo);
-    final info =
-        await NostrCashuFunctions.shared.fetchNutzapInformation(pubkey);
+    final info = await NostrCashuFunctions.shared.fetchNutzapInformation(
+      pubkey,
+    );
 
     if (info == null) {
       return CashuResponse.fromErrorMsg(
-          'No wallet configuration can be found for this user');
+        'No wallet configuration can be found for this user',
+      );
     }
 
     if (info.P2PkPubkey == null) {
       return CashuResponse.fromErrorMsg(
-          'Recipient has no P2PK pubkey configured');
+        'Recipient has no P2PK pubkey configured',
+      );
     }
 
     // 2. Determine Target Mint strategy
     final sourceMintUrl = mintUrl;
 
     // Check if recipient accepts source Mint
-    final recipientAcceptsSource = info.mints.containsKey(sourceMintUrl) &&
+    final recipientAcceptsSource =
+        info.mints.containsKey(sourceMintUrl) &&
         info.mints[sourceMintUrl]!.contains(unit);
 
     String targetMintUrl;
@@ -1571,18 +1601,20 @@ class CashuManager {
     if (!swapResponse.isSuccess) return swapResponse.cast();
 
     // 4. Unblind & Store locally
-    final unblindingResponse =
-        await ProofBlindingManager.shared.unblindingBlindedSignature((
-      mint,
-      unit,
-      swapResponse.data,
-      secrets,
-      rs,
-      List.generate(blindedMessages.length,
-          (_) => const UnblindingOption(isSaveToLocal: true)),
-      ProofBlindingAction.multiMintSwap,
-      '',
-    ));
+    final unblindingResponse = await ProofBlindingManager.shared
+        .unblindingBlindedSignature((
+          mint,
+          unit,
+          swapResponse.data,
+          secrets,
+          rs,
+          List.generate(
+            blindedMessages.length,
+            (_) => const UnblindingOption(isSaveToLocal: true),
+          ),
+          ProofBlindingAction.multiMintSwap,
+          '',
+        ));
 
     if (!unblindingResponse.isSuccess) return unblindingResponse.cast();
 
@@ -1693,156 +1725,4 @@ class CashuManager {
       e.handleHistoryChanged();
     }
   }
-
-  // Future<CashuResponse<void>> sendP2PKToken({
-  //   required String recipientPubkey,
-  //   required String mintURL,
-  //   required int amount,
-  //   String unit = 'sat',
-  //   void Function(CashuActionsStatus status)? onStatusUpdate,
-  // }) async {
-  //   final mint = await getMint(mintURL);
-  //   if (mint == null) return CashuResponse.fromErrorMsg('Mint not found');
-
-  //   // 1. Swap tokens to lock them to recipient's P2PK
-  //   onStatusUpdate?.call(CashuActionsStatus.selectingTokens);
-  //   final response = await ProofHelper.getProofsForECash(
-  //     mint: mint,
-  //     proofRequest: ProofRequest.proofs(null, amount),
-  //     unit: unit,
-  //     customSecret: P2PKSecret.fromOptions(
-  //       receivePubKeys: [recipientPubkey],
-  //     ),
-  //   );
-  //   if (!response.isSuccess) return response.cast();
-
-  //   final p2pkProofs = response.data;
-
-  //   // 3. Broadcast to recipient via Nostr
-  //   onStatusUpdate?.call(CashuActionsStatus.broadcastingNew);
-  //   final eventId = await NostrCashuFunctions.shared.sendTokenToPubkey(
-  //     recipientPubkey: recipientPubkey,
-  //     mintUrl: mintURL,
-  //     unit: unit,
-  //     proofs: p2pkProofs,
-  //   );
-
-  //   // 4. Sync our own state
-  //   await syncTokensWithNostr(mint: mint, unit: unit);
-
-  //   if (eventId != null) {
-  //     await NostrCashuFunctions.shared.sendSpendingEvent(
-  //       amount: amount,
-  //       unit: unit,
-  //       tokenStates: {eventId: CashuTokenStatus.created},
-  //       direction: CashuSpendingDirection.outgoing,
-  //     );
-  //   }
-
-  //   onStatusUpdate?.call(CashuActionsStatus.finalizing);
-  //   await updateMintBalance(mint);
-
-  //   return CashuResponse.fromSuccessData(null);
-  // }
-
-  // Future<CashuResponse<String?>> payPaymentRequest({
-  //   required PaymentRequest request,
-  //   void Function(CashuActionsStatus status)? onStatusUpdate,
-  // }) async {
-  //   final amount = request.amount;
-  //   if (amount == null) {
-  //     return CashuResponse.fromErrorMsg('Amount is missing in payment request');
-  //   }
-
-  //   final unit = request.unit ?? 'sat';
-
-  //   // 1. Select Mint
-  //   IMint? selectedMint;
-
-  //   // First try mints specified in the request
-  //   if (request.mints != null && request.mints!.isNotEmpty) {
-  //     for (final mintUrl in request.mints!) {
-  //       final mint = await getMint(mintUrl);
-  //       if (mint != null && mint.balance >= amount) {
-  //         selectedMint = mint;
-  //         break;
-  //       }
-  //     }
-  //   }
-
-  //   // If no specific mint found or insufficient balance, try any mint with balance
-  //   if (selectedMint == null) {
-  //     for (final mint in mints.values) {
-  //       if (request.mints != null && !request.mints!.contains(mint.mintURL)) {
-  //         continue;
-  //       }
-
-  //       final proofs = await ProofHelper.getProofs(mint.mintURL);
-  //       final balance = proofs.fold(0, (sum, p) => sum + p.amountNum);
-  //       if (balance >= amount) {
-  //         selectedMint = mint;
-  //         break;
-  //       }
-  //     }
-  //   }
-
-  //   // If still no mint, try to find any mint with balance (ignoring request mints preference if strict match failed)
-  //   if (selectedMint == null) {
-  //     for (final mint in mints.values) {
-  //       final proofs = await ProofHelper.getProofs(mint.mintURL);
-  //       final balance = proofs.fold(0, (sum, p) => sum + p.amountNum);
-  //       if (balance >= amount) {
-  //         selectedMint = mint;
-  //         break;
-  //       }
-  //     }
-  //   }
-
-  //   if (selectedMint == null) {
-  //     return CashuResponse.fromErrorMsg(
-  //         'No suitable mint found with sufficient balance');
-  //   }
-
-  //   // 2. Create Token (Send Ecash)
-  //   onStatusUpdate?.call(CashuActionsStatus.selectingTokens);
-  //   final response = await CashuAPIGeneralClient.sendEcash(
-  //     mint: selectedMint,
-  //     amount: amount,
-  //     memo: request.description ?? '',
-  //     unit: unit,
-  //   );
-
-  //   if (!response.isSuccess) return response.cast<String?>();
-  //   final tokenString = response.data;
-
-  //   // 3. Transport
-  //   if (request.transports != null && request.transports!.isNotEmpty) {
-  //     for (final transport in request.transports!) {
-  //       if (transport.type == 'nostr') {
-  //         onStatusUpdate?.call(CashuActionsStatus.broadcastingNew);
-  //         // TODO: Implement Nostr DM sending
-  //         // await NostrCashuFunctions.shared.sendDM(transport.target, tokenString);
-  //       }
-  //     }
-  //   }
-
-  //   return CashuResponse.fromSuccessData(tokenString);
-  // }
-
-  // Future<List<IMint>> _addDefaultMint() async {
-  //   final result = <IMint>[];
-
-  //   for (final mintURL in defaultMints) {
-  //     final maxNutsVersion = await MintHelper.getMaxNutsVersion(mintURL);
-  //     final mint = IMint(
-  //       pubkey: pubkey,
-  //       mintURL: mintURL,
-  //       maxNutsVersion: maxNutsVersion,
-  //     );
-  //     await db.saveMints([mint]);
-  //     result.add(mint);
-  //   }
-
-  //   return result;
-  // }
 }

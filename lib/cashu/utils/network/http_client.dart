@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:nostr_core_enhanced/utils/utils.dart';
 
@@ -62,7 +63,7 @@ class HTTPClient {
     try {
       final logPrefix =
           '[http - ${requestData.method.text}] uri: ${requestData.uri}';
-      print('$logPrefix, request: ${requestData.body}');
+      debugPrint('$logPrefix, request: ${requestData.body}');
       final response = await request(requestData, timeOut: timeOut);
       return handleWithResponse(
         requestData: requestData,
@@ -94,7 +95,7 @@ class HTTPClient {
     try {
       final logPrefix =
           '[http - ${requestData.method.text}] uri: ${requestData.uri}';
-      print('$logPrefix, request: ${requestData.body}');
+      debugPrint('$logPrefix, request: ${requestData.body}');
       final response = await request(requestData, timeOut: timeOut);
       return handleWithResponse(
         requestData: requestData,
@@ -169,7 +170,7 @@ class HTTPClient {
   }) async {
     final logPrefix =
         '[http - ${requestData.method.text}] uri: ${requestData.uri}';
-    print(
+    debugPrint(
       '$logPrefix, response: ${response.body}, status: ${response.statusCode}',
     );
 

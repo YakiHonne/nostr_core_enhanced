@@ -19,15 +19,16 @@ const REMOTE_NIP44_ENCRYPT = 'nip44_encrypt';
 const REMOTE_NIP44_DECRYPT = 'nip44_decrypt';
 
 // Regex patterns
-final RegExp BUNKER_REGEX =
-    RegExp(r'^bunker://([0-9a-f]{64})\??([?\\/\w:.=&%-]*)$');
-final RegExp NIP05_REGEX =
-    RegExp(r'^([a-z0-9._-]+)@([a-z0-9.-]+\.[a-z]{2,})$', caseSensitive: false);
+final RegExp BUNKER_REGEX = RegExp(
+  r'^bunker://([0-9a-f]{64})\??([?\\/\w:.=&%-]*)$',
+);
+final RegExp NIP05_REGEX = RegExp(
+  r'^([a-z0-9._-]+)@([a-z0-9.-]+\.[a-z]{2,})$',
+  caseSensitive: false,
+);
 final RegExp EMAIL_REGEX = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
 
-List<String> remoteSignerRelays = [
-  'wss://relay.nsec.app',
-];
+List<String> remoteSignerRelays = ['wss://relay.nsec.app'];
 
 enum RemoteSignerState {
   disconnected,
@@ -42,11 +43,7 @@ class BunkerPointer {
   final String pubkey;
   final String? secret;
 
-  BunkerPointer({
-    required this.relays,
-    required this.pubkey,
-    this.secret,
-  });
+  BunkerPointer({required this.relays, required this.pubkey, this.secret});
 
   String toBunkerURL() {
     final uri = Uri(
@@ -153,7 +150,8 @@ class RemoteEventSigner implements EventSigner {
   }
 
   Future<void> generateKeysAndConnect(
-      Function(String) onConnectionUrlReady) async {
+    Function(String) onConnectionUrlReady,
+  ) async {
     final keys = Keychain.generate();
 
     _loadSigner(
@@ -195,10 +193,7 @@ class RemoteEventSigner implements EventSigner {
     // Setup temporary subscription to listen for connection
     subscriptionId = signer.nc.addSubscription(
       [
-        Filter(
-          kinds: [EventKind.REMOTE_SIGNER],
-          p: [localSigner.publicKey],
-        ),
+        Filter(kinds: [EventKind.REMOTE_SIGNER], p: [localSigner.publicKey]),
       ],
       signer.relays,
       removeRemoteSignerRelay: false,
@@ -263,11 +258,7 @@ class RemoteEventSigner implements EventSigner {
           return null;
         }
 
-        return BunkerPointer(
-          pubkey: pubkey,
-          relays: relays,
-          secret: secret,
-        );
+        return BunkerPointer(pubkey: pubkey, relays: relays, secret: secret);
       } catch (e) {
         return null;
       }
@@ -315,7 +306,8 @@ class RemoteEventSigner implements EventSigner {
   static ParsedNostrConnectURI parseNostrConnectURI(String uri) {
     if (!uri.startsWith('nostrconnect://')) {
       throw ArgumentError(
-          'Invalid nostrconnect URI: Must start with "nostrconnect://".');
+        'Invalid nostrconnect URI: Must start with "nostrconnect://".',
+      );
     }
 
     final parsedUri = Uri.parse(uri);
@@ -328,13 +320,15 @@ class RemoteEventSigner implements EventSigner {
     final relays = parsedUri.queryParametersAll['relay'] ?? [];
     if (relays.isEmpty) {
       throw ArgumentError(
-          'Invalid nostrconnect URI: Missing "relay" parameter.');
+        'Invalid nostrconnect URI: Missing "relay" parameter.',
+      );
     }
 
     final secret = parsedUri.queryParameters['secret'];
     if (secret == null || secret.isEmpty) {
       throw ArgumentError(
-          'Invalid nostrconnect URI: Missing "secret" parameter.');
+        'Invalid nostrconnect URI: Missing "secret" parameter.',
+      );
     }
 
     final permsString = parsedUri.queryParameters['perms'];
@@ -389,14 +383,8 @@ class RemoteEventSigner implements EventSigner {
     required String pubkey,
   }) async {
     try {
-      return (await localSigner.decrypt44(
-            content,
-            pubkey,
-          )) ??
-          (await localSigner.decrypt04(
-            content,
-            pubkey,
-          ));
+      return (await localSigner.decrypt44(content, pubkey)) ??
+          (await localSigner.decrypt04(content, pubkey));
     } catch (e) {
       logger.i(e);
       return null;
@@ -432,7 +420,8 @@ class RemoteEventSigner implements EventSigner {
           onAuth!(error ?? '', true);
         } else {
           logger.w(
-              'Remote signer $bunkerPubkey tried to send auth_url but no onauth callback configured.');
+            'Remote signer $bunkerPubkey tried to send auth_url but no onauth callback configured.',
+          );
         }
         return;
       }
@@ -472,17 +461,10 @@ class RemoteEventSigner implements EventSigner {
       await _setupSubscription();
     }
 
-    logger.i('Subscribed : $_subscriptionId');
-    logger.i(nc.connectStatus);
-
     _serial++;
     final id = '$_idPrefix-$_serial';
 
-    final requestData = {
-      'id': id,
-      'method': method,
-      'params': params,
-    };
+    final requestData = {'id': id, 'method': method, 'params': params};
 
     final encryptedContent = await localSigner.encrypt44(
       json.encode(requestData),
@@ -490,24 +472,20 @@ class RemoteEventSigner implements EventSigner {
     );
 
     if (encryptedContent == null) {
-      completer.complete({
-        'error': 'Failed to encrypt request',
-      });
+      completer.complete({'error': 'Failed to encrypt request'});
     }
 
     final event = await Event.genEvent(
       kind: EventKind.REMOTE_SIGNER,
       tags: [
-        ['p', bunkerPubkey]
+        ['p', bunkerPubkey],
       ],
       content: encryptedContent!,
       signer: localSigner,
     );
 
     if (event == null) {
-      completer.complete({
-        'error': 'Failed to create request event',
-      });
+      completer.complete({'error': 'Failed to create request event'});
     }
 
     _listeners[id] = completer;
@@ -529,9 +507,7 @@ class RemoteEventSigner implements EventSigner {
         final comp = _listeners.remove(id)!;
         _waitingForAuth.remove(id);
         if (!comp.isCompleted) {
-          comp.complete({
-            'error': 'Request timed out',
-          });
+          comp.complete({'error': 'Request timed out'});
         }
       }
     });
@@ -552,10 +528,11 @@ class RemoteEventSigner implements EventSigner {
   Future<bool> connect() async {
     _connectionState = RemoteSignerState.connecting;
 
-    final data = await sendRequest(
-      'connect',
-      [bunkerPubkey, connectionSecret ?? '', perms.join(',')],
-    );
+    final data = await sendRequest('connect', [
+      bunkerPubkey,
+      connectionSecret ?? '',
+      perms.join(','),
+    ]);
 
     if (data['result'] == 'ack') {
       _connectionState = RemoteSignerState.connected;
@@ -669,10 +646,7 @@ class RemoteEventSigner implements EventSigner {
 
         final decrypt = await decrypt44(sgEvent.content, sgEvent.pubkey);
         if (decrypt != null) {
-          return Event.fromJson(
-            json.decode(decrypt),
-            currentUser: publicKey,
-          );
+          return Event.fromJson(json.decode(decrypt), currentUser: publicKey);
         }
       }
       return null;
@@ -727,7 +701,9 @@ class RemoteEventSigner implements EventSigner {
     const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
     return String.fromCharCodes(
       Iterable.generate(
-          7, (_) => chars.codeUnitAt(random.nextInt(chars.length))),
+        7,
+        (_) => chars.codeUnitAt(random.nextInt(chars.length)),
+      ),
     );
   }
 

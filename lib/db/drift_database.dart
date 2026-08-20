@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:nostr_core_enhanced/cashu/db/cashu_db_tables.dart';
 import 'package:nostr_core_enhanced/cashu/db/cashu_spending_table.dart';
 import 'package:nostr_core_enhanced/cashu/db/cashu_tokens_table.dart';
@@ -48,6 +49,9 @@ class NostrDatabase extends _$NostrDatabase {
 
   NostrDatabase._internal() : super(_openConnection());
 
+  @visibleForTesting
+  NostrDatabase.forTesting(super.e);
+
   @override
   int get schemaVersion => 2;
 
@@ -75,9 +79,13 @@ class NostrDatabase extends _$NostrDatabase {
             await customStatement('PRAGMA busy_timeout=30000;');
             await customStatement('PRAGMA synchronous=NORMAL;');
             await customStatement('PRAGMA cache_size=10000;');
-            await customStatement('PRAGMA temp_store=MEMORY;');
+            // temp_store=FILE: large ORDER BY sorts spill to disk instead of
+            // exhausting the heap (SQLITE_NOMEM on big event tables).
+            await customStatement('PRAGMA temp_store=FILE;');
             await customStatement(
                 'CREATE INDEX IF NOT EXISTS idx_events_d_tag ON event_table (d_tag);');
+            await customStatement(
+                'CREATE INDEX IF NOT EXISTS idx_events_created_at ON event_table (created_at DESC);');
             await customStatement(
                 'CREATE INDEX IF NOT EXISTS idx_events_pk_kind_created ON event_table (pubkey, kind, created_at DESC);');
           } catch (_) {}

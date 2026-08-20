@@ -26,7 +26,9 @@ class Message {
       'AUTH'
     ];
 
-    assert(messages.contains(data[0]), 'Unsupported payload (or NIP)');
+    if (data is! List || data.isEmpty || !messages.contains(data[0])) {
+      throw ArgumentError('Unsupported payload (or NIP)');
+    }
 
     type = data[0];
     switch (type) {
@@ -63,7 +65,9 @@ class RemoteCacheMessage {
       'EOSE',
     ];
 
-    assert(messages.contains(data[0]), 'Unsupported payload (or NIP)');
+    if (data is! List || data.isEmpty || !messages.contains(data[0])) {
+      throw ArgumentError('Unsupported payload (or NIP)');
+    }
 
     type = data[0];
 

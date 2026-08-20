@@ -23,6 +23,7 @@ import 'package:uuid/uuid.dart';
 import '../cache/remote_cache_service.dart';
 import '../models/mute_list.dart';
 import '../models/wot_models.dart';
+import 'relay_event_parser.dart';
 
 const Duration REFRESH_CONTACT_LIST_DURATION = Duration(days: 1);
 
@@ -125,8 +126,18 @@ class NostrCore {
   // MARK: SIGNER
   // =====================================================================
 
+  bool _sweptOldEvents = false;
+
   void setSigner(EventSigner? signer) {
     currentSigner = signer;
+
+    // Cache retention sweep, once per session. Runs here rather than at
+    // db.init() because exempting the user's own events needs the signer's
+    // pubkey. Fire-and-forget; sweepOldEvents swallows its own errors.
+    if (!_sweptOldEvents && signer != null) {
+      _sweptOldEvents = true;
+      db.sweepOldEvents(exemptPubkey: signer.getPublicKey());
+    }
   }
 
   // =====================================================================
@@ -141,12 +152,40 @@ class NostrCore {
         connect(webSocketKey);
       }
     }
+
+    // Publishes are one-shot and their callers time out within seconds
+    // (TIMER_TICKS * 500ms). Entries whose relays never replied OK used to
+    // stay in sendsMap forever; sweep anything older than 2 minutes.
+    final cutoff = DateTime.now().millisecondsSinceEpoch - 120000;
+    sendsMap.removeWhere((_, sends) => sends.sendsTime < cutoff);
   }
 
+  Timer? _flushPeriodicTimer;
+
   void automaticFlush() {
-    Timer.periodic(Duration(seconds: 10), (_) {
+    _flushPeriodicTimer = Timer.periodic(Duration(seconds: 10), (_) {
       db.flushEventsSeenRelays(dbWrapper);
     });
+  }
+
+  bool _disposed = false;
+
+  /// Releases this instance's sockets and timers. The database is NOT
+  /// closed — it may be shared with other NostrCore instances (the app
+  /// passes `nc.db` into secondary cores). Buffered events are flushed
+  /// into it before the sockets go down.
+  Future<void> dispose() async {
+    if (_disposed) return;
+    _disposed = true;
+    _flushPeriodicTimer?.cancel();
+    dbWrapper.dispose();
+    await db.flushEventsSeenRelays(dbWrapper);
+    // closeConnect marks each relay closed, so _onDisconnected won't
+    // schedule reconnects for the dying sockets.
+    await closeConnect(List.of(webSockets.keys));
+    requestsMap.clear();
+    sendsMap.clear();
+    connectStatusListeners.clear();
   }
 
   Future<void> forceReconnect() async {
@@ -213,6 +252,7 @@ class NostrCore {
     bool? fromIdleState,
     bool? waitForAuth,
   }) async {
+    if (_disposed) return;
     try {
       WebSocket? socket;
 
@@ -242,6 +282,10 @@ class NostrCore {
         _listenEvent(socket, r);
         webSockets[r] = socket;
         printLog('$r socket connection initialized');
+        // Reset so attempts counts consecutive failures only; otherwise a
+        // relay that reconnected successfully a few times permanently falls
+        // out of relaysAutoReconnect's `attempts <= 3` check.
+        attempts.remove(r);
         _setConnectStatus(r, 1);
         if (waitForAuth != null) {
           await Future.delayed(const Duration(seconds: 2));
@@ -252,13 +296,27 @@ class NostrCore {
     } catch (_) {}
   }
 
-  Future<void> connectRelays(List<String> relays, {bool? fromIdleState}) async {
+  Future<void> connectRelays(
+    List<String> relays, {
+    bool? fromIdleState,
+    bool? waitForAuth,
+  }) async {
     final rs = relays.where((r) {
       final relay = Relay.clean(r);
       return relay != null && !this.relays().contains(relay);
     }).toList();
 
-    await Future.wait(rs.map((e) => connect(e)).toList());
+    await Future.wait(
+      rs
+          .map(
+            (e) => connect(
+              e,
+              fromIdleState: fromIdleState,
+              waitForAuth: waitForAuth,
+            ),
+          )
+          .toList(),
+    );
   }
 
   Future<void> connectNonConnectedRelays(Set<String> relays) async {
@@ -276,6 +334,7 @@ class NostrCore {
     for (final relay in relays) {
       if (webSockets.containsKey(relay)) {
         attempts.remove(relay);
+        connectStatus.remove(relay);
         closedRelays.add(relay);
         final socket = webSockets.remove(relay);
         await socket?.close();
@@ -317,27 +376,31 @@ class NostrCore {
     int? startingTimeout,
   }) async {
     final completer = Completer<String>();
-    Timer? timer = Timer(Duration(seconds: timeOut), () {});
+    Timer? timer;
     String id = '';
 
+    // Filters actually sent to relays: cacheFirst substitutes copies with a
+    // bumped `since`, so the caller's Filter objects are never mutated.
+    var relayFilters = filters;
+
     if (source != EventsSource.relays) {
-      final events = await dbWrapper.loadEvents(
-        filters: filters,
-        relays: relays,
-        db: db,
-        includeExpired: includeExpired,
-      );
+      final List<Event> events;
 
       if (source == EventsSource.cacheFirst) {
-        final mostRecentEvent = events.isEmpty ? 0 : events.first.createdAt;
-
-        if (mostRecentEvent != 0) {
-          for (final filter in filters) {
-            if ((filter.since ?? 0) < mostRecentEvent) {
-              filter.since = mostRecentEvent + 1;
-            }
-          }
-        }
+        final result = await _loadCacheAndBumpSince(
+          filters,
+          relays,
+          includeExpired: includeExpired,
+        );
+        events = result.events;
+        relayFilters = result.relayFilters;
+      } else {
+        events = await dbWrapper.loadEvents(
+          filters: filters,
+          relays: relays,
+          db: db,
+          includeExpired: includeExpired,
+        );
       }
 
       for (final e in events) {
@@ -360,14 +423,21 @@ class NostrCore {
         }
       }
 
+      void finish({bool closeAdHocRelays = false}) {
+        if (completer.isCompleted) return;
+        closeRequests(<String>[id]);
+        completer.complete(id);
+        db.flushEventsSeenRelays(dbWrapper);
+        if (closeAdHocRelays && nonConnectedRelays.isNotEmpty) {
+          closeConnect(nonConnectedRelays);
+        }
+      }
+
       id = addSubscription(
-        filters,
+        relayFilters,
         relays,
         onConnectionStatus: (status) {
-          if (!status) {
-            closeRequests(<String>[id]);
-            completer.complete(id);
-          }
+          if (!status) finish();
         },
         eoseCallBack: (requestId, ok, relay, unCompletedRelays) {
           closeSubscription(requestId, relay);
@@ -376,13 +446,7 @@ class NostrCore {
             timer: timer,
             timeOut: timeOut,
             shouldClose: unCompletedRelays.isEmpty,
-            onClose: () {
-              if (!completer.isCompleted) {
-                closeRequests(<String>[id]);
-                completer.complete(id);
-                db.flushEventsSeenRelays(dbWrapper);
-              }
-            },
+            onClose: finish,
           );
 
           if (eoseCallBack != null) {
@@ -399,37 +463,81 @@ class NostrCore {
         },
       );
 
+      // Relays that never answer used to hang the query until the
+      // timeOut + 10 fallback below (15s by default); the first EOSE
+      // replaces this timer with the rolling per-EOSE one.
+      timer?.cancel();
+      timer = Timer(
+        Duration(seconds: timeOut),
+        () => finish(closeAdHocRelays: true),
+      );
+
       // Fallback timeout to ensure completion
-      Timer(Duration(seconds: timeOut + 10), () {
-        if (!completer.isCompleted) {
-          closeRequests(<String>[id]);
-          completer.complete(id);
-          if (nonConnectedRelays.isNotEmpty) {
-            closeConnect(nonConnectedRelays);
-          }
-        }
-      });
+      Timer(
+        Duration(seconds: timeOut + 10),
+        () => finish(closeAdHocRelays: true),
+      );
 
       if (startingTimeout != null) {
         timer = setTimerAndApply(
           timer: timer,
           timeOut: startingTimeout,
           shouldClose: false,
-          onClose: () {
-            if (!completer.isCompleted) {
-              closeRequests(<String>[id]);
-              completer.complete(id);
-
-              if (nonConnectedRelays.isNotEmpty) {
-                closeConnect(nonConnectedRelays);
-              }
-            }
-          },
+          onClose: () => finish(closeAdHocRelays: true),
         );
       }
     }
 
     return completer.future;
+  }
+
+  /// cacheFirst support: load cached events per filter and build the relay
+  /// filters with `since` bumped past each filter's own cached data — one
+  /// filter's warm cache must not bump another filter's `since` past events
+  /// it never cached. The bump is inclusive (no +1): an uncached event in
+  /// the same second as the newest cached one is re-sent rather than lost;
+  /// duplicates are already the norm since every relay re-sends the same
+  /// event. Callers' Filter objects are never mutated.
+  Future<({List<Event> events, List<Filter> relayFilters})>
+  _loadCacheAndBumpSince(
+    List<Filter> filters,
+    List<String> relays, {
+    bool includeExpired = true,
+  }) async {
+    final perFilter = await Future.wait(
+      filters.map(
+        (f) => dbWrapper.loadEvents(
+          filters: [f],
+          relays: relays,
+          db: db,
+          includeExpired: includeExpired,
+        ),
+      ),
+    );
+
+    final relayFilters = <Filter>[];
+    for (var i = 0; i < filters.length; i++) {
+      final cached = perFilter[i];
+      final limit = filters[i].limit;
+      // Only bump when the cache plausibly satisfied the query: a partial
+      // hit (fewer rows than the filter's limit) means holes below the
+      // newest cached event, and bumping `since` would hide them from
+      // relays forever. Filters without a limit give no completeness
+      // signal, so they keep the bump (delta-sync) behavior.
+      final cacheComplete = limit == null || cached.length >= limit;
+      // Results are createdAt-descending, so first is the newest.
+      final newest = cached.isEmpty ? 0 : cached.first.createdAt;
+      relayFilters.add(
+        cacheComplete && newest > (filters[i].since ?? 0)
+            ? filters[i].copyWithSince(newest)
+            : filters[i],
+      );
+    }
+
+    return (
+      events: [for (final evs in perFilter) ...evs],
+      relayFilters: relayFilters,
+    );
   }
 
   List<String> getNonConnectedRelays(List<String> relays) {
@@ -446,23 +554,21 @@ class NostrCore {
   }) async {
     Timer? timer = Timer(Duration(seconds: 5), () {});
 
+    var relayFilters = filters;
+
     if (source != EventsSource.relays) {
-      final events = await dbWrapper.loadEvents(
-        filters: filters,
-        relays: relays,
-        db: db,
-      );
+      final List<Event> events;
 
       if (source == EventsSource.cacheFirst) {
-        final mostRecentEvent = events.isEmpty ? 0 : events.first.createdAt;
-
-        if (mostRecentEvent != 0) {
-          for (final filter in filters) {
-            if ((filter.since ?? 0) < mostRecentEvent) {
-              filter.since = mostRecentEvent + 1;
-            }
-          }
-        }
+        final result = await _loadCacheAndBumpSince(filters, relays);
+        events = result.events;
+        relayFilters = result.relayFilters;
+      } else {
+        events = await dbWrapper.loadEvents(
+          filters: filters,
+          relays: relays,
+          db: db,
+        );
       }
 
       for (final e in events) {
@@ -476,7 +582,7 @@ class NostrCore {
 
     if (source != EventsSource.cache) {
       return addSubscription(
-        filters,
+        relayFilters,
         relays,
         eoseCallBack: (requestId, ok, relay, unCompletedRelays) {
           eoseCallBack?.call(requestId, ok, relay, unCompletedRelays);
@@ -577,13 +683,20 @@ class NostrCore {
   }
 
   closeSubscriptions(String subscriptionId) {
-    for (var relay in relays()) {
-      if (subscriptionId.isNotEmpty) {
-        _send(Close(subscriptionId).serialize(), chosenRelays: [relay]);
-        requestsMap.remove(subscriptionId + relay);
-        printLog('close $subscriptionId');
-      }
+    if (subscriptionId.isEmpty) {
+      return;
     }
+
+    for (var relay in relays()) {
+      _send(Close(subscriptionId).serialize(), chosenRelays: [relay]);
+      printLog('close $subscriptionId');
+    }
+
+    // Remove by prefix (keys are subscriptionId + relay, and ids are 64
+    // random hex chars). This also clears entries for relays that have
+    // disconnected since the subscription was opened — those entries, and
+    // the callbacks they capture, used to leak forever.
+    requestsMap.removeWhere((key, _) => key.startsWith(subscriptionId));
   }
 
   closeSubscription(String subscriptionId, String relay) {
@@ -596,20 +709,25 @@ class NostrCore {
   }
 
   Future closeRequests(List<String> requestsIds) async {
-    Iterable<String> requestsMapKeys = List<String>.from(requestsMap.keys);
+    // Collect first: the same Requests object sits under one key per relay.
+    final toClose = <Requests>{};
 
-    for (var key in requestsMapKeys) {
-      var requests = requestsMap[key];
-
-      if (requestsIds.contains(requests!.requestId)) {
-        for (var relay in relays()) {
-          if (requests.subscriptions[relay] != null) {
-            closeSubscription(requests.subscriptions[relay]!, relay);
-          }
-        }
-
-        return;
+    for (var requests in requestsMap.values) {
+      if (requestsIds.contains(requests.requestId)) {
+        toClose.add(requests);
       }
+    }
+
+    for (var requests in toClose) {
+      // Close against the request's own relay list, not the currently
+      // connected ones — entries for since-disconnected relays used to be
+      // skipped here and leak.
+      requests.subscriptions.forEach((relay, subscriptionId) {
+        _send(Close(subscriptionId).serialize(), chosenRelays: [relay]);
+        printLog('close $subscriptionId');
+      });
+
+      requestsMap.removeWhere((_, v) => identical(v, requests));
     }
   }
 
@@ -623,30 +741,23 @@ class NostrCore {
     Function(List<String>, List<String>)? onProgress,
   }) {
     final completer = Completer<bool>();
-    bool isSuccessful = false;
 
     sendEvent(
       event,
       relays,
       sendCallBack: (ok, relay, unCompletedRelays) {
-        if (onProgress != null) {
-          onProgress.call(relays, unCompletedRelays);
-        }
+        onProgress?.call(relays, unCompletedRelays);
 
-        if (ok.status && !isSuccessful) {
-          isSuccessful = true;
+        if (ok.status && !completer.isCompleted) {
+          completer.complete(true);
         }
       },
     );
 
-    Timer.periodic(const Duration(milliseconds: 500), (timer) {
-      if (isSuccessful || timer.tick > TIMER_TICKS) {
-        completer.complete(isSuccessful);
-        timer.cancel();
-      }
-    });
-
-    return completer.future;
+    return completer.future.timeout(
+      const Duration(milliseconds: TIMER_TICKS * 500),
+      onTimeout: () => false,
+    );
   }
 
   Future<bool> sendEventAsync({
@@ -656,26 +767,22 @@ class NostrCore {
     int? timeout,
   }) async {
     final completer = Completer<bool>();
-    bool isSuccessful = false;
 
     sendEvent(
       event,
       relays ?? [],
       sendCallBack: (ok, relay, unCompletedRelays) {
-        if (ok.status && !isSuccessful) {
-          isSuccessful = true;
+        if (ok.status && !completer.isCompleted) {
+          completer.complete(true);
         }
       },
     );
 
-    Timer.periodic(const Duration(milliseconds: 500), (timer) {
-      if (isSuccessful || timer.tick > (timeout ?? TIMER_TICKS)) {
-        completer.complete(isSuccessful);
-        timer.cancel();
-      }
-    });
-
-    return completer.future;
+    // timeout is in 500ms ticks, kept for callers of the old polling loop.
+    return completer.future.timeout(
+      Duration(milliseconds: (timeout ?? TIMER_TICKS) * 500),
+      onTimeout: () => false,
+    );
   }
 
   void sendEvent(
@@ -741,68 +848,74 @@ class NostrCore {
   // =====================================================================
 
   Future<void> _authenticateRelay(String message, String relay) async {
+    if (!(currentSigner?.canSign() ?? false)) return;
+
+    final dm = jsonDecode(message);
+    if (dm is! List || dm.length < 2) return;
+
+    final ev = await Event.genEvent(
+      kind: EventKind.AUTHENTICATION,
+      tags: [
+        ['relay', Relay.clean(relay) ?? relay],
+        ['challenge', dm[1]],
+      ],
+      content: '',
+      signer: currentSigner,
+    );
+
+    // Returning early instead of leaving the completer dangling: the old
+    // version never completed when the signer failed to produce an event.
+    if (ev == null) return;
+
     final completer = Completer<void>();
-
-    if (currentSigner?.canSign() ?? false) {
-      final dm = jsonDecode(message);
-
-      if (dm is List && dm.length > 1) {
-        final ev = await Event.genEvent(
-          kind: EventKind.AUTHENTICATION,
-          tags: [
-            ['relay', Relay.clean(relay) ?? relay],
-            ['challenge', dm[1]],
-          ],
-          content: '',
-          signer: currentSigner,
-        );
-
-        if (ev != null) {
-          sendEvent(
-            ev,
-            [relay],
-            isAuth: true,
-            sendCallBack: (ok, relay, unCompletedRelays) {
-              completer.complete();
-            },
-          );
-        }
-      }
-    } else {
-      completer.complete();
-    }
+    sendEvent(
+      ev,
+      [relay],
+      isAuth: true,
+      sendCallBack: (ok, relay, unCompletedRelays) {
+        if (!completer.isCompleted) completer.complete();
+      },
+    );
 
     return completer.future;
   }
 
+  late final RelayEventParser _eventParser = RelayEventParser(
+    onMessage: _dispatchParsedMessage,
+    onUnparsable: (message, relay) =>
+        printLog('Received message not supported: $message'),
+  );
+
   void _handleMessage(String message, String relay) {
-    try {
-      var m = Message.deserialize(message);
+    // Every frame (EVENT/EOSE/NOTICE/OK/AUTH) is batched onto the parser
+    // isolate, in wire order, to keep jsonDecode + Event construction off
+    // the UI isolate. Dispatch below preserves relay wire order — EOSE must
+    // never run before the EVENTs that preceded it, or its subscription
+    // cleanup would drop them.
+    _eventParser.add(message, relay);
+  }
 
-      switch (m.type) {
-        case 'EVENT':
-          _handleEvent(m.message, relay);
-          break;
-        case 'EOSE':
-          _handleEOSE(m.message, relay);
-          break;
-        case 'NOTICE':
-          _handleNotice(m.message, relay);
-          break;
-        case 'OK':
-          _handleOk(message, relay);
-          break;
-        case 'AUTH':
-          _authenticateRelay(message, relay);
-          print(message);
-          break;
+  void _dispatchParsedMessage(Message m, String raw, String relay) {
+    switch (m.type) {
+      case 'EVENT':
+        _handleEvent(m.message, relay);
+        break;
+      case 'EOSE':
+        _handleEOSE(m.message, relay);
+        break;
+      case 'NOTICE':
+        _handleNotice(m.message, relay);
+        break;
+      case 'OK':
+        _handleOk(raw, relay);
+        break;
+      case 'AUTH':
+        _authenticateRelay(raw, relay);
+        break;
 
-        default:
-          printLog('Received message not supported: $message');
-          break;
-      }
-    } catch (e) {
-      printLog('Received message not supported: $message');
+      default:
+        printLog('Received message not supported: $raw');
+        break;
     }
   }
 
@@ -1056,6 +1169,7 @@ class NostrCore {
       final sub = ws.listen(
         (data) => responded = true,
         onDone: () => responded = true,
+        onError: (e) => logger.e('checkRelayConnectivity socket error: $e'),
       );
 
       ws.add('ping');
@@ -1075,7 +1189,9 @@ class NostrCore {
     printLog('_onDisconnected');
     _setConnectStatus(relay, 3);
     if (!closedRelays.contains(relay)) {
-      await Future.delayed(const Duration(milliseconds: 1000));
+      // Exponential backoff on consecutive failures: 1s, 2s, 4s ... 32s cap.
+      final failures = (attempts[relay] ?? 0).clamp(0, 5);
+      await Future.delayed(Duration(seconds: 1 << failures));
       connect(relay);
     }
   }
@@ -2013,7 +2129,7 @@ class NostrCore {
       }
     }
 
-    print(
+    printLog(
       "Have lists of relays for $foundCount/${pubKeys.length} pubKeys ${foundCount < pubKeys.length ? "(missing ${pubKeys.length - foundCount})" : ""}",
     );
 
@@ -2148,7 +2264,7 @@ class NostrCore {
     Set<String> found = {};
 
     if (missingPubKeys.isNotEmpty) {
-      print("loading missing relay lists ${missingPubKeys.length}");
+      printLog("loading missing relay lists ${missingPubKeys.length}");
       if (onProgress != null) {
         onProgress.call(
           "loading missing relay lists",

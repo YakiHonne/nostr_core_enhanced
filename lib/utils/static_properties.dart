@@ -15,6 +15,8 @@ class EventKind {
 
   static const int REACTION = 7;
 
+  static const int BADGE_AWARD = 8;
+
   static const int SEALED_EVENT = 13;
 
   static const int PRIVATE_DIRECT_MESSAGE = 14;
@@ -105,6 +107,8 @@ class EventKind {
 
   static const int CATEGORIZED_BOOKMARK = 30003;
 
+  static const int BADGE_DEFINITION = 30009;
+
   static const int CURATION_ARTICLES = 30004;
 
   static const int CURATION_VIDEOS = 30005;
@@ -116,6 +120,8 @@ class EventKind {
   static const int SMART_WIDGET_ENH = 30033;
 
   static const int APP_CUSTOM = 30078;
+
+  static const int CREATOR_PLANS = 30164;
 
   static const int RELAY_DISCOVERY = 30166;
 
@@ -140,6 +146,12 @@ class EventKind {
   static const int MEDIA_PACKS = 39092;
  
   static const int COMMENT = 1111;
+
+  static const int POMEGRANATE_SHARD = 20444;
+
+  static const int POMEGRANATE_REGISTRATION = 20445;
+
+  static const int POMEGRANATE_SETUP = 16440;
 }
 
 class CacheEventKind {

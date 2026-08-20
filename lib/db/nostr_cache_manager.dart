@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:nostr_core_enhanced/cache/cache_manager.dart';
 import 'package:nostr_core_enhanced/cashu/models/cashu_spending_data.dart';
 import 'package:nostr_core_enhanced/cashu/models/cashu_token_data.dart';
@@ -21,6 +22,7 @@ import 'package:nostr_core_enhanced/nostr/filter.dart';
 
 import '../cashu/models/lightning_invoice.dart';
 import '../utils/helpers.dart';
+import '../utils/static_properties.dart';
 import 'drift_database.dart';
 
 class NostrDB extends CacheManager {
@@ -62,9 +64,12 @@ class NostrDB extends CacheManager {
   // MARK: INITIALIZATION
   // =====================================================================
 
-  Future<void> init({String? directory}) async {
+  Future<void> init() async {
     _database = NostrDatabase();
   }
+
+  @visibleForTesting
+  void setDatabaseForTesting(NostrDatabase db) => _database = db;
 
   // =====================================================================
   // MARK: DATABASE SIZE CALCULATOR
@@ -489,29 +494,104 @@ class NostrDB extends CacheManager {
 
   @override
   Future<void> flushEventsSeenRelays(DbWrapper dbWrapper) async {
-    await _retryOnLocked(
-      () async {
-        if (DateTime.now().difference(dbWrapper.lastFlush).inSeconds < 2) {
-          return;
-        }
+    // Single-flight per wrapper: the buffer isn't trimmed until the write
+    // completes, so without this every markEvent past the threshold (plus
+    // the periodic/query-finish callers) started another concurrent flush,
+    // each snapshotting and jsonEncoding the whole buffer — OOM under load.
+    if (dbWrapper.flushing) return;
+    dbWrapper.flushing = true;
+    try {
+      final events = dbWrapper.currentEvents;
+      if (events.isEmpty) return;
 
-        dbWrapper.lastFlush = DateTime.now();
+      // Snapshot synchronously and remove entries only after the write
+      // succeeds: the old flow cleared the live buffer while the batch write
+      // was still pending (and a throttle here silently skipped the write
+      // entirely), dropping events from the cache under load.
+      final flushedIds = events.keys.toList();
+      final flushedEvents = events.values.toList();
+      final companions = flushedEvents.map((e) => e.toCompanion()).toList();
 
-        final r = dbWrapper.currentEvents;
-        if (r.isEmpty) return;
-
-        await _database.batch(
+      await _retryOnLocked(
+        () => _database.batch(
           (batch) => batch.insertAllOnConflictUpdate(
             _database.eventTable,
-            r.values.map(
-              (e) {
-                return e.toCompanion();
-              },
-            ).toList(),
+            companions,
           ),
-        );
-      },
-    );
+        ),
+      );
+
+      // Events marked while the write was in flight keep their entries.
+      for (final id in flushedIds) {
+        dbWrapper.currentEvents.remove(id);
+      }
+
+      await _removeStaleReplaceableVersions(flushedEvents);
+    } finally {
+      dbWrapper.flushing = false;
+    }
+  }
+
+  /// NIP-01: for replaceable kinds (0, 3, 10000-19999) only the newest event
+  /// per (pubkey, kind) is valid; for parameterized replaceables
+  /// (30000-39999) it's per (pubkey, kind, dTag). Upserts key on event id,
+  /// so superseded versions used to accumulate and be served from cache.
+  Future<void> _removeStaleReplaceableVersions(List<Event> flushed) async {
+    final seen = <String>{};
+
+    for (final e in flushed) {
+      final param = e.kind >= 30000 && e.kind < 40000;
+      final replaceable =
+          e.kind == 0 || e.kind == 3 || (e.kind >= 10000 && e.kind < 20000);
+      if (!param && !replaceable) continue;
+
+      // ponytail: a parameterized event missing its d tag matches nothing
+      // and is skipped rather than risking a cross-dTag delete.
+      final d = param ? (e.dTag ?? '') : null;
+      if (!seen.add('${e.pubkey}:${e.kind}:$d')) continue;
+
+      await _retryOnLocked(
+        () => _database.customStatement(
+          'DELETE FROM event_table WHERE pubkey = ?1 AND kind = ?2 '
+          'AND (?3 IS NULL OR d_tag = ?3) '
+          'AND created_at < ('
+          'SELECT MAX(created_at) FROM event_table '
+          'WHERE pubkey = ?1 AND kind = ?2 AND (?3 IS NULL OR d_tag = ?3))',
+          [e.pubkey, e.kind, d],
+        ),
+      );
+    }
+  }
+
+  /// 30-day cache retention. Exempt: DM kinds (the cache is the only
+  /// reliable DM store, and gift wraps have randomized timestamps) and the
+  /// current user's own events. Best-effort: failures are swallowed, the
+  /// next session sweeps again.
+  Future<void> sweepOldEvents({
+    Duration maxAge = const Duration(days: 30),
+    String exemptPubkey = '',
+  }) async {
+    const dmKinds = [
+      EventKind.DIRECT_MESSAGE,
+      EventKind.SEALED_EVENT,
+      EventKind.PRIVATE_DIRECT_MESSAGE,
+      EventKind.GIFT_WRAP,
+    ];
+
+    final cutoff =
+        DateTime.now().subtract(maxAge).millisecondsSinceEpoch ~/ 1000;
+
+    try {
+      await _retryOnLocked(
+        () => (_database.delete(_database.eventTable)
+              ..where((tbl) =>
+                  tbl.createdAt.isSmallerThanValue(cutoff) &
+                  tbl.kind.isNotIn(dmKinds) &
+                  tbl.pubkey.equals(exemptPubkey).not() &
+                  tbl.currentUser.equals('')))
+            .go(),
+      );
+    } catch (_) {}
   }
 
   @override
@@ -604,9 +684,9 @@ class NostrDB extends CacheManager {
         })
         ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)]);
 
-      if (f.limit != null) {
-        query.limit(f.limit!);
-      }
+      // ponytail: default cap so a limitless filter can't materialize the
+      // whole table; raise if a caller legitimately needs more.
+      query.limit(f.limit ?? 1000);
 
       final events = await query.get();
 

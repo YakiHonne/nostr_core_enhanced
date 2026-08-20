@@ -37,6 +37,9 @@ class Filter {
   /// a list of identifiers that are referenced in a "t" tag
   List<String>? t;
 
+  /// a list of identifiers that are referenced in an "m" tag
+  List<String>? m;
+
   /// a list of identifiers that are referenced in a "search" tag
   String? search;
 
@@ -67,11 +70,37 @@ class Filter {
     this.a,
     this.t,
     this.q,
+    this.m,
     this.bolt11,
     this.since,
     this.until,
     this.limit,
   });
+
+  /// Shallow copy with an overridden `since`; list fields are shared, which
+  /// is fine as long as callers treat filters as immutable after creation.
+  Filter copyWithSince(int since) {
+    return Filter(
+      ids: ids,
+      authors: authors,
+      kinds: kinds,
+      e: e,
+      p: p,
+      l: l,
+      d: d,
+      search: search,
+      k: k,
+      c: c,
+      a: a,
+      t: t,
+      q: q,
+      m: m,
+      bolt11: bolt11,
+      since: since,
+      until: until,
+      limit: limit,
+    );
+  }
 
   /// Deserialize a filter from a JSON
   Filter.fromJson(Map<String, dynamic> json) {
@@ -88,7 +117,10 @@ class Filter {
     l = json['#l'] == null ? null : List<String>.from(json['#l']);
     q = json['#q'] == null ? null : List<String>.from(json['#q']);
     k = json['#k'] == null ? null : List<String>.from(json['#k']);
-    search = json['#search'].toString();
+    m = json['#m'] == null ? null : List<String>.from(json['#m']);
+    // toJson writes 'search'; accept the legacy '#search' key too. The old
+    // read produced the literal string "null" when the key was absent.
+    search = (json['search'] ?? json['#search'])?.toString();
     bolt11 =
         json['#bolt11'] == null ? null : List<String>.from(json['#bolt11']);
     since = json['since'];
@@ -137,6 +169,9 @@ class Filter {
     }
     if (k != null) {
       data['#k'] = k;
+    }
+    if (m != null) {
+      data['#m'] = m;
     }
     if (bolt11 != null) {
       data['#bolt11'] = bolt11;

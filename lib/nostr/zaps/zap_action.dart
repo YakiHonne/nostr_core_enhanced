@@ -31,6 +31,7 @@ class ZapAction {
         comment: comment,
         removeNostrEvent: removeNostrEvent,
         aTag: aTag,
+        extraTags: extraTags,
       );
 
       if (res == null) {
@@ -91,6 +92,7 @@ class ZapAction {
         pollOption: pollOption,
         comment: comment,
         removeNostrEvent: removeNostrEvent,
+        extraTags: extraTags,
       );
     } finally {
       // cancelFunc.call();
@@ -107,6 +109,7 @@ class ZapAction {
     String? pollOption,
     String? comment,
     bool? removeNostrEvent,
+    List<List<String>>? extraTags,
   }) async {
     try {
       String? lnurl = metadata.lud06;
@@ -153,6 +156,7 @@ class ZapAction {
         pollOption: pollOption,
         comment: comment,
         removeNostrEvent: removeNostrEvent,
+        extraTags: extraTags,
       );
     } catch (_) {
       return null;

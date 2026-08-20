@@ -99,6 +99,7 @@ class Zap {
     String? pollOption,
     String? comment,
     bool? removeNostrEvent,
+    List<List<String>>? extraTags,
   }) async {
     var lnurlResponse = await getLnurlResponse(lud16Link);
 
@@ -147,6 +148,10 @@ class Zap {
 
       if (StringUtil.isNotBlank(pollOption)) {
         tags.add(['poll_option', pollOption!]);
+      }
+
+      if (extraTags != null) {
+        tags.addAll(extraTags);
       }
 
       event = await Event.genEvent(

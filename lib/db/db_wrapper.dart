@@ -9,7 +9,10 @@ class DbWrapper {
   final Duration flushDelay;
   final int maxEvents;
   Timer? _flushTimer;
-  DateTime lastFlush = DateTime.fromMillisecondsSinceEpoch(0);
+
+  /// True while NostrDB is flushing this wrapper's buffer; concurrent flush
+  /// calls no-op instead of each snapshotting the whole buffer.
+  bool flushing = false;
 
   DbWrapper(
     this.db, {
@@ -24,27 +27,32 @@ class DbWrapper {
     // If we hit the max events threshold, flush immediately
     if (currentEvents.length >= maxEvents) {
       _doFlush();
-      return;
     }
 
-    // Otherwise, debounce flush
+    // Always (re)arm the debounce: events buffered while a flush is in
+    // flight (its single-flight guard no-ops the call above) still get
+    // flushed shortly after.
     _flushTimer?.cancel();
     _flushTimer = Timer(flushDelay, _doFlush);
+  }
+
+  /// Cancels the debounce timer. Buffered events stay in [currentEvents];
+  /// the owner flushes them once more before dropping the wrapper.
+  void dispose() {
+    _flushTimer?.cancel();
+    _flushTimer = null;
   }
 
   Future<void> _doFlush() async {
     _flushTimer?.cancel();
     _flushTimer = null;
     await flushEventsSeenRelays();
-    currentEvents.clear();
   }
 
-  Future<void> flushEventsSeenRelays() async {
-    if (currentEvents.isEmpty) return;
-
-    db.flushEventsSeenRelays(this);
-    currentEvents.clear();
-  }
+  // The db side snapshots the buffer and removes only what it wrote —
+  // clearing here raced the (previously un-awaited) write and dropped
+  // events that were never persisted.
+  Future<void> flushEventsSeenRelays() => db.flushEventsSeenRelays(this);
 
   Future<List<Event>> loadEvents({
     required List<Filter> filters,
