@@ -26,6 +26,65 @@ class EventStats extends Equatable {
   final Map<String, Map<String, int>> zaps;
   final int newestCreatedAt;
 
+  static double getZapEvent(Event event) {
+    try {
+      final ZapReceipt receipt = Nip57.getZapReceipt(event);
+      final Bolt11PaymentRequest req = Bolt11PaymentRequest(receipt.bolt11);
+
+      return (req.amount.toDouble() * 100000000).round().toDouble();
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  static ({String sender, String content}) getZapPubkey(
+    List<List<String>> tags,
+  ) {
+    String? zapRequestEventStr;
+    String senderPubkey = '';
+    String content = '';
+
+    for (final tag in tags) {
+      if (tag.length > 1 && tag[0] == 'description') {
+        zapRequestEventStr = tag[1];
+      }
+    }
+
+    if (zapRequestEventStr != null && zapRequestEventStr.isNotEmpty) {
+      try {
+        final eventJson = jsonDecode(zapRequestEventStr);
+        final zapRequestEvent = Event.fromJson(eventJson);
+        senderPubkey = zapRequestEvent.pubkey;
+        content = zapRequestEvent.content;
+      } catch (e) {
+        senderPubkey = SpiderUtil.subUntil(
+          zapRequestEventStr,
+          'pubkey":"',
+          '"',
+        );
+      }
+    }
+
+    return (sender: senderPubkey, content: content);
+  }
+
+  static ({bool skipPaid, int amount}) getZapData(Event ev) {
+    String? receiver;
+    for (final tag in ev.tags) {
+      if (tag.length > 1 && tag[0] == 'p') {
+        receiver = tag[1];
+      }
+    }
+
+    final amount = getZapEvent(ev).toInt();
+
+    return (
+      skipPaid:
+          receiver == yakihonneHexCore && (amount == 800 || amount == 400),
+      amount: amount,
+    );
+  }
+
   EventStatsTableCompanion toCompanion() {
     return EventStatsTableCompanion.insert(
       id: eventId,
@@ -69,32 +128,25 @@ class EventStats extends Equatable {
     String highestZapPubkey = '';
     List<Map<String, dynamic>> topZaps = [];
 
-    zaps.forEach(
-      (user, groupedZaps) {
-        groupedZaps.forEach(
-          (zap, value) {
-            total += value;
+    zaps.forEach((user, groupedZaps) {
+      groupedZaps.forEach((zap, value) {
+        total += value;
 
-            if (value > highestZap) {
-              highestZap = value;
-              highestZapId = zap;
-              highestZapPubkey = user;
-            }
+        if (value > highestZap) {
+          highestZap = value;
+          highestZapId = zap;
+          highestZapPubkey = user;
+        }
 
-            topZaps.add({
-              'value': value,
-              'pubkey': user,
-            });
+        topZaps.add({'value': value, 'pubkey': user});
 
-            topZaps.sort((a, b) => b['value'].compareTo(a['value']));
+        topZaps.sort((a, b) => b['value'].compareTo(a['value']));
 
-            if (topZaps.length > 4) {
-              topZaps.removeLast();
-            }
-          },
-        );
-      },
-    );
+        if (topZaps.length > 4) {
+          topZaps.removeLast();
+        }
+      });
+    });
 
     List<String> nextBestPubkeys = [];
     for (int i = 1; i < topZaps.length && i < 4; i++) {
@@ -123,16 +175,14 @@ class EventStats extends Equatable {
   Map<String, MapEntry<String, int>> getZappersList(List<String> mutes) {
     Map<String, MapEntry<String, int>> zappers = {};
 
-    zaps.forEach(
-      (user, groupedZaps) {
-        if (!mutes.contains(user) && groupedZaps.isNotEmpty) {
-          zappers[user] = MapEntry(
-            groupedZaps.keys.first,
-            groupedZaps.values.reduce((a, b) => a + b),
-          );
-        }
-      },
-    );
+    zaps.forEach((user, groupedZaps) {
+      if (!mutes.contains(user) && groupedZaps.isNotEmpty) {
+        zappers[user] = MapEntry(
+          groupedZaps.keys.first,
+          groupedZaps.values.reduce((a, b) => a + b),
+        );
+      }
+    });
 
     return zappers;
   }
@@ -154,9 +204,7 @@ class EventStats extends Equatable {
   Map<String, String> filteredReactions(List<String> mutes) {
     if (mutes.isNotEmpty) {
       final map = Map<String, String>.from(reactions)
-        ..removeWhere(
-          (key, value) => mutes.contains(value),
-        );
+        ..removeWhere((key, value) => mutes.contains(value));
 
       return map;
     } else {
@@ -183,9 +231,7 @@ class EventStats extends Equatable {
   Map<String, String> filteredReposts(List<String> mutes) {
     if (mutes.isNotEmpty) {
       final map = Map<String, String>.from(reposts)
-        ..removeWhere(
-          (key, value) => mutes.contains(value),
-        );
+        ..removeWhere((key, value) => mutes.contains(value));
 
       return map;
     } else {
@@ -196,9 +242,7 @@ class EventStats extends Equatable {
   Map<String, String> filteredQuotes(List<String> mutes) {
     if (mutes.isNotEmpty) {
       final map = Map<String, String>.from(quotes)
-        ..removeWhere(
-          (key, value) => mutes.contains(value),
-        );
+        ..removeWhere((key, value) => mutes.contains(value));
 
       return map;
     } else {
@@ -209,9 +253,7 @@ class EventStats extends Equatable {
   Map<String, Map<String, int>> filteredZap(List<String> mutes) {
     if (mutes.isNotEmpty) {
       final map = Map<String, Map<String, int>>.from(zaps)
-        ..removeWhere(
-          (key, value) => mutes.contains(key),
-        );
+        ..removeWhere((key, value) => mutes.contains(key));
 
       return map;
     } else {
@@ -249,21 +291,19 @@ class EventStats extends Equatable {
         reposts: Map<String, String>.from(reposts)..addAll({ev.id: ev.pubkey}),
       );
     } else if (ev.kind == EventKind.ZAP && !hasZapId(ev.id)) {
-      logger.i(ev.toJson());
-      final p = getZapPubkey(ev.tags).first;
-      final amount = getZapEvent(ev).toInt();
+      final zapData = getZapData(ev);
+      final amount = zapData.amount;
 
-      if (p == yakihonneHexCore && amount == 800) {
+      if (zapData.skipPaid) {
         return this;
       }
 
+      final p = getZapPubkey(ev.tags).sender;
       final zp = p.isNotEmpty ? p : ev.pubkey;
       final newZaps = Map<String, Map<String, int>>.from(zaps);
       newZaps[zp] = {...zaps[zp] ?? {}, ev.id: amount};
 
-      return copyWith(
-        zaps: newZaps,
-      );
+      return copyWith(zaps: newZaps);
     }
 
     return this;
@@ -275,20 +315,15 @@ class EventStats extends Equatable {
     required int amount,
   }) {
     final newZaps = Map<String, Map<String, int>>.from(zaps);
-    newZaps[zapperPubkey] = {
-      ...zaps[zapperPubkey] ?? {},
-      zapId: amount,
-    };
+    newZaps[zapperPubkey] = {...zaps[zapperPubkey] ?? {}, zapId: amount};
 
-    return copyWith(
-      zaps: newZaps,
-    );
+    return copyWith(zaps: newZaps);
   }
 
-// Helper method to check if a zap ID is temporary
+  // Helper method to check if a zap ID is temporary
   bool isOptimisticZap(String zapId) => zapId.startsWith('temp_');
 
-// Method to replace optimistic zap with real one
+  // Method to replace optimistic zap with real one
   EventStats replaceOptimisticZap({
     required String tempZapId,
     required Event realZapEvent,
@@ -303,8 +338,8 @@ class EventStats extends Equatable {
     }
 
     // Add the real zap using existing logic
-    final realZapperPubkey = getZapPubkey(realZapEvent.tags).first.isNotEmpty
-        ? getZapPubkey(realZapEvent.tags).first
+    final realZapperPubkey = getZapPubkey(realZapEvent.tags).sender.isNotEmpty
+        ? getZapPubkey(realZapEvent.tags).sender
         : realZapEvent.pubkey;
 
     newZaps[realZapperPubkey] = {
@@ -312,9 +347,7 @@ class EventStats extends Equatable {
       realZapEvent.id: getZapEvent(realZapEvent).toInt(),
     };
 
-    return copyWith(
-      zaps: newZaps,
-    );
+    return copyWith(zaps: newZaps);
   }
 
   EventStats addEvents(List<Event> events) {
@@ -346,15 +379,14 @@ class EventStats extends Equatable {
         updatedReposts[ev.id] = ev.pubkey;
         createdAt = getNewestCreatedAt(ev.createdAt);
       } else if (ev.kind == EventKind.ZAP && !hasZapId(ev.id)) {
-        final p = getZapPubkey(ev.tags).first;
-        final amount = getZapEvent(ev).toInt();
-        final hasLTag = ev.tags.any((tag) =>
-            tag.length >= 2 && tag[0] == 'l' && tag[1] == FN_SEARCH_VALUE_CORE);
+        final zapData = getZapData(ev);
+        final amount = zapData.amount;
 
-        if (p == yakihonneHexCore && amount == 800 && hasLTag) {
+        if (zapData.skipPaid) {
           continue;
         }
 
+        final p = getZapPubkey(ev.tags).sender;
         final zp = p.isNotEmpty ? p : ev.pubkey;
 
         updatedZaps[zp] = {...updatedZaps[zp] ?? {}, ev.id: amount};
@@ -376,36 +408,19 @@ class EventStats extends Equatable {
     final updatedReactions = Map<String, String>.from(reactions)
       ..remove(eventId);
 
-    return copyWith(
-      reactions: updatedReactions,
-    );
+    return copyWith(reactions: updatedReactions);
   }
 
   EventStats removeRepost(String eventId) {
     final updatedReposts = Map<String, String>.from(reposts)..remove(eventId);
 
-    return copyWith(
-      reposts: updatedReposts,
-    );
+    return copyWith(reposts: updatedReposts);
   }
 
   EventStats removeReply(String eventId) {
     final updatedReplies = Map<String, String>.from(replies)..remove(eventId);
 
-    return copyWith(
-      replies: updatedReplies,
-    );
-  }
-
-  double getZapEvent(Event event) {
-    try {
-      final ZapReceipt receipt = Nip57.getZapReceipt(event);
-      final Bolt11PaymentRequest req = Bolt11PaymentRequest(receipt.bolt11);
-
-      return (req.amount.toDouble() * 100000000).round().toDouble();
-    } catch (_) {
-      return 0;
-    }
+    return copyWith(replies: updatedReplies);
   }
 
   int getNewestCreatedAt(int createdAt) {
@@ -414,32 +429,6 @@ class EventStats extends Equatable {
     } else {
       return newestCreatedAt;
     }
-  }
-
-  List<String> getZapPubkey(List<List<String>> tags) {
-    String? zapRequestEventStr;
-    String senderPubkey = '';
-    String content = '';
-
-    for (final tag in tags) {
-      if (tag.length > 1 && tag[0] == 'description') {
-        zapRequestEventStr = tag[1];
-      }
-    }
-
-    if (zapRequestEventStr != null && zapRequestEventStr.isNotEmpty) {
-      try {
-        final eventJson = jsonDecode(zapRequestEventStr);
-        final zapRequestEvent = Event.fromJson(eventJson);
-        senderPubkey = zapRequestEvent.pubkey;
-        content = zapRequestEvent.content;
-      } catch (e) {
-        senderPubkey =
-            SpiderUtil.subUntil(zapRequestEventStr, 'pubkey":"', '"');
-      }
-    }
-
-    return [senderPubkey, content];
   }
 
   bool canAddNote(List<String> tag, String noteId) {
@@ -461,8 +450,9 @@ class EventStats extends Equatable {
   }) {
     return EventStats(
       eventId: eventId ?? this.eventId,
-      reactions:
-          reactions != null ? Map.from(reactions) : Map.from(this.reactions),
+      reactions: reactions != null
+          ? Map.from(reactions)
+          : Map.from(this.reactions),
       replies: replies != null ? Map.from(replies) : Map.from(this.replies),
       quotes: quotes != null ? Map.from(quotes) : Map.from(this.quotes),
       reposts: reposts != null ? Map.from(reposts) : Map.from(this.reposts),
@@ -473,12 +463,12 @@ class EventStats extends Equatable {
 
   @override
   List<Object?> get props => [
-        eventId,
-        reactions,
-        replies,
-        quotes,
-        reposts,
-        zaps,
-        newestCreatedAt,
-      ];
+    eventId,
+    reactions,
+    replies,
+    quotes,
+    reposts,
+    zaps,
+    newestCreatedAt,
+  ];
 }

@@ -6,8 +6,12 @@ class Nip20 {
   static OKEvent? getOk(String okPayload) {
     var ok = Message.deserialize(okPayload);
     if (ok.type == 'OK') {
-      var object = jsonDecode(ok.message);
-      return OKEvent(object[0], object[1], object[2]);
+      var object = jsonDecode(ok.message) as List;
+      return OKEvent(
+        object[0]?.toString() ?? '',
+        object.length > 1 && object[1] == true,
+        object.length > 2 ? (object[2]?.toString() ?? '') : '',
+      );
     }
     return null;
   }

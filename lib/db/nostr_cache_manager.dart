@@ -77,10 +77,12 @@ class NostrDB extends CacheManager {
 
   Future<double> getDatabaseSizeInMB() async {
     try {
-      final pageSizeRow =
-          await _database.customSelect('PRAGMA page_size;').getSingle();
-      final pageCountRow =
-          await _database.customSelect('PRAGMA page_count;').getSingle();
+      final pageSizeRow = await _database
+          .customSelect('PRAGMA page_size;')
+          .getSingle();
+      final pageCountRow = await _database
+          .customSelect('PRAGMA page_count;')
+          .getSingle();
 
       final pageSize = pageSizeRow.data.values.first as int;
       final pageCount = pageCountRow.data.values.first as int;
@@ -98,29 +100,23 @@ class NostrDB extends CacheManager {
 
   @override
   Future<List<Metadata>> getAllMetadatas() async {
-    return await _retryOnLocked(
-      () async {
-        return (await _database.select(_database.metadataTable).get())
-            .map((e) => Metadata.fromMetadataTableData(e))
-            .toList();
-      },
-    );
+    return await _retryOnLocked(() async {
+      return (await _database.select(_database.metadataTable).get())
+          .map((e) => Metadata.fromMetadataTableData(e))
+          .toList();
+    });
   }
 
   @override
   Future<Metadata?> getMetadataByNip05(String nip05) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.metadataTable)
-          ..where(
-            (tbl) => tbl.nip05.equals(nip05),
-          );
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.metadataTable)
+        ..where((tbl) => tbl.nip05.equals(nip05));
 
-        final m = await query.get();
+      final m = await query.get();
 
-        return m.isNotEmpty ? Metadata.fromMetadataTableData(m.first) : null;
-      },
-    );
+      return m.isNotEmpty ? Metadata.fromMetadataTableData(m.first) : null;
+    });
   }
 
   @override
@@ -129,76 +125,68 @@ class NostrDB extends CacheManager {
       ..where((tbl) => tbl.pubkey.equals(pubkey));
 
     return query.watchSingleOrNull().map(
-          (m) => m != null ? Metadata.fromMetadataTableData(m) : null,
-        );
+      (m) => m != null ? Metadata.fromMetadataTableData(m) : null,
+    );
   }
 
   @override
   Future<Metadata?> loadMetadata(String pubkey) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.metadataTable)
-          ..where((tbl) => tbl.pubkey.equals(pubkey))
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.metadataTable)
+        ..where((tbl) => tbl.pubkey.equals(pubkey))
+        ..limit(1);
 
-        final m = await query.getSingleOrNull();
+      final m = await query.getSingleOrNull();
 
-        return m != null ? Metadata.fromMetadataTableData(m) : null;
-      },
-    );
+      return m != null ? Metadata.fromMetadataTableData(m) : null;
+    });
   }
 
   @override
   Future<List<String>> getMissingMetadatas(List<String> pubkeys) async {
-    return await _retryOnLocked(
-      () async {
-        if (pubkeys.isEmpty) return [];
+    return await _retryOnLocked(() async {
+      if (pubkeys.isEmpty) return [];
 
-        final query = _database.select(_database.metadataTable)
-          ..where((tbl) => tbl.pubkey.isIn(pubkeys));
+      final query = _database.select(_database.metadataTable)
+        ..where((tbl) => tbl.pubkey.isIn(pubkeys));
 
-        final existingMetadatas = await query.get();
-        final existingPubkeys = existingMetadatas.map((m) => m.pubkey).toSet();
+      final existingMetadatas = await query.get();
+      final existingPubkeys = existingMetadatas.map((m) => m.pubkey).toSet();
 
-        // Return the pubkeys that are not in the database
-        return pubkeys.where((pk) => !existingPubkeys.contains(pk)).toList();
-      },
-    );
+      // Return the pubkeys that are not in the database
+      return pubkeys.where((pk) => !existingPubkeys.contains(pk)).toList();
+    });
   }
 
   @override
   Future<List<Metadata>> loadMetadatas(List<String> pubkeys) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.metadataTable)
-          ..where((tbl) => tbl.pubkey.isIn(pubkeys));
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.metadataTable)
+        ..where((tbl) => tbl.pubkey.isIn(pubkeys));
 
-        final ms = await query.get();
+      final ms = await query.get();
 
-        return ms.map((m) => Metadata.fromMetadataTableData(m)).toList();
-      },
-    );
+      return ms.map((m) => Metadata.fromMetadataTableData(m)).toList();
+    });
   }
 
   @override
   Future<List<Metadata>> searchMetadatas(String search, int limit) async {
-    return await _retryOnLocked(
-      () async {
-        final lcSearch = search.toLowerCase();
-        final query = _database.select(_database.metadataTable)
-          ..where(
-            (tbl) =>
-                tbl.name.lower().contains(lcSearch) |
-                tbl.nip05.lower().contains(lcSearch) |
-                tbl.displayName.lower().contains(lcSearch),
-          )
-          ..limit(limit);
+    return await _retryOnLocked(() async {
+      final lcSearch = search.toLowerCase();
+      final query = _database.select(_database.metadataTable)
+        ..where(
+          (tbl) =>
+              tbl.name.lower().contains(lcSearch) |
+              tbl.nip05.lower().contains(lcSearch) |
+              tbl.displayName.lower().contains(lcSearch),
+        )
+        ..limit(limit);
 
-        final ms = await query.get();
+      final ms = await query.get();
 
-        return ms.map((e) => Metadata.fromMetadataTableData(e)).toList();
-      },
-    );
+      return ms.map((e) => Metadata.fromMetadataTableData(e)).toList();
+    });
   }
 
   @override
@@ -207,75 +195,59 @@ class NostrDB extends CacheManager {
     List<String> pubkeys,
     int limit,
   ) async {
-    return await _retryOnLocked(
-      () async {
-        final lcSearch = search.toLowerCase();
-        final query = _database.select(_database.metadataTable)
-          ..where(
-            (tbl) =>
-                tbl.pubkey.isIn(pubkeys) &
-                (tbl.name.lower().contains(lcSearch) |
-                    tbl.nip05.lower().contains(lcSearch) |
-                    tbl.displayName.lower().contains(lcSearch)),
-          )
-          ..limit(limit);
+    return await _retryOnLocked(() async {
+      final lcSearch = search.toLowerCase();
+      final query = _database.select(_database.metadataTable)
+        ..where(
+          (tbl) =>
+              tbl.pubkey.isIn(pubkeys) &
+              (tbl.name.lower().contains(lcSearch) |
+                  tbl.nip05.lower().contains(lcSearch) |
+                  tbl.displayName.lower().contains(lcSearch)),
+        )
+        ..limit(limit);
 
-        final ms = await query.get();
+      final ms = await query.get();
 
-        return ms.map((e) => Metadata.fromMetadataTableData(e)).toList();
-      },
-    );
+      return ms.map((e) => Metadata.fromMetadataTableData(e)).toList();
+    });
   }
 
   @override
   Future<void> saveMetadata(Metadata metadata) async {
-    await _retryOnLocked(
-      () async {
-        await _database.into(_database.metadataTable).insertOnConflictUpdate(
-              metadata.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.metadataTable)
+          .insertOnConflictUpdate(metadata.toCompanion());
+    });
   }
 
   @override
   Future<void> saveMetadatas(List<Metadata> metadatas) async {
-    await _retryOnLocked(
-      () async {
-        await _database.batch(
-          (batch) {
-            batch.insertAllOnConflictUpdate(
-              _database.metadataTable,
-              metadatas.map(
-                (e) => e.toCompanion(),
-              ),
-            );
-          },
+    await _retryOnLocked(() async {
+      await _database.batch((batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.metadataTable,
+          metadatas.map((e) => e.toCompanion()),
         );
-      },
-    );
+      });
+    });
   }
 
   @override
   Future<void> removeMetadata(String pubkey) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.metadataTable)
-              ..where(
-                (tbl) => tbl.pubkey.equals(pubkey),
-              ))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.metadataTable,
+      )..where((tbl) => tbl.pubkey.equals(pubkey))).go();
+    });
   }
 
   @override
   Future<void> removeAllMetadatas() async {
-    await _retryOnLocked(
-      () async {
-        await _database.delete(_database.metadataTable).go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database.delete(_database.metadataTable).go();
+    });
   }
 
   // =====================================================================
@@ -284,88 +256,66 @@ class NostrDB extends CacheManager {
 
   @override
   Future<ContactList?> loadContactList(String pubkey) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.contactListTable)
-          ..where((tbl) => tbl.pubkey.equals(pubkey))
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.contactListTable)
+        ..where((tbl) => tbl.pubkey.equals(pubkey))
+        ..limit(1);
 
-        final c = await query.getSingleOrNull();
+      final c = await query.getSingleOrNull();
 
-        return c != null ? ContactList.fromContactListTableData(c) : null;
-      },
-    );
+      return c != null ? ContactList.fromContactListTableData(c) : null;
+    });
   }
 
   @override
   Future<List<ContactList>> loadContactLists(List<String> pubkeys) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.contactListTable)
-          ..where((tbl) => tbl.pubkey.isIn(pubkeys));
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.contactListTable)
+        ..where((tbl) => tbl.pubkey.isIn(pubkeys));
 
-        final c = await query.get();
+      final c = await query.get();
 
-        return c.isNotEmpty
-            ? c
-                .map(
-                  (e) => ContactList.fromContactListTableData(e),
-                )
-                .toList()
-            : [];
-      },
-    );
+      return c.isNotEmpty
+          ? c.map((e) => ContactList.fromContactListTableData(e)).toList()
+          : [];
+    });
   }
 
   @override
   Future<void> saveContactList(ContactList contactList) async {
-    await _retryOnLocked(
-      () async {
-        await _database.into(_database.contactListTable).insertOnConflictUpdate(
-              contactList.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.contactListTable)
+          .insertOnConflictUpdate(contactList.toCompanion());
+    });
   }
 
   @override
   Future<void> saveContactLists(List<ContactList> contactLists) async {
-    await _retryOnLocked(
-      () async {
-        await _database.batch(
-          (batch) {
-            batch.insertAllOnConflictUpdate(
-              _database.contactListTable,
-              contactLists.map(
-                (e) => e.toCompanion(),
-              ),
-            );
-          },
+    await _retryOnLocked(() async {
+      await _database.batch((batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.contactListTable,
+          contactLists.map((e) => e.toCompanion()),
         );
-      },
-    );
+      });
+    });
   }
 
   @override
   Future<void> removeContactList(String pubkey) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.contactListTable)
-              ..where(
-                (tbl) => tbl.pubkey.equals(pubkey),
-              ))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.contactListTable,
+      )..where((tbl) => tbl.pubkey.equals(pubkey))).go();
+    });
   }
 
   @override
   Future<void> removeAllContactLists() async {
-    await _retryOnLocked(
-      () async {
-        await _database.delete(_database.contactListTable).go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database.delete(_database.contactListTable).go();
+    });
   }
 
   // =====================================================================
@@ -374,68 +324,52 @@ class NostrDB extends CacheManager {
 
   @override
   Future<MuteList?> loadMuteList(String pubkey) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.muteListTable)
-          ..where((tbl) => tbl.pubkey.equals(pubkey))
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.muteListTable)
+        ..where((tbl) => tbl.pubkey.equals(pubkey))
+        ..limit(1);
 
-        final m = await query.getSingleOrNull();
+      final m = await query.getSingleOrNull();
 
-        return m != null ? MuteList.fromMuteListTableData(m) : null;
-      },
-    );
+      return m != null ? MuteList.fromMuteListTableData(m) : null;
+    });
   }
 
   @override
   Future<void> saveMuteList(MuteList muteList) async {
-    await _retryOnLocked(
-      () async {
-        await _database.into(_database.muteListTable).insertOnConflictUpdate(
-              muteList.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.muteListTable)
+          .insertOnConflictUpdate(muteList.toCompanion());
+    });
   }
 
   @override
   Future<void> saveMuteLists(List<MuteList> muteLists) async {
-    await _retryOnLocked(
-      () async {
-        await _database.batch(
-          (batch) {
-            batch.insertAllOnConflictUpdate(
-              _database.muteListTable,
-              muteLists.map(
-                (e) => e.toCompanion(),
-              ),
-            );
-          },
+    await _retryOnLocked(() async {
+      await _database.batch((batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.muteListTable,
+          muteLists.map((e) => e.toCompanion()),
         );
-      },
-    );
+      });
+    });
   }
 
   @override
   Future<void> removeMuteList(String pubkey) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.muteListTable)
-              ..where(
-                (tbl) => tbl.pubkey.equals(pubkey),
-              ))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.muteListTable,
+      )..where((tbl) => tbl.pubkey.equals(pubkey))).go();
+    });
   }
 
   @override
   Future<void> removeAllMuteLists() async {
-    await _retryOnLocked(
-      () async {
-        await _database.delete(_database.muteListTable).go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database.delete(_database.muteListTable).go();
+    });
   }
 
   // =====================================================================
@@ -450,46 +384,44 @@ class NostrDB extends CacheManager {
     String? pTag,
     int? kind,
   }) async {
-    return await _retryOnLocked(
-      () async {
-        // String tagPattern(String type, String value) => '%["$type","$value"%';
+    return await _retryOnLocked(() async {
+      // String tagPattern(String type, String value) => '%["$type","$value"%';
 
-        final query = _database.select(_database.eventTable)
-          ..where((tbl) {
-            final conditions = <Expression<bool>>[];
+      final query = _database.select(_database.eventTable)
+        ..where((tbl) {
+          final conditions = <Expression<bool>>[];
 
-            if (kind != null) {
-              conditions.add(tbl.kind.equals(kind));
-            }
+          if (kind != null) {
+            conditions.add(tbl.kind.equals(kind));
+          }
 
-            if (Helpers.isNotBlank(pubkey)) {
-              conditions.add(tbl.pubkey.equals(pubkey!));
-            }
+          if (Helpers.isNotBlank(pubkey)) {
+            conditions.add(tbl.pubkey.equals(pubkey!));
+          }
 
-            if (Helpers.isNotBlank(kTag)) {
-              conditions.add(tbl.kTags.contains('"$kTag"'));
-            }
+          if (Helpers.isNotBlank(kTag)) {
+            conditions.add(tbl.kTags.contains('"$kTag"'));
+          }
 
-            if (Helpers.isNotBlank(e)) {
-              conditions.add(tbl.eTags.contains('"$e"'));
-            }
+          if (Helpers.isNotBlank(e)) {
+            conditions.add(tbl.eTags.contains('"$e"'));
+          }
 
-            if (Helpers.isNotBlank(pTag)) {
-              conditions.add(tbl.pTags.contains('"$pTag"'));
-            }
+          if (Helpers.isNotBlank(pTag)) {
+            conditions.add(tbl.pTags.contains('"$pTag"'));
+          }
 
-            if (conditions.isEmpty) {
-              return const Constant(true);
-            }
-            return conditions.reduce((a, b) => a & b);
-          })
-          ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)])
-          ..limit(1);
+          if (conditions.isEmpty) {
+            return const Constant(true);
+          }
+          return conditions.reduce((a, b) => a & b);
+        })
+        ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)])
+        ..limit(1);
 
-        final ev = await query.getSingleOrNull();
-        return ev != null ? Event.fromEventTableData(ev) : null;
-      },
-    );
+      final ev = await query.getSingleOrNull();
+      return ev != null ? Event.fromEventTableData(ev) : null;
+    });
   }
 
   @override
@@ -514,10 +446,8 @@ class NostrDB extends CacheManager {
 
       await _retryOnLocked(
         () => _database.batch(
-          (batch) => batch.insertAllOnConflictUpdate(
-            _database.eventTable,
-            companions,
-          ),
+          (batch) =>
+              batch.insertAllOnConflictUpdate(_database.eventTable, companions),
         ),
       );
 
@@ -583,36 +513,36 @@ class NostrDB extends CacheManager {
 
     try {
       await _retryOnLocked(
-        () => (_database.delete(_database.eventTable)
-              ..where((tbl) =>
-                  tbl.createdAt.isSmallerThanValue(cutoff) &
-                  tbl.kind.isNotIn(dmKinds) &
-                  tbl.pubkey.equals(exemptPubkey).not() &
-                  tbl.currentUser.equals('')))
-            .go(),
+        () =>
+            (_database.delete(_database.eventTable)..where(
+                  (tbl) =>
+                      tbl.createdAt.isSmallerThanValue(cutoff) &
+                      tbl.kind.isNotIn(dmKinds) &
+                      tbl.pubkey.equals(exemptPubkey).not() &
+                      tbl.currentUser.equals(''),
+                ))
+                .go(),
       );
     } catch (_) {}
   }
 
   @override
   Future<Event?> loadEventById(String id, bool r) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.eventTable)
-          ..where((tbl) {
-            if (r) {
-              return tbl.dTag.equals(id);
-            } else {
-              return tbl.id.equals(id);
-            }
-          })
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.eventTable)
+        ..where((tbl) {
+          if (r) {
+            return tbl.dTag.equals(id);
+          } else {
+            return tbl.id.equals(id);
+          }
+        })
+        ..limit(1);
 
-        final e = await query.getSingleOrNull();
+      final e = await query.getSingleOrNull();
 
-        return e != null ? Event.fromEventTableData(e) : null;
-      },
-    );
+      return e != null ? Event.fromEventTableData(e) : null;
+    });
   }
 
   @override
@@ -641,8 +571,9 @@ class NostrDB extends CacheManager {
           }
 
           if (f.search?.isNotEmpty ?? false) {
-            conditions
-                .add(tbl.content.lower().contains(f.search!.toLowerCase()));
+            conditions.add(
+              tbl.content.lower().contains(f.search!.toLowerCase()),
+            );
           }
 
           if (f.ids?.isNotEmpty ?? false) conditions.add(tbl.id.isIn(f.ids!));
@@ -703,118 +634,84 @@ class NostrDB extends CacheManager {
 
   @override
   Future<void> saveEvent(Event event) async {
-    await _retryOnLocked(
-      () async {
-        await _database.into(_database.eventTable).insertOnConflictUpdate(
-              event.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.eventTable)
+          .insertOnConflictUpdate(event.toCompanion());
+    });
   }
 
   @override
   Future<void> saveEvents(List<Event> events) async {
-    await _retryOnLocked(
-      () async {
-        await _database.batch(
-          (batch) {
-            batch.insertAllOnConflictUpdate(
-              _database.eventTable,
-              events.map(
-                (e) => e.toCompanion(),
-              ),
-            );
-          },
+    await _retryOnLocked(() async {
+      await _database.batch((batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.eventTable,
+          events.map((e) => e.toCompanion()),
         );
-      },
-    );
+      });
+    });
   }
 
   @override
   Future<void> removeEvent(String id) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.eventTable)
-              ..where(
-                (tbl) => tbl.id.equals(id),
-              ))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.eventTable,
+      )..where((tbl) => tbl.id.equals(id))).go();
+    });
   }
 
   @override
   Future<void> removeEvents(List<String> ids) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.eventTable)
-              ..where(
-                (tbl) => tbl.id.isIn(ids),
-              ))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.eventTable,
+      )..where((tbl) => tbl.id.isIn(ids))).go();
+    });
   }
 
   @override
   Future<void> removeEventByDTag(String dTag) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.eventTable)
-              ..where(
-                (tbl) => tbl.dTag.equals(dTag),
-              ))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.eventTable,
+      )..where((tbl) => tbl.dTag.equals(dTag))).go();
+    });
   }
 
   @override
   Future<void> removeEventsByDTag(List<String> dTags) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.eventTable)
-              ..where(
-                (tbl) => tbl.dTag.isIn(dTags),
-              ))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.eventTable,
+      )..where((tbl) => tbl.dTag.isIn(dTags))).go();
+    });
   }
 
   @override
   Future<void> removeAllEvents() async {
-    await _retryOnLocked(
-      () async {
-        await _database.delete(_database.eventTable).go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database.delete(_database.eventTable).go();
+    });
   }
 
   @override
   Future<void> removeAllEventsByKinds(List<int> kinds) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.eventTable)
-              ..where(
-                (tbl) => tbl.kind.isIn(kinds),
-              ))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.eventTable,
+      )..where((tbl) => tbl.kind.isIn(kinds))).go();
+    });
   }
 
   @override
   Future<void> removeAllEventsByPubKey(String pubkey) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.eventTable)
-              ..where(
-                (tbl) => tbl.pubkey.equals(pubkey),
-              ))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.eventTable,
+      )..where((tbl) => tbl.pubkey.equals(pubkey))).go();
+    });
   }
 
   // =====================================================================
@@ -823,17 +720,15 @@ class NostrDB extends CacheManager {
 
   @override
   Future<EventStats?> loadEventStats(String eventId) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.eventStatsTable)
-          ..where((tbl) => tbl.id.equals(eventId))
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.eventStatsTable)
+        ..where((tbl) => tbl.id.equals(eventId))
+        ..limit(1);
 
-        final es = await query.getSingleOrNull();
+      final es = await query.getSingleOrNull();
 
-        return es != null ? EventStats.fromEventStatsTableData(es) : null;
-      },
-    );
+      return es != null ? EventStats.fromEventStatsTableData(es) : null;
+    });
   }
 
   @override
@@ -843,74 +738,58 @@ class NostrDB extends CacheManager {
       ..limit(1);
 
     return query.watchSingleOrNull().map(
-          (event) =>
-              event != null ? EventStats.fromEventStatsTableData(event) : null,
-        );
+      (event) =>
+          event != null ? EventStats.fromEventStatsTableData(event) : null,
+    );
   }
 
   @override
   Future<List<EventStats?>> loadEventStatsList(List<String> eventIds) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.eventStatsTable)
-          ..where((tbl) => tbl.id.isIn(eventIds));
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.eventStatsTable)
+        ..where((tbl) => tbl.id.isIn(eventIds));
 
-        final es = await query.get();
+      final es = await query.get();
 
-        return es.map((e) => EventStats.fromEventStatsTableData(e)).toList();
-      },
-    );
+      return es.map((e) => EventStats.fromEventStatsTableData(e)).toList();
+    });
   }
 
   @override
   Future<void> saveEventStats(EventStats stats) async {
-    await _retryOnLocked(
-      () async {
-        await _database.into(_database.eventStatsTable).insertOnConflictUpdate(
-              stats.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.eventStatsTable)
+          .insertOnConflictUpdate(stats.toCompanion());
+    });
   }
 
   @override
   Future<void> saveEventStatsList(List<EventStats> stats) async {
-    await _retryOnLocked(
-      () async {
-        await _database.batch(
-          (batch) {
-            batch.insertAllOnConflictUpdate(
-              _database.eventStatsTable,
-              stats.map(
-                (e) => e.toCompanion(),
-              ),
-            );
-          },
+    await _retryOnLocked(() async {
+      await _database.batch((batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.eventStatsTable,
+          stats.map((e) => e.toCompanion()),
         );
-      },
-    );
+      });
+    });
   }
 
   @override
   Future<void> removeEventStats(String eventId) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.eventStatsTable)
-              ..where(
-                (tbl) => tbl.id.equals(eventId),
-              ))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.eventStatsTable,
+      )..where((tbl) => tbl.id.equals(eventId))).go();
+    });
   }
 
   @override
   Future<void> removeAllEventStats() async {
-    await _retryOnLocked(
-      () async {
-        await _database.delete(_database.eventStatsTable).go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database.delete(_database.eventStatsTable).go();
+    });
   }
 
   // =====================================================================
@@ -919,89 +798,67 @@ class NostrDB extends CacheManager {
 
   @override
   Future<List<DMSessionInfo>> loadDmSessionsInfo(String id) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.dmSessionInfosTable)
-          ..where((tbl) => tbl.dmSessionId.like("$id%"));
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.dmSessionInfosTable)
+        ..where((tbl) => tbl.dmSessionId.like("$id%"));
 
-        final dms = await query.get();
+      final dms = await query.get();
 
-        return dms
-            .map((e) => DMSessionInfo.fromDmSessionInfosTableData(e))
-            .toList();
-      },
-    );
+      return dms
+          .map((e) => DMSessionInfo.fromDmSessionInfosTableData(e))
+          .toList();
+    });
   }
 
   @override
   Future<List<DMSessionInfo>> loadDmSessionsInfos(List<String> ids) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.dmSessionInfosTable)
-          ..where((tbl) => tbl.dmSessionId.isIn(ids));
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.dmSessionInfosTable)
+        ..where((tbl) => tbl.dmSessionId.isIn(ids));
 
-        final dms = await query.get();
+      final dms = await query.get();
 
-        return dms
-            .map(
-              (dm) => DMSessionInfo.fromDmSessionInfosTableData(dm),
-            )
-            .toList();
-      },
-    );
+      return dms
+          .map((dm) => DMSessionInfo.fromDmSessionInfosTableData(dm))
+          .toList();
+    });
   }
 
   @override
   Future<void> saveDmSessionsInfo(DMSessionInfo info) async {
-    await _retryOnLocked(
-      () async {
-        await _database
-            .into(_database.dmSessionInfosTable)
-            .insertOnConflictUpdate(
-              info.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.dmSessionInfosTable)
+          .insertOnConflictUpdate(info.toCompanion());
+    });
   }
 
   @override
   Future<void> saveDmSessionsInfos(List<DMSessionInfo> infos) async {
-    await _retryOnLocked(
-      () async {
-        await _database.batch(
-          (batch) {
-            batch.insertAllOnConflictUpdate(
-              _database.dmSessionInfosTable,
-              infos.map(
-                (e) => e.toCompanion(),
-              ),
-            );
-          },
+    await _retryOnLocked(() async {
+      await _database.batch((batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.dmSessionInfosTable,
+          infos.map((e) => e.toCompanion()),
         );
-      },
-    );
+      });
+    });
   }
 
   @override
   Future<void> removeDmSessionsInfo(String id) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.dmSessionInfosTable)
-              ..where(
-                (tbl) => tbl.dmSessionId.equals(id),
-              ))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.dmSessionInfosTable,
+      )..where((tbl) => tbl.dmSessionId.equals(id))).go();
+    });
   }
 
   @override
   Future<void> removeAllDmSessionsInfo() async {
-    await _retryOnLocked(
-      () async {
-        await _database.delete(_database.dmSessionInfosTable).go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database.delete(_database.dmSessionInfosTable).go();
+    });
   }
 
   // =====================================================================
@@ -1010,84 +867,64 @@ class NostrDB extends CacheManager {
 
   @override
   Future<Nip05?> loadNip05(String pubkey) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.nip05Table)
-          ..where((tbl) => tbl.pubkey.equals(pubkey))
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.nip05Table)
+        ..where((tbl) => tbl.pubkey.equals(pubkey))
+        ..limit(1);
 
-        final n = await query.getSingleOrNull();
+      final n = await query.getSingleOrNull();
 
-        return n != null ? Nip05.fromNip05TableData(n) : null;
-      },
-    );
+      return n != null ? Nip05.fromNip05TableData(n) : null;
+    });
   }
 
   @override
   Future<Map<String, Nip05>> loadNip05s(List<String> pubkeys) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.nip05Table)
-          ..where(
-            (tbl) => tbl.pubkey.isIn(pubkeys),
-          );
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.nip05Table)
+        ..where((tbl) => tbl.pubkey.isIn(pubkeys));
 
-        final n = await query.get();
+      final n = await query.get();
 
-        return {for (final e in n) e.pubkey: Nip05.fromNip05TableData(e)};
-      },
-    );
+      return {for (final e in n) e.pubkey: Nip05.fromNip05TableData(e)};
+    });
   }
 
   @override
   Future<void> saveNip05(Nip05 nip05) async {
-    await _retryOnLocked(
-      () async {
-        await _database.into(_database.nip05Table).insertOnConflictUpdate(
-              nip05.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.nip05Table)
+          .insertOnConflictUpdate(nip05.toCompanion());
+    });
   }
 
   @override
   Future<void> saveNip05s(List<Nip05> nip05s) async {
-    await _retryOnLocked(
-      () async {
-        await _database.batch(
-          (batch) {
-            batch.insertAllOnConflictUpdate(
-              _database.nip05Table,
-              nip05s.map(
-                (e) => e.toCompanion(),
-              ),
-            );
-          },
+    await _retryOnLocked(() async {
+      await _database.batch((batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.nip05Table,
+          nip05s.map((e) => e.toCompanion()),
         );
-      },
-    );
+      });
+    });
   }
 
   @override
   Future<void> removeNip05(String pubkey) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.nip05Table)
-              ..where(
-                (tbl) => tbl.pubkey.equals(pubkey),
-              ))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.nip05Table,
+      )..where((tbl) => tbl.pubkey.equals(pubkey))).go();
+    });
   }
 
   @override
   Future<void> removeAllNip05s() async {
-    await _retryOnLocked(
-      () async {
-        await _database.delete(_database.nip05Table).go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database.delete(_database.nip05Table).go();
+    });
   }
 
   // =====================================================================
@@ -1096,50 +933,40 @@ class NostrDB extends CacheManager {
 
   @override
   Future<RelaySet?> loadRelaySet(String name, String pubkey) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.relaySetTable)
-          ..where((tbl) => tbl.id.equals(RelaySet.buildId(name, pubkey)))
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.relaySetTable)
+        ..where((tbl) => tbl.id.equals(RelaySet.buildId(name, pubkey)))
+        ..limit(1);
 
-        final r = await query.getSingleOrNull();
+      final r = await query.getSingleOrNull();
 
-        return r != null ? RelaySet.fromRelaySetTableData(r) : null;
-      },
-    );
+      return r != null ? RelaySet.fromRelaySetTableData(r) : null;
+    });
   }
 
   @override
   Future<void> saveRelaySet(RelaySet relaySet) async {
-    await _retryOnLocked(
-      () async {
-        await _database.into(_database.relaySetTable).insertOnConflictUpdate(
-              relaySet.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.relaySetTable)
+          .insertOnConflictUpdate(relaySet.toCompanion());
+    });
   }
 
   @override
   Future<void> removeRelaySet(String name, String pubkey) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.relaySetTable)
-              ..where(
-                (tbl) => tbl.id.equals(RelaySet.buildId(name, pubkey)),
-              ))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.relaySetTable,
+      )..where((tbl) => tbl.id.equals(RelaySet.buildId(name, pubkey)))).go();
+    });
   }
 
   @override
   Future<void> removeAllRelaySets() async {
-    await _retryOnLocked(
-      () async {
-        await _database.delete(_database.relaySetTable).go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database.delete(_database.relaySetTable).go();
+    });
   }
 
   // =====================================================================
@@ -1148,54 +975,42 @@ class NostrDB extends CacheManager {
 
   @override
   Future<AppSharedSettings?> loadUserAppSettings(String pubkey) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.userAppSettingsTable)
-          ..where((tbl) => tbl.pubkey.equals(pubkey))
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.userAppSettingsTable)
+        ..where((tbl) => tbl.pubkey.equals(pubkey))
+        ..limit(1);
 
-        final as = await query.getSingleOrNull();
+      final as = await query.getSingleOrNull();
 
-        return as != null
-            ? AppSharedSettings.fromAppSharedSettingsTableData(as)
-            : null;
-      },
-    );
+      return as != null
+          ? AppSharedSettings.fromAppSharedSettingsTableData(as)
+          : null;
+    });
   }
 
   @override
   Future<void> saveUserAppSettings(AppSharedSettings userAppSettings) async {
-    await _retryOnLocked(
-      () async {
-        await _database
-            .into(_database.userAppSettingsTable)
-            .insertOnConflictUpdate(
-              userAppSettings.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.userAppSettingsTable)
+          .insertOnConflictUpdate(userAppSettings.toCompanion());
+    });
   }
 
   @override
   Future<void> removeUserAppSettings(String pubkey) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.userAppSettingsTable)
-              ..where(
-                (tbl) => tbl.pubkey.equals(pubkey),
-              ))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.userAppSettingsTable,
+      )..where((tbl) => tbl.pubkey.equals(pubkey))).go();
+    });
   }
 
   @override
   Future<void> removeAllAppSettings() async {
-    await _retryOnLocked(
-      () async {
-        await _database.delete(_database.userAppSettingsTable).go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database.delete(_database.userAppSettingsTable).go();
+    });
   }
 
   // =====================================================================
@@ -1204,50 +1019,40 @@ class NostrDB extends CacheManager {
 
   @override
   Future<UserDrafts?> loadUserDrafts(String pubkey) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.userDraftTable)
-          ..where((tbl) => tbl.pubkey.equals(pubkey))
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.userDraftTable)
+        ..where((tbl) => tbl.pubkey.equals(pubkey))
+        ..limit(1);
 
-        final ud = await query.getSingleOrNull();
+      final ud = await query.getSingleOrNull();
 
-        return ud != null ? UserDrafts.fromUserDraftTableData(ud) : null;
-      },
-    );
+      return ud != null ? UserDrafts.fromUserDraftTableData(ud) : null;
+    });
   }
 
   @override
   Future<void> saveUserDrafts(UserDrafts userDrafts) async {
-    await _retryOnLocked(
-      () async {
-        await _database.into(_database.userDraftTable).insertOnConflictUpdate(
-              userDrafts.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.userDraftTable)
+          .insertOnConflictUpdate(userDrafts.toCompanion());
+    });
   }
 
   @override
   Future<void> removeUserDrafts(String pubkey) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.userDraftTable)
-              ..where(
-                (tbl) => tbl.pubkey.equals(pubkey),
-              ))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.userDraftTable,
+      )..where((tbl) => tbl.pubkey.equals(pubkey))).go();
+    });
   }
 
   @override
   Future<void> removeAllUserDrafts() async {
-    await _retryOnLocked(
-      () async {
-        await _database.delete(_database.userDraftTable).go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database.delete(_database.userDraftTable).go();
+    });
   }
 
   // =====================================================================
@@ -1256,52 +1061,40 @@ class NostrDB extends CacheManager {
 
   @override
   Future<UserFollowers?> loadUserFollowers(String pubkey) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.userFollowersTable)
-          ..where((tbl) => tbl.pubkey.equals(pubkey))
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.userFollowersTable)
+        ..where((tbl) => tbl.pubkey.equals(pubkey))
+        ..limit(1);
 
-        final uf = await query.getSingleOrNull();
+      final uf = await query.getSingleOrNull();
 
-        return uf != null ? UserFollowers.fromUserFollowersTableData(uf) : null;
-      },
-    );
+      return uf != null ? UserFollowers.fromUserFollowersTableData(uf) : null;
+    });
   }
 
   @override
   Future<void> saveUserFollowers(UserFollowers userFollowers) async {
-    await _retryOnLocked(
-      () async {
-        await _database
-            .into(_database.userFollowersTable)
-            .insertOnConflictUpdate(
-              userFollowers.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.userFollowersTable)
+          .insertOnConflictUpdate(userFollowers.toCompanion());
+    });
   }
 
   @override
   Future<void> removeUserFollowers(String pubkey) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.userFollowersTable)
-              ..where(
-                (tbl) => tbl.pubkey.equals(pubkey),
-              ))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.userFollowersTable,
+      )..where((tbl) => tbl.pubkey.equals(pubkey))).go();
+    });
   }
 
   @override
   Future<void> removeAllUserFollowers() async {
-    await _retryOnLocked(
-      () async {
-        await _database.delete(_database.userFollowersTable).go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database.delete(_database.userFollowersTable).go();
+    });
   }
 
   // =====================================================================
@@ -1310,88 +1103,64 @@ class NostrDB extends CacheManager {
 
   @override
   Future<RelayInfo?> loadRelayInfo(String relay) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.relayInfoListTable)
-          ..where((tbl) => tbl.url.equals(relay))
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.relayInfoListTable)
+        ..where((tbl) => tbl.url.equals(relay))
+        ..limit(1);
 
-        final ri = await query.getSingleOrNull();
+      final ri = await query.getSingleOrNull();
 
-        return ri != null ? RelayInfo.fromRelayInfoListTableData(ri) : null;
-      },
-    );
+      return ri != null ? RelayInfo.fromRelayInfoListTableData(ri) : null;
+    });
   }
 
   @override
   Future<List<RelayInfo>> loadRelayInfoByRelays(List<String> relays) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.relayInfoListTable)
-          ..where((tbl) => tbl.url.isIn(relays));
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.relayInfoListTable)
+        ..where((tbl) => tbl.url.isIn(relays));
 
-        final ri = await query.get();
+      final ri = await query.get();
 
-        return ri
-            .map(
-              (e) => RelayInfo.fromRelayInfoListTableData(e),
-            )
-            .toList();
-      },
-    );
+      return ri.map((e) => RelayInfo.fromRelayInfoListTableData(e)).toList();
+    });
   }
 
   @override
   Future<void> saveRelayInfo(RelayInfo relayInfo) async {
-    return await _retryOnLocked(
-      () async {
-        await _database
-            .into(_database.relayInfoListTable)
-            .insertOnConflictUpdate(
-              relayInfo.toCompanion(),
-            );
-      },
-    );
+    return await _retryOnLocked(() async {
+      await _database
+          .into(_database.relayInfoListTable)
+          .insertOnConflictUpdate(relayInfo.toCompanion());
+    });
   }
 
   @override
   Future<void> saveRelayInfoList(List<RelayInfo> relayInfoList) async {
-    return await _retryOnLocked(
-      () async {
-        await _database.batch(
-          (batch) {
-            batch.insertAllOnConflictUpdate(
-              _database.relayInfoListTable,
-              relayInfoList.map(
-                (e) => e.toCompanion(),
-              ),
-            );
-          },
+    return await _retryOnLocked(() async {
+      await _database.batch((batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.relayInfoListTable,
+          relayInfoList.map((e) => e.toCompanion()),
         );
-      },
-    );
+      });
+    });
   }
 
   @override
   Future<void> removeRelayInfo(String relay) async {
-    return await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.relayInfoListTable)
-              ..where(
-                (tbl) => tbl.name.equals(relay),
-              ))
-            .go();
-      },
-    );
+    return await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.relayInfoListTable,
+      )..where((tbl) => tbl.name.equals(relay))).go();
+    });
   }
 
   @override
   Future<void> removeAllRelayInfo() async {
-    return await _retryOnLocked(
-      () async {
-        await _database.delete(_database.relayInfoListTable).go();
-      },
-    );
+    return await _retryOnLocked(() async {
+      await _database.delete(_database.relayInfoListTable).go();
+    });
   }
 
   // =====================================================================
@@ -1400,120 +1169,93 @@ class NostrDB extends CacheManager {
 
   @override
   Future<UserRelayList?> loadUserRelayList(String pubkey) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.userRelayListTable)
-          ..where((tbl) => tbl.pubkey.equals(pubkey))
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.userRelayListTable)
+        ..where((tbl) => tbl.pubkey.equals(pubkey))
+        ..limit(1);
 
-        final ur = await query.getSingleOrNull();
+      final ur = await query.getSingleOrNull();
 
-        return ur != null ? UserRelayList.fromUserRelayListTableData(ur) : null;
-      },
-    );
+      return ur != null ? UserRelayList.fromUserRelayListTableData(ur) : null;
+    });
   }
 
   @override
   Future<List<UserRelayList>> loadUserRelayListByPubkeys(
-      List<String> pubkeys) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.userRelayListTable)
-          ..where((tbl) => tbl.pubkey.isIn(pubkeys));
+    List<String> pubkeys,
+  ) async {
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.userRelayListTable)
+        ..where((tbl) => tbl.pubkey.isIn(pubkeys));
 
-        final ur = await query.get();
+      final ur = await query.get();
 
-        return ur
-            .map(
-              (e) => UserRelayList.fromUserRelayListTableData(e),
-            )
-            .toList();
-      },
-    );
+      return ur
+          .map((e) => UserRelayList.fromUserRelayListTableData(e))
+          .toList();
+    });
   }
 
   @override
   Future<List<UserRelayList>> loadUserRelayListAll() async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.userRelayListTable);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.userRelayListTable);
 
-        final ur = await query.get();
+      final ur = await query.get();
 
-        return ur
-            .map(
-              (e) => UserRelayList.fromUserRelayListTableData(e),
-            )
-            .toList();
-      },
-    );
+      return ur
+          .map((e) => UserRelayList.fromUserRelayListTableData(e))
+          .toList();
+    });
   }
 
   @override
   Future<List<String>> getPubkeysByRelayAvailability(String relay) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.userRelayListTable)
-          ..where((tbl) => tbl.relays.contains(relay));
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.userRelayListTable)
+        ..where((tbl) => tbl.relays.contains(relay));
 
-        final ur = await query.get();
+      final ur = await query.get();
 
-        return ur.map((e) => e.pubkey).toList();
-      },
-    );
+      return ur.map((e) => e.pubkey).toList();
+    });
   }
 
   @override
   Future<void> saveUserRelayList(UserRelayList userRelayList) async {
-    await _retryOnLocked(
-      () async {
-        await _database
-            .into(_database.userRelayListTable)
-            .insertOnConflictUpdate(
-              userRelayList.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.userRelayListTable)
+          .insertOnConflictUpdate(userRelayList.toCompanion());
+    });
   }
 
   @override
   Future<void> saveUserRelayLists(List<UserRelayList> userRelayLists) async {
-    await _retryOnLocked(
-      () async {
-        await _database.batch(
-          (batch) {
-            batch.insertAllOnConflictUpdate(
-              _database.userRelayListTable,
-              userRelayLists.map(
-                (e) => e.toCompanion(),
-              ),
-            );
-          },
+    await _retryOnLocked(() async {
+      await _database.batch((batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.userRelayListTable,
+          userRelayLists.map((e) => e.toCompanion()),
         );
-      },
-    );
+      });
+    });
   }
 
   @override
   Future<void> removeUserRelayList(String pubkey) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.userRelayListTable)
-              ..where(
-                (tbl) => tbl.pubkey.equals(pubkey),
-              ))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.userRelayListTable,
+      )..where((tbl) => tbl.pubkey.equals(pubkey))).go();
+    });
   }
 
   @override
   Future<void> removeAllUserRelayLists() async {
-    await _retryOnLocked(
-      () async {
-        await _database.delete(_database.userRelayListTable).go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database.delete(_database.userRelayListTable).go();
+    });
   }
 
   // =====================================================================
@@ -1525,25 +1267,25 @@ class NostrDB extends CacheManager {
     required List<String> originPubkeyList,
     required String peerPubkey,
   }) async {
-    return await _retryOnLocked(
-      () async {
-        if (originPubkeyList.isEmpty) {
-          return null;
-        }
+    return await _retryOnLocked(() async {
+      if (originPubkeyList.isEmpty) {
+        return null;
+      }
 
-        final countExp = countAll();
+      final countExp = countAll();
 
-        final query = _database.selectOnly(_database.contactListTable)
-          ..addColumns([countExp])
-          ..where(_database.contactListTable.pubkey.isIn(originPubkeyList) &
-              _database.contactListTable.contacts.contains(peerPubkey))
-          ..limit(1);
+      final query = _database.selectOnly(_database.contactListTable)
+        ..addColumns([countExp])
+        ..where(
+          _database.contactListTable.pubkey.isIn(originPubkeyList) &
+              _database.contactListTable.contacts.contains(peerPubkey),
+        )
+        ..limit(1);
 
-        final row = await query.getSingleOrNull();
+      final row = await query.getSingleOrNull();
 
-        return row == null ? 0 : row.read(countExp);
-      },
-    );
+      return row == null ? 0 : row.read(countExp);
+    });
   }
 
   @override
@@ -1551,21 +1293,21 @@ class NostrDB extends CacheManager {
     required List<String> originPubkeyList,
     required String peerPubkey,
   }) async {
-    return await _retryOnLocked(
-      () async {
-        final countExp = countAll();
+    return await _retryOnLocked(() async {
+      final countExp = countAll();
 
-        final query = _database.selectOnly(_database.muteListTable)
-          ..addColumns([countExp])
-          ..where(_database.muteListTable.pubkey.isIn(originPubkeyList) &
-              _database.muteListTable.mutes.contains(peerPubkey))
-          ..limit(1);
+      final query = _database.selectOnly(_database.muteListTable)
+        ..addColumns([countExp])
+        ..where(
+          _database.muteListTable.pubkey.isIn(originPubkeyList) &
+              _database.muteListTable.mutes.contains(peerPubkey),
+        )
+        ..limit(1);
 
-        final row = await query.getSingleOrNull();
+      final row = await query.getSingleOrNull();
 
-        return row == null ? 0 : row.read(countExp);
-      },
-    );
+      return row == null ? 0 : row.read(countExp);
+    });
   }
 
   @override
@@ -1573,22 +1315,24 @@ class NostrDB extends CacheManager {
     required List<String> originPubkeyList,
     required List<String> peerPubkeys,
   }) async {
-    return await _retryOnLocked(
-      () async {
-        final results = <String, Map<String, int>>{};
+    return await _retryOnLocked(() async {
+      final results = <String, Map<String, int>>{};
 
-        if (originPubkeyList.isEmpty || peerPubkeys.isEmpty) {
-          return results;
-        }
+      if (originPubkeyList.isEmpty || peerPubkeys.isEmpty) {
+        return results;
+      }
 
-        final originKeysStr = originPubkeyList.map((k) => "'$k'").join(',');
+      final originKeysStr = originPubkeyList.map((k) => "'$k'").join(',');
 
-        for (final peer in peerPubkeys) {
-          final peerEscaped =
-              peer.replaceAll("'", "''"); // Escape quotes in pubkey
+      for (final peer in peerPubkeys) {
+        final peerEscaped = peer.replaceAll(
+          "'",
+          "''",
+        ); // Escape quotes in pubkey
 
-          // Combine both follow and mute counts using UNION
-          final sql = '''
+        // Combine both follow and mute counts using UNION
+        final sql =
+            '''
       SELECT '$peer' as peer, 'following' as type, COUNT(*) as count
       FROM contact_list_table
       WHERE pubkey IN ($originKeysStr)
@@ -1602,70 +1346,59 @@ class NostrDB extends CacheManager {
         AND mutes LIKE '%"$peerEscaped"%'
     ''';
 
-          final query = await _database.customSelect(sql).get();
+        final query = await _database.customSelect(sql).get();
 
-          final peerResult = <String, int>{'following': 0, 'mutes': 0};
+        final peerResult = <String, int>{'following': 0, 'mutes': 0};
 
-          for (final row in query) {
-            final type = row.data['type'] as String;
-            final count = row.data['count'] as int;
-            peerResult[type] = count;
-          }
-
-          results[peer] = peerResult;
+        for (final row in query) {
+          final type = row.data['type'] as String;
+          final count = row.data['count'] as int;
+          peerResult[type] = count;
         }
 
-        return results;
-      },
-    );
+        results[peer] = peerResult;
+      }
+
+      return results;
+    });
   }
 
   @override
   Future<WotModel?> loadUserWot(String pubkey) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.userWotTable)
-          ..where((tbl) => tbl.pubkey.equals(pubkey))
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.userWotTable)
+        ..where((tbl) => tbl.pubkey.equals(pubkey))
+        ..limit(1);
 
-        final wot = await query.getSingleOrNull();
+      final wot = await query.getSingleOrNull();
 
-        return wot != null ? WotModel.fromUserWotTableData(wot) : null;
-      },
-    );
+      return wot != null ? WotModel.fromUserWotTableData(wot) : null;
+    });
   }
 
   @override
   Future<void> saveUserWot(WotModel wotModel) async {
-    return await _retryOnLocked(
-      () async {
-        await _database.into(_database.userWotTable).insertOnConflictUpdate(
-              wotModel.toCompanion(),
-            );
-      },
-    );
+    return await _retryOnLocked(() async {
+      await _database
+          .into(_database.userWotTable)
+          .insertOnConflictUpdate(wotModel.toCompanion());
+    });
   }
 
   @override
   Future<void> removeUserWot(String pubkey) async {
-    return await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.userWotTable)
-              ..where(
-                (tbl) => tbl.pubkey.equals(pubkey),
-              ))
-            .go();
-      },
-    );
+    return await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.userWotTable,
+      )..where((tbl) => tbl.pubkey.equals(pubkey))).go();
+    });
   }
 
   @override
   Future<void> removeAllWot() async {
-    return await _retryOnLocked(
-      () async {
-        await _database.delete(_database.userWotTable).go();
-      },
-    );
+    return await _retryOnLocked(() async {
+      await _database.delete(_database.userWotTable).go();
+    });
   }
 
   // =====================================================================
@@ -1674,18 +1407,18 @@ class NostrDB extends CacheManager {
 
   @override
   Future<WotScore?> loadWotScore(String pubkey, String originPubkey) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.wotScoreTable)
-          ..where((tbl) =>
-              tbl.pubkey.equals(pubkey) & tbl.originPubkey.equals(originPubkey))
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.wotScoreTable)
+        ..where(
+          (tbl) =>
+              tbl.pubkey.equals(pubkey) & tbl.originPubkey.equals(originPubkey),
+        )
+        ..limit(1);
 
-        final ws = await query.getSingleOrNull();
+      final ws = await query.getSingleOrNull();
 
-        return ws != null ? WotScore.fromWotScoreTableData(ws) : null;
-      },
-    );
+      return ws != null ? WotScore.fromWotScoreTableData(ws) : null;
+    });
   }
 
   @override
@@ -1693,17 +1426,17 @@ class NostrDB extends CacheManager {
     List<String> pubkeys,
     String originPubkey,
   ) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.wotScoreTable)
-          ..where((tbl) =>
-              tbl.pubkey.isIn(pubkeys) & tbl.originPubkey.equals(originPubkey));
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.wotScoreTable)
+        ..where(
+          (tbl) =>
+              tbl.pubkey.isIn(pubkeys) & tbl.originPubkey.equals(originPubkey),
+        );
 
-        final ws = await query.get();
+      final ws = await query.get();
 
-        return ws.map((w) => WotScore.fromWotScoreTableData(w)).toList();
-      },
-    );
+      return ws.map((w) => WotScore.fromWotScoreTableData(w)).toList();
+    });
   }
 
   @override
@@ -1718,53 +1451,39 @@ class NostrDB extends CacheManager {
 
   @override
   Future<void> saveWotScore(WotScore wotScore) async {
-    await _retryOnLocked(
-      () async {
-        await _database.into(_database.wotScoreTable).insertOnConflictUpdate(
-              wotScore.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.wotScoreTable)
+          .insertOnConflictUpdate(wotScore.toCompanion());
+    });
   }
 
   @override
   Future<void> saveWotScoresBatch(List<WotScore> wotScores) async {
-    await _retryOnLocked(
-      () async {
-        await _database.batch(
-          (batch) {
-            batch.insertAllOnConflictUpdate(
-              _database.wotScoreTable,
-              wotScores.map(
-                (e) => e.toCompanion(),
-              ),
-            );
-          },
+    await _retryOnLocked(() async {
+      await _database.batch((batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.wotScoreTable,
+          wotScores.map((e) => e.toCompanion()),
         );
-      },
-    );
+      });
+    });
   }
 
   @override
   Future<void> removeWotScore(String id) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.wotScoreTable)
-              ..where(
-                (tbl) => tbl.id.equals(id),
-              ))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.wotScoreTable,
+      )..where((tbl) => tbl.id.equals(id))).go();
+    });
   }
 
   @override
   Future<void> removeAllWotScore() async {
-    await _retryOnLocked(
-      () async {
-        await _database.delete(_database.wotScoreTable).go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database.delete(_database.wotScoreTable).go();
+    });
   }
 
   // =====================================================================
@@ -1890,106 +1609,86 @@ class NostrDB extends CacheManager {
 
   @override
   Future<void> saveMint(IMint mint) async {
-    await _retryOnLocked(
-      () async {
-        await _database.into(_database.cashuMintTable).insertOnConflictUpdate(
-              mint.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.cashuMintTable)
+          .insertOnConflictUpdate(mint.toCompanion());
+    });
   }
 
   @override
   Future<void> saveMints(List<IMint> mints) async {
-    await _retryOnLocked(
-      () async {
-        await _database.batch(
-          (batch) {
-            batch.insertAllOnConflictUpdate(
-              _database.cashuMintTable,
-              mints.map((e) => e.toCompanion()),
-            );
-          },
+    await _retryOnLocked(() async {
+      await _database.batch((batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.cashuMintTable,
+          mints.map((e) => e.toCompanion()),
         );
-      },
-    );
+      });
+    });
   }
 
   @override
   Future<void> saveMintsWithoutUpdate(List<IMint> mints) async {
-    await _retryOnLocked(
-      () async {
-        await _database.batch(
-          (batch) {
-            batch.insertAll(
-              _database.cashuMintTable,
-              mints.map((e) => e.toCompanion()),
-              mode: InsertMode.insertOrIgnore,
-            );
-          },
+    await _retryOnLocked(() async {
+      await _database.batch((batch) {
+        batch.insertAll(
+          _database.cashuMintTable,
+          mints.map((e) => e.toCompanion()),
+          mode: InsertMode.insertOrIgnore,
         );
-      },
-    );
+      });
+    });
   }
 
   @override
   Future<IMint?> loadMint(String mintURL) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.cashuMintTable)
-          ..where((tbl) => tbl.mintURL.equals(mintURL))
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.cashuMintTable)
+        ..where((tbl) => tbl.mintURL.equals(mintURL))
+        ..limit(1);
 
-        final m = await query.getSingleOrNull();
+      final m = await query.getSingleOrNull();
 
-        return m != null ? MintDriftExtension.fromTableData(m) : null;
-      },
-    );
+      return m != null ? MintDriftExtension.fromTableData(m) : null;
+    });
   }
 
   @override
   Future<List<IMint>> loadMintsByPubkey(String pubkey) async {
-    return await _retryOnLocked(
-      () async {
-        final mints = await (_database.select(_database.cashuMintTable)
-              ..where((tbl) => tbl.pubkey.equals(pubkey)))
-            .get();
+    return await _retryOnLocked(() async {
+      final mints = await (_database.select(
+        _database.cashuMintTable,
+      )..where((tbl) => tbl.pubkey.equals(pubkey))).get();
 
-        return mints.map((m) => MintDriftExtension.fromTableData(m)).toList();
-      },
-    );
+      return mints.map((m) => MintDriftExtension.fromTableData(m)).toList();
+    });
   }
 
   @override
   Future<List<IMint>> loadAllMints() async {
-    return await _retryOnLocked(
-      () async {
-        final mints = await _database.select(_database.cashuMintTable).get();
+    return await _retryOnLocked(() async {
+      final mints = await _database.select(_database.cashuMintTable).get();
 
-        return mints.map((m) => MintDriftExtension.fromTableData(m)).toList();
-      },
-    );
+      return mints.map((m) => MintDriftExtension.fromTableData(m)).toList();
+    });
   }
 
   @override
   Future<void> removeMint(String mintURL, String pubkey) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.cashuMintTable)
-              ..where((tbl) =>
-                  tbl.mintURL.equals(mintURL) & tbl.pubkey.equals(pubkey)))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(_database.cashuMintTable)..where(
+            (tbl) => tbl.mintURL.equals(mintURL) & tbl.pubkey.equals(pubkey),
+          ))
+          .go();
+    });
   }
 
   @override
   Future<void> removeAllMints() async {
-    await _retryOnLocked(
-      () async {
-        await _database.delete(_database.cashuMintTable).go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database.delete(_database.cashuMintTable).go();
+    });
   }
 
   // =====================================================================
@@ -1998,46 +1697,36 @@ class NostrDB extends CacheManager {
 
   @override
   Future<void> saveKeysetInfo(KeysetInfo keysetInfo) async {
-    await _retryOnLocked(
-      () async {
-        await _database
-            .into(_database.cashuKeysetInfoTable)
-            .insertOnConflictUpdate(
-              keysetInfo.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.cashuKeysetInfoTable)
+          .insertOnConflictUpdate(keysetInfo.toCompanion());
+    });
   }
 
   @override
   Future<void> saveKeysetInfos(List<KeysetInfo> keysetInfos) async {
-    await _retryOnLocked(
-      () async {
-        await _database.batch(
-          (batch) {
-            batch.insertAllOnConflictUpdate(
-              _database.cashuKeysetInfoTable,
-              keysetInfos.map((e) => e.toCompanion()),
-            );
-          },
+    await _retryOnLocked(() async {
+      await _database.batch((batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.cashuKeysetInfoTable,
+          keysetInfos.map((e) => e.toCompanion()),
         );
-      },
-    );
+      });
+    });
   }
 
   @override
   Future<KeysetInfo?> loadKeysetInfo(String id, String mintURL) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.cashuKeysetInfoTable)
-          ..where((tbl) => tbl.id.equals(id) & tbl.mintURL.equals(mintURL))
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.cashuKeysetInfoTable)
+        ..where((tbl) => tbl.id.equals(id) & tbl.mintURL.equals(mintURL))
+        ..limit(1);
 
-        final k = await query.getSingleOrNull();
+      final k = await query.getSingleOrNull();
 
-        return k != null ? KeysetInfoDriftExtension.fromTableData(k) : null;
-      },
-    );
+      return k != null ? KeysetInfoDriftExtension.fromTableData(k) : null;
+    });
   }
 
   @override
@@ -2047,91 +1736,82 @@ class NostrDB extends CacheManager {
     String? unit,
     bool? active,
   }) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.cashuKeysetInfoTable)
-          ..where((tbl) {
-            final conditions = <Expression<bool>>[];
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.cashuKeysetInfoTable)
+        ..where((tbl) {
+          final conditions = <Expression<bool>>[];
 
-            if (mintURL != null && mintURL.isNotEmpty) {
-              conditions.add(tbl.mintURL.equals(mintURL));
-            }
-            if (id != null && id.isNotEmpty) {
-              conditions.add(tbl.id.equals(id));
-            }
-            if (unit != null && unit.isNotEmpty) {
-              conditions.add(tbl.unit.equals(unit));
-            }
-            if (active != null) {
-              conditions.add(tbl.active.equals(active));
-            }
+          if (mintURL != null && mintURL.isNotEmpty) {
+            conditions.add(tbl.mintURL.equals(mintURL));
+          }
+          if (id != null && id.isNotEmpty) {
+            conditions.add(tbl.id.equals(id));
+          }
+          if (unit != null && unit.isNotEmpty) {
+            conditions.add(tbl.unit.equals(unit));
+          }
+          if (active != null) {
+            conditions.add(tbl.active.equals(active));
+          }
 
-            // If no conditions, return all
-            if (conditions.isEmpty) {
-              return const Constant(true);
-            }
+          // If no conditions, return all
+          if (conditions.isEmpty) {
+            return const Constant(true);
+          }
 
-            // Combine all conditions with AND
-            return conditions.reduce((a, b) => a & b);
-          });
+          // Combine all conditions with AND
+          return conditions.reduce((a, b) => a & b);
+        });
 
-        final keysets = await query.get();
+      final keysets = await query.get();
 
-        return keysets
-            .map((k) => KeysetInfoDriftExtension.fromTableData(k))
-            .toList();
-      },
-    );
+      return keysets
+          .map((k) => KeysetInfoDriftExtension.fromTableData(k))
+          .toList();
+    });
   }
 
   @override
   Future<List<KeysetInfo>> loadKeysetInfosByMint(String mintURL) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.cashuKeysetInfoTable)
-          ..where((tbl) => tbl.mintURL.equals(mintURL));
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.cashuKeysetInfoTable)
+        ..where((tbl) => tbl.mintURL.equals(mintURL));
 
-        final keysets = await query.get();
+      final keysets = await query.get();
 
-        return keysets
-            .map((k) => KeysetInfoDriftExtension.fromTableData(k))
-            .toList();
-      },
-    );
+      return keysets
+          .map((k) => KeysetInfoDriftExtension.fromTableData(k))
+          .toList();
+    });
   }
 
   @override
   Future<List<KeysetInfo>> loadAllKeysetInfos() async {
-    return await _retryOnLocked(
-      () async {
-        final keysets =
-            await _database.select(_database.cashuKeysetInfoTable).get();
+    return await _retryOnLocked(() async {
+      final keysets = await _database
+          .select(_database.cashuKeysetInfoTable)
+          .get();
 
-        return keysets
-            .map((k) => KeysetInfoDriftExtension.fromTableData(k))
-            .toList();
-      },
-    );
+      return keysets
+          .map((k) => KeysetInfoDriftExtension.fromTableData(k))
+          .toList();
+    });
   }
 
   @override
   Future<void> removeKeysetInfo(String id, String mintURL) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.cashuKeysetInfoTable)
-              ..where((tbl) => tbl.id.equals(id) & tbl.mintURL.equals(mintURL)))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.cashuKeysetInfoTable,
+      )..where((tbl) => tbl.id.equals(id) & tbl.mintURL.equals(mintURL))).go();
+    });
   }
 
   @override
   Future<void> removeAllKeysetInfos() async {
-    await _retryOnLocked(
-      () async {
-        await _database.delete(_database.cashuKeysetInfoTable).go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database.delete(_database.cashuKeysetInfoTable).go();
+    });
   }
 
   // =====================================================================
@@ -2269,98 +1949,80 @@ class NostrDB extends CacheManager {
 
   @override
   Future<void> saveInvoice(IInvoice invoice) async {
-    await _retryOnLocked(
-      () async {
-        await _database
-            .into(_database.cashuInvoiceTable)
-            .insertOnConflictUpdate(
-              invoice.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.cashuInvoiceTable)
+          .insertOnConflictUpdate(invoice.toCompanion());
+    });
   }
 
   @override
   Future<void> saveInvoices(List<IInvoice> invoices) async {
-    await _retryOnLocked(
-      () async {
-        await _database.batch(
-          (batch) {
-            batch.insertAllOnConflictUpdate(
-              _database.cashuInvoiceTable,
-              invoices.map((e) => e.toCompanion()),
-            );
-          },
+    await _retryOnLocked(() async {
+      await _database.batch((batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.cashuInvoiceTable,
+          invoices.map((e) => e.toCompanion()),
         );
-      },
-    );
+      });
+    });
   }
 
   @override
   Future<IInvoice?> loadInvoice(String mintURL, String quote) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.cashuInvoiceTable)
-          ..where(
-              (tbl) => tbl.mintURL.equals(mintURL) & tbl.quote.equals(quote))
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.cashuInvoiceTable)
+        ..where((tbl) => tbl.mintURL.equals(mintURL) & tbl.quote.equals(quote))
+        ..limit(1);
 
-        final i = await query.getSingleOrNull();
+      final i = await query.getSingleOrNull();
 
-        return i != null ? InvoiceDriftExtension.fromTableData(i) : null;
-      },
-    );
+      return i != null ? InvoiceDriftExtension.fromTableData(i) : null;
+    });
   }
 
   @override
   Future<List<IInvoice>> loadInvoicesByMint(String mintURL) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.cashuInvoiceTable)
-          ..where((tbl) => tbl.mintURL.equals(mintURL));
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.cashuInvoiceTable)
+        ..where((tbl) => tbl.mintURL.equals(mintURL));
 
-        final invoices = await query.get();
+      final invoices = await query.get();
 
-        return invoices
-            .map((i) => InvoiceDriftExtension.fromTableData(i))
-            .toList();
-      },
-    );
+      return invoices
+          .map((i) => InvoiceDriftExtension.fromTableData(i))
+          .toList();
+    });
   }
 
   @override
   Future<List<IInvoice>> loadAllInvoices() async {
-    return await _retryOnLocked(
-      () async {
-        final invoices =
-            await _database.select(_database.cashuInvoiceTable).get();
+    return await _retryOnLocked(() async {
+      final invoices = await _database
+          .select(_database.cashuInvoiceTable)
+          .get();
 
-        return invoices
-            .map((i) => InvoiceDriftExtension.fromTableData(i))
-            .toList();
-      },
-    );
+      return invoices
+          .map((i) => InvoiceDriftExtension.fromTableData(i))
+          .toList();
+    });
   }
 
   @override
   Future<void> removeInvoice(String mintURL, String quote) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.cashuInvoiceTable)
-              ..where((tbl) =>
-                  tbl.mintURL.equals(mintURL) & tbl.quote.equals(quote)))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(_database.cashuInvoiceTable)..where(
+            (tbl) => tbl.mintURL.equals(mintURL) & tbl.quote.equals(quote),
+          ))
+          .go();
+    });
   }
 
   @override
   Future<void> removeAllInvoices() async {
-    await _retryOnLocked(
-      () async {
-        await _database.delete(_database.cashuInvoiceTable).go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database.delete(_database.cashuInvoiceTable).go();
+    });
   }
 
   // =====================================================================
@@ -2369,92 +2031,75 @@ class NostrDB extends CacheManager {
 
   @override
   Future<void> saveUnblindingData(UnblindingData data) async {
-    await _retryOnLocked(
-      () async {
-        await _database
-            .into(_database.cashuUnblindingDataTable)
-            .insertOnConflictUpdate(
-              data.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.cashuUnblindingDataTable)
+          .insertOnConflictUpdate(data.toCompanion());
+    });
   }
 
   @override
   Future<void> saveUnblindingDataList(List<UnblindingData> dataList) async {
-    await _retryOnLocked(
-      () async {
-        await _database.batch(
-          (batch) {
-            batch.insertAllOnConflictUpdate(
-              _database.cashuUnblindingDataTable,
-              dataList.map((e) => e.toCompanion()),
-            );
-          },
+    await _retryOnLocked(() async {
+      await _database.batch((batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.cashuUnblindingDataTable,
+          dataList.map((e) => e.toCompanion()),
         );
-      },
-    );
+      });
+    });
   }
 
   @override
   Future<UnblindingData?> loadUnblindingData(String id, String secret) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.cashuUnblindingDataTable)
-          ..where((tbl) => tbl.id.equals(id) & tbl.secret.equals(secret))
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.cashuUnblindingDataTable)
+        ..where((tbl) => tbl.id.equals(id) & tbl.secret.equals(secret))
+        ..limit(1);
 
-        final u = await query.getSingleOrNull();
+      final u = await query.getSingleOrNull();
 
-        return u != null ? UnblindingDataDriftExtension.fromTableData(u) : null;
-      },
-    );
+      return u != null ? UnblindingDataDriftExtension.fromTableData(u) : null;
+    });
   }
 
   @override
   Future<List<UnblindingData>> loadAllUnblindingData() async {
-    return await _retryOnLocked(
-      () async {
-        final data =
-            await _database.select(_database.cashuUnblindingDataTable).get();
+    return await _retryOnLocked(() async {
+      final data = await _database
+          .select(_database.cashuUnblindingDataTable)
+          .get();
 
-        return data
-            .map((u) => UnblindingDataDriftExtension.fromTableData(u))
-            .toList();
-      },
-    );
+      return data
+          .map((u) => UnblindingDataDriftExtension.fromTableData(u))
+          .toList();
+    });
   }
 
   @override
   Future<void> removeUnblindingData(String id, String secret) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.cashuUnblindingDataTable)
-              ..where((tbl) => tbl.id.equals(id) & tbl.secret.equals(secret)))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.cashuUnblindingDataTable,
+      )..where((tbl) => tbl.id.equals(id) & tbl.secret.equals(secret))).go();
+    });
   }
 
   @override
   Future<void> removeAllUnblindingData() async {
-    await _retryOnLocked(
-      () async {
-        await _database.delete(_database.cashuUnblindingDataTable).go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database.delete(_database.cashuUnblindingDataTable).go();
+    });
   }
 
   @override
   Future<void> removeUnblindingDataList(List<UnblindingData> delData) async {
-    await _retryOnLocked(
-      () async {
-        final ids = delData.map((p) => p.id).toList();
-        await (_database.delete(_database.cashuUnblindingDataTable)
-              ..where((tbl) => tbl.id.isIn(ids)))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      final ids = delData.map((p) => p.id).toList();
+      await (_database.delete(
+        _database.cashuUnblindingDataTable,
+      )..where((tbl) => tbl.id.isIn(ids))).go();
+    });
   }
 
   // =====================================================================
@@ -2463,80 +2108,65 @@ class NostrDB extends CacheManager {
 
   @override
   Future<void> saveMintInfo(MintInfo mintInfo) async {
-    await _retryOnLocked(
-      () async {
-        await _database
-            .into(_database.cashuMintInfoTable)
-            .insertOnConflictUpdate(
-              mintInfo.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.cashuMintInfoTable)
+          .insertOnConflictUpdate(mintInfo.toCompanion());
+    });
   }
 
   @override
   Future<void> saveMintInfos(List<MintInfo> mintInfos) async {
-    await _retryOnLocked(
-      () async {
-        await _database.batch(
-          (batch) {
-            batch.insertAllOnConflictUpdate(
-              _database.cashuMintInfoTable,
-              mintInfos.map((e) => e.toCompanion()),
-            );
-          },
+    await _retryOnLocked(() async {
+      await _database.batch((batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.cashuMintInfoTable,
+          mintInfos.map((e) => e.toCompanion()),
         );
-      },
-    );
+      });
+    });
   }
 
   @override
   Future<MintInfo?> loadMintInfo(String mintURL) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.cashuMintInfoTable)
-          ..where((tbl) => tbl.mintURL.equals(mintURL))
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.cashuMintInfoTable)
+        ..where((tbl) => tbl.mintURL.equals(mintURL))
+        ..limit(1);
 
-        final m = await query.getSingleOrNull();
+      final m = await query.getSingleOrNull();
 
-        return m != null ? MintInfoDriftExtension.fromTableData(m) : null;
-      },
-    );
+      return m != null ? MintInfoDriftExtension.fromTableData(m) : null;
+    });
   }
 
   @override
   Future<List<MintInfo>> loadAllMintInfos() async {
-    return await _retryOnLocked(
-      () async {
-        final mintInfos =
-            await _database.select(_database.cashuMintInfoTable).get();
+    return await _retryOnLocked(() async {
+      final mintInfos = await _database
+          .select(_database.cashuMintInfoTable)
+          .get();
 
-        return mintInfos
-            .map((m) => MintInfoDriftExtension.fromTableData(m))
-            .toList();
-      },
-    );
+      return mintInfos
+          .map((m) => MintInfoDriftExtension.fromTableData(m))
+          .toList();
+    });
   }
 
   @override
   Future<void> removeMintInfo(String mintURL) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.cashuMintInfoTable)
-              ..where((tbl) => tbl.mintURL.equals(mintURL)))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.cashuMintInfoTable,
+      )..where((tbl) => tbl.mintURL.equals(mintURL))).go();
+    });
   }
 
   @override
   Future<void> removeAllMintInfos() async {
-    await _retryOnLocked(
-      () async {
-        await _database.delete(_database.cashuMintInfoTable).go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database.delete(_database.cashuMintInfoTable).go();
+    });
   }
 
   // =====================================================================
@@ -2545,97 +2175,79 @@ class NostrDB extends CacheManager {
 
   @override
   Future<void> saveLightningInvoice(LightningInvoice invoice) async {
-    await _retryOnLocked(
-      () async {
-        await _database
-            .into(_database.cashuLightningInvoiceTable)
-            .insertOnConflictUpdate(
-              invoice.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.cashuLightningInvoiceTable)
+          .insertOnConflictUpdate(invoice.toCompanion());
+    });
   }
 
   @override
   Future<void> saveLightningInvoices(List<LightningInvoice> invoices) async {
-    await _retryOnLocked(
-      () async {
-        await _database.batch(
-          (batch) {
-            batch.insertAllOnConflictUpdate(
-              _database.cashuLightningInvoiceTable,
-              invoices.map((e) => e.toCompanion()),
-            );
-          },
+    await _retryOnLocked(() async {
+      await _database.batch((batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.cashuLightningInvoiceTable,
+          invoices.map((e) => e.toCompanion()),
         );
-      },
-    );
+      });
+    });
   }
 
   @override
   Future<LightningInvoice?> loadLightningInvoice(
-      String mintURL, String hash) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.cashuLightningInvoiceTable)
-          ..where((tbl) => tbl.mintURL.equals(mintURL) & tbl.hash.equals(hash))
-          ..limit(1);
+    String mintURL,
+    String hash,
+  ) async {
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.cashuLightningInvoiceTable)
+        ..where((tbl) => tbl.mintURL.equals(mintURL) & tbl.hash.equals(hash))
+        ..limit(1);
 
-        final i = await query.getSingleOrNull();
+      final i = await query.getSingleOrNull();
 
-        return i != null
-            ? LightningInvoiceDriftExtension.fromTableData(i)
-            : null;
-      },
-    );
+      return i != null ? LightningInvoiceDriftExtension.fromTableData(i) : null;
+    });
   }
 
   @override
   Future<List<LightningInvoice>> loadAllLightningInvoices() async {
-    return await _retryOnLocked(
-      () async {
-        final invoices =
-            await _database.select(_database.cashuLightningInvoiceTable).get();
+    return await _retryOnLocked(() async {
+      final invoices = await _database
+          .select(_database.cashuLightningInvoiceTable)
+          .get();
 
-        return invoices
-            .map((i) => LightningInvoiceDriftExtension.fromTableData(i))
-            .toList();
-      },
-    );
+      return invoices
+          .map((i) => LightningInvoiceDriftExtension.fromTableData(i))
+          .toList();
+    });
   }
 
   @override
   Future<int> removeInvoices(List<String> invoiceIds) async {
-    return await _retryOnLocked(
-      () async {
-        final deleted = await (_database.delete(_database.cashuInvoiceTable)
-              ..where((tbl) => tbl.id.isIn(invoiceIds)))
-            .go();
-        return deleted;
-      },
-    );
+    return await _retryOnLocked(() async {
+      final deleted = await (_database.delete(
+        _database.cashuInvoiceTable,
+      )..where((tbl) => tbl.id.isIn(invoiceIds))).go();
+      return deleted;
+    });
   }
 
   @override
   Future<int> removeLightningInvoices(List<String> lightningInvoiceIds) async {
-    return await _retryOnLocked(
-      () async {
-        final deleted =
-            await (_database.delete(_database.cashuLightningInvoiceTable)
-                  ..where((tbl) => tbl.id.isIn(lightningInvoiceIds)))
-                .go();
-        return deleted;
-      },
-    );
+    return await _retryOnLocked(() async {
+      final deleted = await (_database.delete(
+        _database.cashuLightningInvoiceTable,
+      )..where((tbl) => tbl.id.isIn(lightningInvoiceIds))).go();
+      return deleted;
+    });
   }
 
   @override
   Future<void> removeAllLightningInvoices() async {
-    await _retryOnLocked(
-      () async {
-        await _database.delete(_database.cashuLightningInvoiceTable).go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database.delete(_database.cashuLightningInvoiceTable).go();
+    });
   }
 
   // =====================================================================
@@ -2644,57 +2256,47 @@ class NostrDB extends CacheManager {
 
   @override
   Future<void> saveCashuToken(CashuTokenData token) async {
-    await _retryOnLocked(
-      () async {
-        await _database.into(_database.cashuTokensTable).insertOnConflictUpdate(
-              token.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.cashuTokensTable)
+          .insertOnConflictUpdate(token.toCompanion());
+    });
   }
 
   @override
   Future<void> saveCashuTokens(List<CashuTokenData> tokens) async {
-    await _retryOnLocked(
-      () async {
-        await _database.batch(
-          (batch) {
-            batch.insertAllOnConflictUpdate(
-              _database.cashuTokensTable,
-              tokens.map((e) => e.toCompanion()),
-            );
-          },
+    await _retryOnLocked(() async {
+      await _database.batch((batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.cashuTokensTable,
+          tokens.map((e) => e.toCompanion()),
         );
-      },
-    );
+      });
+    });
   }
 
   @override
   Future<void> removeCashuTokens(List<String> ids) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.cashuTokensTable)
-              ..where((tbl) => tbl.id.isIn(ids)))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.cashuTokensTable,
+      )..where((tbl) => tbl.id.isIn(ids))).go();
+    });
   }
 
   @override
   Future<CashuTokenData?> getCashuTokenById(String id) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.cashuTokensTable)
-          ..where((tbl) => tbl.id.equals(id))
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.cashuTokensTable)
+        ..where((tbl) => tbl.id.equals(id))
+        ..limit(1);
 
-        final result = await query.getSingleOrNull();
+      final result = await query.getSingleOrNull();
 
-        return result != null
-            ? CashuTokenDataDriftHelper.fromTableData(result)
-            : null;
-      },
-    );
+      return result != null
+          ? CashuTokenDataDriftHelper.fromTableData(result)
+          : null;
+    });
   }
 
   @override
@@ -2702,55 +2304,47 @@ class NostrDB extends CacheManager {
     String? mintURL,
     String? pubkey,
   }) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.cashuTokensTable);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.cashuTokensTable);
 
-        if (mintURL != null) {
-          query.where((tbl) => tbl.mintUrl.equals(mintURL));
-        }
+      if (mintURL != null) {
+        query.where((tbl) => tbl.mintUrl.equals(mintURL));
+      }
 
-        if (pubkey != null) {
-          query.where((tbl) => tbl.pubkey.equals(pubkey));
-        }
+      if (pubkey != null) {
+        query.where((tbl) => tbl.pubkey.equals(pubkey));
+      }
 
-        final result = await query.get();
+      final result = await query.get();
 
-        return result
-            .map((e) => CashuTokenDataDriftHelper.fromTableData(e))
-            .toList();
-      },
-    );
+      return result
+          .map((e) => CashuTokenDataDriftHelper.fromTableData(e))
+          .toList();
+    });
   }
 
   @override
   Future<int?> getLatestCashuTokenCreatedAt(String pubkey) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.cashuTokensTable)
-          ..where((tbl) => tbl.pubkey.equals(pubkey))
-          ..orderBy([
-            (tbl) => OrderingTerm(
-                  expression: tbl.createdAt,
-                  mode: OrderingMode.desc,
-                )
-          ])
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.cashuTokensTable)
+        ..where((tbl) => tbl.pubkey.equals(pubkey))
+        ..orderBy([
+          (tbl) =>
+              OrderingTerm(expression: tbl.createdAt, mode: OrderingMode.desc),
+        ])
+        ..limit(1);
 
-        final result = await query.getSingleOrNull();
+      final result = await query.getSingleOrNull();
 
-        return result?.createdAt;
-      },
-    );
+      return result?.createdAt;
+    });
   }
 
   @override
   Future<void> removeAllCashuTokens() async {
-    await _retryOnLocked(
-      () async {
-        await _database.delete(_database.cashuTokensTable).go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database.delete(_database.cashuTokensTable).go();
+    });
   }
 
   // =====================================================================
@@ -2759,102 +2353,83 @@ class NostrDB extends CacheManager {
 
   @override
   Future<void> saveCashuSpending(CashuSpendingData spending) async {
-    await _retryOnLocked(
-      () async {
-        await _database
-            .into(_database.cashuSpendingTable)
-            .insertOnConflictUpdate(
-              spending.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.cashuSpendingTable)
+          .insertOnConflictUpdate(spending.toCompanion());
+    });
   }
 
   @override
   Future<void> saveCashuSpendingList(List<CashuSpendingData> spendings) async {
-    await _retryOnLocked(
-      () async {
-        await _database.batch(
-          (batch) {
-            batch.insertAllOnConflictUpdate(
-              _database.cashuSpendingTable,
-              spendings.map((e) => e.toCompanion()),
-            );
-          },
+    await _retryOnLocked(() async {
+      await _database.batch((batch) {
+        batch.insertAllOnConflictUpdate(
+          _database.cashuSpendingTable,
+          spendings.map((e) => e.toCompanion()),
         );
-      },
-    );
+      });
+    });
   }
 
   @override
   Future<CashuSpendingData?> getCashuSpendingById(String id) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.cashuSpendingTable)
-          ..where((tbl) => tbl.id.equals(id))
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.cashuSpendingTable)
+        ..where((tbl) => tbl.id.equals(id))
+        ..limit(1);
 
-        final result = await query.getSingleOrNull();
+      final result = await query.getSingleOrNull();
 
-        return result != null
-            ? CashuSpendingDataDriftHelper.fromTableData(result)
-            : null;
-      },
-    );
+      return result != null
+          ? CashuSpendingDataDriftHelper.fromTableData(result)
+          : null;
+    });
   }
 
   @override
   Future<List<CashuSpendingData>> getCashuSpendingsByPubkey(
-      String pubkey) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.cashuSpendingTable)
-          ..where((tbl) => tbl.pubkey.equals(pubkey))
-          ..orderBy([
-            (tbl) => OrderingTerm(
-                  expression: tbl.createdAt,
-                  mode: OrderingMode.desc,
-                )
-          ]);
+    String pubkey,
+  ) async {
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.cashuSpendingTable)
+        ..where((tbl) => tbl.pubkey.equals(pubkey))
+        ..orderBy([
+          (tbl) =>
+              OrderingTerm(expression: tbl.createdAt, mode: OrderingMode.desc),
+        ]);
 
-        final result = await query.get();
+      final result = await query.get();
 
-        return result
-            .map((e) => CashuSpendingDataDriftHelper.fromTableData(e))
-            .toList();
-      },
-    );
+      return result
+          .map((e) => CashuSpendingDataDriftHelper.fromTableData(e))
+          .toList();
+    });
   }
 
   @override
   Future<void> removeCashuSpending(String id) async {
-    await _retryOnLocked(
-      () async {
-        _database.delete(_database.cashuSpendingTable)
-          ..where((tbl) => tbl.id.equals(id))
-          ..go();
-      },
-    );
+    await _retryOnLocked(() async {
+      _database.delete(_database.cashuSpendingTable)
+        ..where((tbl) => tbl.id.equals(id))
+        ..go();
+    });
   }
 
   @override
   Future<void> removeCashuSpendingList(List<CashuSpendingData> delData) async {
-    await _retryOnLocked(
-      () async {
-        _database.delete(_database.cashuSpendingTable)
-          ..where((tbl) => tbl.id.isIn(delData.map((e) => e.id)))
-          ..go();
-      },
-    );
+    await _retryOnLocked(() async {
+      _database.delete(_database.cashuSpendingTable)
+        ..where((tbl) => tbl.id.isIn(delData.map((e) => e.id)))
+        ..go();
+    });
   }
 
   @override
   Future<void> removeAllCashuSpendings() async {
-    await _retryOnLocked(
-      () async {
-        await _database.delete(_database.cashuSpendingTable).go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database.delete(_database.cashuSpendingTable).go();
+    });
   }
 
   // =====================================================================
@@ -2863,41 +2438,35 @@ class NostrDB extends CacheManager {
 
   @override
   Future<void> saveCashuWallet(CashuWallet wallet) async {
-    await _retryOnLocked(
-      () async {
-        await _database.into(_database.cashuWalletTable).insertOnConflictUpdate(
-              wallet.toCompanion(),
-            );
-      },
-    );
+    await _retryOnLocked(() async {
+      await _database
+          .into(_database.cashuWalletTable)
+          .insertOnConflictUpdate(wallet.toCompanion());
+    });
   }
 
   @override
   Future<CashuWallet?> getCashuWallet(String pubkey) async {
-    return await _retryOnLocked(
-      () async {
-        final query = _database.select(_database.cashuWalletTable)
-          ..where((tbl) => tbl.pubkey.equals(pubkey))
-          ..limit(1);
+    return await _retryOnLocked(() async {
+      final query = _database.select(_database.cashuWalletTable)
+        ..where((tbl) => tbl.pubkey.equals(pubkey))
+        ..limit(1);
 
-        final result = await query.getSingleOrNull();
+      final result = await query.getSingleOrNull();
 
-        return result != null
-            ? CashuWalletDriftExtension.fromTableData(result)
-            : null;
-      },
-    );
+      return result != null
+          ? CashuWalletDriftExtension.fromTableData(result)
+          : null;
+    });
   }
 
   @override
   Future<void> removeCashuWallet(String pubkey) async {
-    await _retryOnLocked(
-      () async {
-        await (_database.delete(_database.cashuWalletTable)
-              ..where((tbl) => tbl.pubkey.equals(pubkey)))
-            .go();
-      },
-    );
+    await _retryOnLocked(() async {
+      await (_database.delete(
+        _database.cashuWalletTable,
+      )..where((tbl) => tbl.pubkey.equals(pubkey))).go();
+    });
   }
 
   @override
@@ -2907,6 +2476,7 @@ class NostrDB extends CacheManager {
       removeAllContactLists(),
       removeAllDmSessionsInfo(),
       removeAllEvents(),
+      removeAllEventStats(),
       removeAllMetadatas(),
       removeAllMuteLists(),
       removeAllNip05s(),

@@ -1144,11 +1144,11 @@ class NostrCore {
   }
 
   Future<bool> checkRelayConnectivity(String relay) async {
-    final uri = Uri.parse(relay);
-    final isOnion = uri.host.endsWith('.onion');
-
     WebSocket? ws;
     try {
+      final uri = Uri.parse(relay);
+      final isOnion = uri.host.endsWith('.onion');
+
       if (isOnion) {
         ws = await _connectTorSocket(uri);
       } else {

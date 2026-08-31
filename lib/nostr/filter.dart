@@ -13,6 +13,10 @@ class Filter {
   /// a list of event ids that are referenced in an "e" tag
   List<String>? e;
 
+  List<String>? capitalE;
+
+  List<String>? capitalA;
+
   /// a list of event ids that are referenced in an "l" tag
   List<String>? l;
 
@@ -61,6 +65,8 @@ class Filter {
     this.authors,
     this.kinds,
     this.e,
+    this.capitalE,
+    this.capitalA,
     this.p,
     this.l,
     this.d,
@@ -85,6 +91,8 @@ class Filter {
       authors: authors,
       kinds: kinds,
       e: e,
+      capitalE: capitalE,
+      capitalA: capitalA,
       p: p,
       l: l,
       d: d,
@@ -105,10 +113,13 @@ class Filter {
   /// Deserialize a filter from a JSON
   Filter.fromJson(Map<String, dynamic> json) {
     ids = json['ids'] == null ? null : List<String>.from(json['ids']);
-    authors =
-        json['authors'] == null ? null : List<String>.from(json['authors']);
+    authors = json['authors'] == null
+        ? null
+        : List<String>.from(json['authors']);
     kinds = json['kinds'] == null ? null : List<int>.from(json['kinds']);
     e = json['#e'] == null ? null : List<String>.from(json['#e']);
+    capitalE = json['#E'] == null ? null : List<String>.from(json['#E']);
+    capitalA = json['#A'] == null ? null : List<String>.from(json['#A']);
     p = json['#p'] == null ? null : List<String>.from(json['#p']);
     d = json['#d'] == null ? null : List<String>.from(json['#d']);
     c = json['#c'] == null ? null : List<String>.from(json['#c']);
@@ -121,8 +132,9 @@ class Filter {
     // toJson writes 'search'; accept the legacy '#search' key too. The old
     // read produced the literal string "null" when the key was absent.
     search = (json['search'] ?? json['#search'])?.toString();
-    bolt11 =
-        json['#bolt11'] == null ? null : List<String>.from(json['#bolt11']);
+    bolt11 = json['#bolt11'] == null
+        ? null
+        : List<String>.from(json['#bolt11']);
     since = json['since'];
     until = json['until'];
     limit = json['limit'];
@@ -145,6 +157,12 @@ class Filter {
     }
     if (e != null) {
       data['#e'] = e;
+    }
+    if (capitalE != null) {
+      data['#E'] = capitalE;
+    }
+    if (capitalA != null) {
+      data['#A'] = capitalA;
     }
     if (l != null) {
       data['#l'] = l;
@@ -241,8 +259,8 @@ class RemoteCacheFilter {
           if (scope != null) 'scope': scope,
           if (query != null) 'query': query,
           if (createdAfter != null) 'created_after': createdAfter,
-        }
-      ]
+        },
+      ],
     };
   }
 
