@@ -364,16 +364,19 @@ class EventStats extends Equatable {
         createdAt = getNewestCreatedAt(ev.createdAt);
       } else if (ev.kind == EventKind.TEXT_NOTE ||
           ev.kind == EventKind.COMMENT) {
-        if (ev.isQuote() && !quotes.containsKey(ev.id)) {
+        // A note can carry a 'q' tag (quoting/embedding another event in its
+        // content) while still being a genuine reply to this event via
+        // 'e'/'a' root/reply markers. Reply markers take priority: only
+        // treat it as a plain quote when it isn't also a reply to us.
+        final isReplyToThis =
+            ev.tags.any((tags) => canAddNote(tags, eventId));
+
+        if (isReplyToThis) {
+          updatedReplies[ev.id] = ev.pubkey;
+          createdAt = getNewestCreatedAt(ev.createdAt);
+        } else if (ev.isQuote() && !quotes.containsKey(ev.id)) {
           updatedQuotes[ev.id] = ev.pubkey;
           createdAt = getNewestCreatedAt(ev.createdAt);
-        } else {
-          for (final tags in ev.tags) {
-            if (canAddNote(tags, eventId)) {
-              updatedReplies[ev.id] = ev.pubkey;
-              createdAt = getNewestCreatedAt(ev.createdAt);
-            }
-          }
         }
       } else if (ev.kind == EventKind.REPOST && !reposts.containsKey(ev.id)) {
         updatedReposts[ev.id] = ev.pubkey;

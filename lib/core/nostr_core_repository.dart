@@ -170,6 +170,11 @@ class NostrCore {
 
   bool _disposed = false;
 
+  // Set when a relay sends an AUTH challenge, completed once our signed
+  // AUTH event is acked. Lets connect() wait on the real handshake instead
+  // of guessing a fixed delay.
+  final Map<String, Future<void>> _pendingAuth = {};
+
   /// Releases this instance's sockets and timers. The database is NOT
   /// closed — it may be shared with other NostrCore instances (the app
   /// passes `nc.db` into secondary cores). Buffered events are flushed
@@ -251,6 +256,7 @@ class NostrCore {
     String r, {
     bool? fromIdleState,
     bool? waitForAuth,
+    Duration? connectTimeout,
   }) async {
     if (_disposed) return;
     try {
@@ -275,10 +281,12 @@ class NostrCore {
       attempts[r] = (attempts[r] ?? 0) + 1;
       closedRelays.remove(r);
       webSockets[r] = null;
-      socket = await _connectWs(r);
+      socket = await _connectWs(r, timeout: connectTimeout);
 
       if (socket != null) {
-        socket.done.then((dynamic _) => _onDisconnected(r));
+        socket.done
+            .then((dynamic _) => _onDisconnected(r))
+            .catchError((_) => _onDisconnected(r));
         _listenEvent(socket, r);
         webSockets[r] = socket;
         printLog('$r socket connection initialized');
@@ -288,7 +296,11 @@ class NostrCore {
         attempts.remove(r);
         _setConnectStatus(r, 1);
         if (waitForAuth != null) {
-          await Future.delayed(const Duration(seconds: 2));
+          await Future.delayed(const Duration(milliseconds: 300));
+          final pending = _pendingAuth.remove(r);
+          if (pending != null) {
+            await pending.timeout(const Duration(seconds: 2), onTimeout: () {});
+          }
         }
       } else {
         webSockets[r] = socket;
@@ -300,6 +312,7 @@ class NostrCore {
     List<String> relays, {
     bool? fromIdleState,
     bool? waitForAuth,
+    Duration? connectTimeout,
   }) async {
     final rs = relays.where((r) {
       final relay = Relay.clean(r);
@@ -313,13 +326,17 @@ class NostrCore {
               e,
               fromIdleState: fromIdleState,
               waitForAuth: waitForAuth,
+              connectTimeout: connectTimeout,
             ),
           )
           .toList(),
     );
   }
 
-  Future<void> connectNonConnectedRelays(Set<String> relays) async {
+  Future<void> connectNonConnectedRelays(
+    Set<String> relays, {
+    Duration? connectTimeout,
+  }) async {
     final rs = relays.where((r) {
       final relay = Relay.clean(r);
       return relay != null &&
@@ -327,19 +344,27 @@ class NostrCore {
           (webSockets[relay] == null || connectStatus[relay] != 1);
     }).toList();
 
-    await Future.wait(rs.map((e) => connect(e)).toList());
+    await Future.wait(
+      rs.map((e) => connect(e, connectTimeout: connectTimeout)).toList(),
+    );
   }
 
   Future closeConnect(List<String> relays) async {
+    final closes = <Future>[];
+
     for (final relay in relays) {
       if (webSockets.containsKey(relay)) {
         attempts.remove(relay);
         connectStatus.remove(relay);
         closedRelays.add(relay);
         final socket = webSockets.remove(relay);
-        await socket?.close();
+        if (socket != null) {
+          closes.add(socket.close());
+        }
       }
     }
+
+    await Future.wait(closes);
   }
 
   // =====================================================================
@@ -374,6 +399,7 @@ class NostrCore {
     void Function(Event, String)? eventCallBack,
     void Function(String, OKEvent, String, List<String>)? eoseCallBack,
     int? startingTimeout,
+    Duration? connectTimeout,
   }) async {
     final completer = Completer<String>();
     Timer? timer;
@@ -419,7 +445,10 @@ class NostrCore {
         nonConnectedRelays.addAll(getNonConnectedRelays(relays));
 
         if (nonConnectedRelays.isNotEmpty) {
-          await connectNonConnectedRelays(nonConnectedRelays.toSet());
+          await connectNonConnectedRelays(
+            nonConnectedRelays.toSet(),
+            connectTimeout: connectTimeout,
+          );
         }
       }
 
@@ -849,7 +878,6 @@ class NostrCore {
 
   Future<void> _authenticateRelay(String message, String relay) async {
     if (!(currentSigner?.canSign() ?? false)) return;
-
     final dm = jsonDecode(message);
     if (dm is! List || dm.length < 2) return;
 
@@ -863,8 +891,6 @@ class NostrCore {
       signer: currentSigner,
     );
 
-    // Returning early instead of leaving the completer dangling: the old
-    // version never completed when the signer failed to produce an event.
     if (ev == null) return;
 
     final completer = Completer<void>();
@@ -910,7 +936,7 @@ class NostrCore {
         _handleOk(raw, relay);
         break;
       case 'AUTH':
-        _authenticateRelay(raw, relay);
+        _pendingAuth[relay] = _authenticateRelay(raw, relay);
         break;
 
       default:
@@ -998,7 +1024,7 @@ class NostrCore {
     } catch (_) {}
   }
 
-  Future<WebSocket?> _connectWs(String relay) async {
+  Future<WebSocket?> _connectWs(String relay, {Duration? timeout}) async {
     try {
       _setConnectStatus(relay, 0);
 
@@ -1012,7 +1038,7 @@ class NostrCore {
         // Regular WebSocket connection for non-onion relays
         return await WebSocket.connect(
           relay,
-        ).timeout(const Duration(seconds: 5));
+        ).timeout(timeout ?? const Duration(seconds: 5));
       }
     } catch (e) {
       _setConnectStatus(relay, 3);

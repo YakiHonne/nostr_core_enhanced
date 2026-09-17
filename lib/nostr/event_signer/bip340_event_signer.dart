@@ -80,6 +80,7 @@ class Bip340EventSigner implements EventSigner {
     String destPubKey, {
     String? id,
   }) async {
+    if (!canSign()) return null;
     return await Nip44.encryptContent(msg, destPubKey, this);
   }
 

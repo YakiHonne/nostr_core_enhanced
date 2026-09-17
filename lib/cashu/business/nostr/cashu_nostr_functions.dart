@@ -209,7 +209,10 @@ class NostrCashuFunctions {
   }) async {
     final privkey = Keychain.generate().private;
 
-    final content = await nc.currentSigner!.encrypt44(
+    final signer = nc.currentSigner;
+    if (signer == null) return null;
+
+    final content = await signer.encrypt44(
       jsonEncode([
         ['privkey', privkey],
         ...mints.isNotEmpty
@@ -258,7 +261,10 @@ class NostrCashuFunctions {
     required List<String> mints,
     required String privkey,
   }) async {
-    final content = await nc.currentSigner!.encrypt44(
+    final signer = nc.currentSigner;
+    if (signer == null) return null;
+
+    final content = await signer.encrypt44(
       jsonEncode([
         ['privkey', privkey],
         ...mints.map((mint) => ['mint', mint]),

@@ -341,6 +341,7 @@ class Event implements BaseEvent {
   String? getEventParent() {
     String? root;
     String? reply;
+    String? quote;
 
     for (final tag in tags) {
       if (kind == EventKind.REACTION ||
@@ -350,23 +351,23 @@ class Event implements BaseEvent {
           reply = tag[1];
         }
       } else {
-        if (isQuote()) {
-          if (tag.first == 'q' && tag.length > 1) {
-            reply = tag[1];
-          }
-        } else {
-          if (tag.length > 3 &&
-              (tag.first == 'a' || tag.first == 'e') &&
-              tag[3] == 'root') {
-            root = tag[1];
-          } else if (tag.length > 3 && tag.first == 'e' && tag[3] == 'reply') {
-            reply = tag[1];
-          }
+        // A note can carry a 'q' tag (quoting/embedding another event in its
+        // content) while still being a genuine reply via 'e'/'a' root/reply
+        // markers. Prefer the actual reply markers; 'q' is only the parent
+        // when there's no reply structure at all.
+        if (tag.length > 3 &&
+            (tag.first == 'a' || tag.first == 'e') &&
+            tag[3] == 'root') {
+          root = tag[1];
+        } else if (tag.length > 3 && tag.first == 'e' && tag[3] == 'reply') {
+          reply = tag[1];
+        } else if (tag.first == 'q' && tag.length > 1) {
+          quote = tag[1];
         }
       }
     }
 
-    return reply ?? root;
+    return reply ?? root ?? quote;
   }
 
   String? getCustomEmojiUrl(String emoji) {
