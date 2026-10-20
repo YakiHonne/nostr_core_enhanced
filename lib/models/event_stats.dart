@@ -286,7 +286,9 @@ class EventStats extends Equatable {
           }
         }
       }
-    } else if (ev.kind == EventKind.REPOST && !reposts.containsKey(ev.id)) {
+    } else if ((ev.kind == EventKind.REPOST ||
+            ev.kind == EventKind.GENERIC_REPOST) &&
+        !reposts.containsKey(ev.id)) {
       return copyWith(
         reposts: Map<String, String>.from(reposts)..addAll({ev.id: ev.pubkey}),
       );

@@ -59,6 +59,9 @@ class EventKind {
 
   static const int ZAP = 9735;
 
+  /// NIP-84 highlight event.
+  static const int HIGHLIGHT = 9802;
+
   static const int MUTE_LIST = 10000;
 
   static const int PINNED_NOTES = 10001;

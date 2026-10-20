@@ -15,6 +15,7 @@ const SOURCE_RECENT = 'recent';
 const SOURCE_RECENT_WITH_REPLIES = 'recent_with_replies';
 const SOURCE_TRENDING = 'trending';
 const SOURCE_PAID = 'paid';
+const SOURCE_NIP84_HIGHLIGHTS = 'nip84_highlights';
 const SOURCE_WIDGETS = 'widgets';
 
 class AppSharedSettings {
@@ -36,9 +37,7 @@ class AppSharedSettings {
     return AppSharedSettings(
       pubkey: data.pubkey,
       filters: ContentFilters.fromMap2(jsonDecode(data.filters)),
-      contentSources: ContentSources.fromMap(
-        jsonDecode(data.contentSources),
-      ),
+      contentSources: ContentSources.fromMap(jsonDecode(data.contentSources)),
     );
   }
 
@@ -99,18 +98,11 @@ class AppSharedSettings {
   factory AppSharedSettings.fromEvent(Event event) {
     final contentMap = jsonDecode(event.content);
 
-    return AppSharedSettings.fromMap(
-      {
-        'pubkey': event.pubkey,
-        ...contentMap,
-      },
-    );
+    return AppSharedSettings.fromMap({'pubkey': event.pubkey, ...contentMap});
   }
 
   factory AppSharedSettings.fromJson(String source) =>
-      AppSharedSettings.fromMap(
-        json.decode(source) as Map<String, dynamic>,
-      );
+      AppSharedSettings.fromMap(json.decode(source) as Map<String, dynamic>);
 
   String eventContent() {
     final contentMap = {};
@@ -146,21 +138,15 @@ class ContentFilters {
   });
 
   Map<String, DiscoverFilter> getDiscoverMappedContent() {
-    return {
-      for (final filter in discoverFilters) filter.id: filter,
-    };
+    return {for (final filter in discoverFilters) filter.id: filter};
   }
 
   Map<String, NotesFilter> getNotesMappedContent() {
-    return {
-      for (final filter in notesFilters) filter.id: filter,
-    };
+    return {for (final filter in notesFilters) filter.id: filter};
   }
 
   Map<String, MediaFilter> getMediaMappedContent() {
-    return {
-      for (final filter in mediaFilters) filter.id: filter,
-    };
+    return {for (final filter in mediaFilters) filter.id: filter};
   }
 
   ContentFilters deepCopy() {
@@ -236,7 +222,7 @@ class ContentFilters {
   List<Map<String, dynamic>> toEventList() {
     return [
       for (final filter in discoverFilters) filter.toEventMap(),
-      for (final filter in notesFilters) filter.toEventMap()
+      for (final filter in notesFilters) filter.toEventMap(),
     ];
   }
 
@@ -282,10 +268,7 @@ class DiscoverFilter {
     return DiscoverFilter(
       hideSensitive: false,
       inludeThumbnail: false,
-      articleFilter: DiscoverArticleFilter(
-        minWords: 150,
-        onlyMedia: false,
-      ),
+      articleFilter: DiscoverArticleFilter(minWords: 150, onlyMedia: false),
       curationFilter: DiscoverCurationFilter(
         type: CurationTypes.articles,
         minItems: 4,
@@ -447,23 +430,14 @@ class DiscoverArticleFilter {
   int minWords;
   bool onlyMedia;
 
-  DiscoverArticleFilter({
-    required this.minWords,
-    required this.onlyMedia,
-  });
+  DiscoverArticleFilter({required this.minWords, required this.onlyMedia});
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'min_words': minWords,
-      'media_only': onlyMedia,
-    };
+    return <String, dynamic>{'min_words': minWords, 'media_only': onlyMedia};
   }
 
   Map<String, dynamic> toEventMap() {
-    return <String, dynamic>{
-      'min_words': minWords,
-      'media_only': onlyMedia,
-    };
+    return <String, dynamic>{'min_words': minWords, 'media_only': onlyMedia};
   }
 
   factory DiscoverArticleFilter.fromMap(Map<String, dynamic> map) {
@@ -485,23 +459,14 @@ class DiscoverCurationFilter {
   CurationTypes type;
   int minItems;
 
-  DiscoverCurationFilter({
-    required this.type,
-    required this.minItems,
-  });
+  DiscoverCurationFilter({required this.type, required this.minItems});
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'type': type.name,
-      'min_items': minItems,
-    };
+    return <String, dynamic>{'type': type.name, 'min_items': minItems};
   }
 
   Map<String, dynamic> toEventMap() {
-    return <String, dynamic>{
-      'type': type.name,
-      'min_items': minItems,
-    };
+    return <String, dynamic>{'type': type.name, 'min_items': minItems};
   }
 
   factory DiscoverCurationFilter.fromMap(Map<String, dynamic> map) {
@@ -518,20 +483,17 @@ class DiscoverCurationFilter {
 
   factory DiscoverCurationFilter.fromJson(String source) =>
       DiscoverCurationFilter.fromMap(
-          json.decode(source) as Map<String, dynamic>);
+        json.decode(source) as Map<String, dynamic>,
+      );
 }
 
 class DiscoverVideoFilter {
   VideoSourceTypes source;
 
-  DiscoverVideoFilter({
-    required this.source,
-  });
+  DiscoverVideoFilter({required this.source});
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'source': source.name,
-    };
+    return <String, dynamic>{'source': source.name};
   }
 
   factory DiscoverVideoFilter.fromMap(Map<String, dynamic> map) {
@@ -700,10 +662,16 @@ class ContentSources {
             index: 4,
             id: uuid.v4(),
           ),
+          highlights: CommunityFeedOption(
+            name: SOURCE_NIP84_HIGHLIGHTS,
+            enabled: true,
+            index: 5,
+            id: uuid.v4(),
+          ),
           widgets: CommunityFeedOption(
             name: SOURCE_WIDGETS,
             enabled: true,
-            index: 5,
+            index: 6,
             id: uuid.v4(),
           ),
           index: 0,
@@ -786,10 +754,16 @@ class ContentSources {
             index: 4,
             id: uuid.v4(),
           ),
+          highlights: CommunityFeedOption(
+            name: SOURCE_NIP84_HIGHLIGHTS,
+            enabled: true,
+            index: 5,
+            id: uuid.v4(),
+          ),
           widgets: CommunityFeedOption(
             name: SOURCE_WIDGETS,
             enabled: true,
-            index: 5,
+            index: 6,
             id: uuid.v4(),
           ),
           index: 0,
@@ -841,9 +815,7 @@ class ContentSources {
   factory ContentSources.fromMap(Map<String, dynamic> map) {
     return ContentSources(
       notesSources: map['notes'] != null
-          ? NotesSources.fromMap(
-              map['notes'] as Map<String, dynamic>,
-            )
+          ? NotesSources.fromMap(map['notes'] as Map<String, dynamic>)
           : NotesSources.defaultSources(),
       discoverSources: map['mixed_content'] != null
           ? DiscoverSources.fromMap(
@@ -851,9 +823,7 @@ class ContentSources {
             )
           : DiscoverSources.defaultSources(),
       mediaSources: map['media'] != null
-          ? MediaSources.fromMap(
-              map['media'] as Map<String, dynamic>,
-            )
+          ? MediaSources.fromMap(map['media'] as Map<String, dynamic>)
           : MediaSources.defaultSources(),
     );
   }
@@ -879,9 +849,7 @@ class ContentSources {
 class NotesSources {
   NotesCommunityFeed communityFeed;
 
-  NotesSources({
-    required this.communityFeed,
-  });
+  NotesSources({required this.communityFeed});
 
   factory NotesSources.defaultSources() {
     return NotesSources(
@@ -916,10 +884,16 @@ class NotesSources {
           index: 4,
           id: uuid.v4(),
         ),
+        highlights: CommunityFeedOption(
+          name: SOURCE_NIP84_HIGHLIGHTS,
+          enabled: true,
+          index: 5,
+          id: uuid.v4(),
+        ),
         widgets: CommunityFeedOption(
           name: SOURCE_WIDGETS,
           enabled: true,
-          index: 5,
+          index: 6,
           id: uuid.v4(),
         ),
         index: 0,
@@ -928,21 +902,15 @@ class NotesSources {
   }
 
   NotesSources deepCopy() {
-    return NotesSources(
-      communityFeed: communityFeed.deepCopy(),
-    );
+    return NotesSources(communityFeed: communityFeed.deepCopy());
   }
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'community': communityFeed.toMap(),
-    };
+    return <String, dynamic>{'community': communityFeed.toMap()};
   }
 
   Map<String, dynamic> toEventMap() {
-    return <String, dynamic>{
-      'community': communityFeed.toEventMap(),
-    };
+    return <String, dynamic>{'community': communityFeed.toEventMap()};
   }
 
   MapEntry<String, String> getFirstNotesSource() {
@@ -956,7 +924,11 @@ class NotesSources {
         final options = [
           communityFeed.recent,
           communityFeed.recentWithReplies,
-          communityFeed.global
+          communityFeed.trending,
+          communityFeed.global,
+          communityFeed.paid,
+          communityFeed.highlights,
+          communityFeed.widgets,
         ]..sort((a, b) => a.index.compareTo(b.index));
         if (options.isNotEmpty) {
           final o = options.firstWhere(
@@ -982,9 +954,14 @@ class NotesSources {
       if (feed is NotesCommunityFeed) {
         isEnabled =
             (feed.recent.id == currentSource.key && feed.recent.enabled) ||
-                (feed.recentWithReplies.id == currentSource.key &&
-                    feed.recentWithReplies.enabled) ||
-                (feed.global.id == currentSource.key && feed.global.enabled);
+            (feed.recentWithReplies.id == currentSource.key &&
+                feed.recentWithReplies.enabled) ||
+            (feed.trending.id == currentSource.key && feed.trending.enabled) ||
+            (feed.global.id == currentSource.key && feed.global.enabled) ||
+            (feed.paid.id == currentSource.key && feed.paid.enabled) ||
+            (feed.highlights.id == currentSource.key &&
+                feed.highlights.enabled) ||
+            (feed.widgets.id == currentSource.key && feed.widgets.enabled);
         if (isEnabled) {
           return currentSource;
         }
@@ -1010,32 +987,26 @@ class NotesSources {
 
   factory NotesSources.fromMap(Map<String, dynamic> map) {
     return NotesSources(
-      communityFeed:
-          NotesCommunityFeed.fromMap(map['community'] as Map<String, dynamic>),
+      communityFeed: NotesCommunityFeed.fromMap(
+        map['community'] as Map<String, dynamic>,
+      ),
     );
   }
 
   String toJson() => json.encode(toMap());
 
-  factory NotesSources.fromJson(String source) => NotesSources.fromMap(
-        json.decode(source) as Map<String, dynamic>,
-      );
+  factory NotesSources.fromJson(String source) =>
+      NotesSources.fromMap(json.decode(source) as Map<String, dynamic>);
 
-  NotesSources copyWith({
-    NotesCommunityFeed? communityFeed,
-  }) {
-    return NotesSources(
-      communityFeed: communityFeed ?? this.communityFeed,
-    );
+  NotesSources copyWith({NotesCommunityFeed? communityFeed}) {
+    return NotesSources(communityFeed: communityFeed ?? this.communityFeed);
   }
 }
 
 class DiscoverSources {
   DiscoverCommunityFeed communityFeed;
 
-  DiscoverSources({
-    required this.communityFeed,
-  });
+  DiscoverSources({required this.communityFeed});
 
   factory DiscoverSources.defaultSources() {
     return DiscoverSources(
@@ -1064,9 +1035,7 @@ class DiscoverSources {
   }
 
   DiscoverSources deepCopy() {
-    return DiscoverSources(
-      communityFeed: communityFeed.deepCopy(),
-    );
+    return DiscoverSources(communityFeed: communityFeed.deepCopy());
   }
 
   MapEntry<String, String> getFirstDiscoverSource() {
@@ -1080,7 +1049,7 @@ class DiscoverSources {
         final options = [
           communityFeed.top,
           communityFeed.network,
-          communityFeed.global
+          communityFeed.global,
         ]..sort((a, b) => a.index.compareTo(b.index));
         if (options.isNotEmpty) {
           final o = options.firstWhere(
@@ -1106,8 +1075,8 @@ class DiscoverSources {
       if (feed is DiscoverCommunityFeed) {
         isEnabled =
             (feed.network.id == currentSource.key && feed.network.enabled) ||
-                (feed.top.id == currentSource.key && feed.top.enabled) ||
-                (feed.global.id == currentSource.key && feed.global.enabled);
+            (feed.top.id == currentSource.key && feed.top.enabled) ||
+            (feed.global.id == currentSource.key && feed.global.enabled);
         if (isEnabled) {
           return currentSource;
         }
@@ -1128,15 +1097,11 @@ class DiscoverSources {
   }
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'community': communityFeed.toMap(),
-    };
+    return <String, dynamic>{'community': communityFeed.toMap()};
   }
 
   Map<String, dynamic> toEventMap() {
-    return <String, dynamic>{
-      'community': communityFeed.toEventMap(),
-    };
+    return <String, dynamic>{'community': communityFeed.toEventMap()};
   }
 
   List<BaseFeed> getFeedsByOrder() {
@@ -1156,21 +1121,15 @@ class DiscoverSources {
   factory DiscoverSources.fromJson(String source) =>
       DiscoverSources.fromMap(json.decode(source) as Map<String, dynamic>);
 
-  DiscoverSources copyWith({
-    DiscoverCommunityFeed? communityFeed,
-  }) {
-    return DiscoverSources(
-      communityFeed: communityFeed ?? this.communityFeed,
-    );
+  DiscoverSources copyWith({DiscoverCommunityFeed? communityFeed}) {
+    return DiscoverSources(communityFeed: communityFeed ?? this.communityFeed);
   }
 }
 
 class MediaSources {
   MediaCommunityFeed communityFeed;
 
-  MediaSources({
-    required this.communityFeed,
-  });
+  MediaSources({required this.communityFeed});
 
   factory MediaSources.defaultSources() {
     return MediaSources(
@@ -1193,9 +1152,7 @@ class MediaSources {
   }
 
   MediaSources deepCopy() {
-    return MediaSources(
-      communityFeed: communityFeed.deepCopy(),
-    );
+    return MediaSources(communityFeed: communityFeed.deepCopy());
   }
 
   MapEntry<String, String> getFirstMediaSource() {
@@ -1232,7 +1189,7 @@ class MediaSources {
       if (feed is MediaCommunityFeed) {
         isEnabled =
             (feed.recent.id == currentSource.key && feed.recent.enabled) ||
-                (feed.global.id == currentSource.key && feed.global.enabled);
+            (feed.global.id == currentSource.key && feed.global.enabled);
         if (isEnabled) {
           return currentSource;
         }
@@ -1253,15 +1210,11 @@ class MediaSources {
   }
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'community': communityFeed.toMap(),
-    };
+    return <String, dynamic>{'community': communityFeed.toMap()};
   }
 
   Map<String, dynamic> toEventMap() {
-    return <String, dynamic>{
-      'community': communityFeed.toEventMap(),
-    };
+    return <String, dynamic>{'community': communityFeed.toEventMap()};
   }
 
   List<BaseFeed> getFeedsByOrder() {
@@ -1281,21 +1234,15 @@ class MediaSources {
   factory MediaSources.fromJson(String source) =>
       MediaSources.fromMap(json.decode(source) as Map<String, dynamic>);
 
-  MediaSources copyWith({
-    MediaCommunityFeed? communityFeed,
-  }) {
-    return MediaSources(
-      communityFeed: communityFeed ?? this.communityFeed,
-    );
+  MediaSources copyWith({MediaCommunityFeed? communityFeed}) {
+    return MediaSources(communityFeed: communityFeed ?? this.communityFeed);
   }
 }
 
 class BaseFeed {
   int index;
 
-  BaseFeed({
-    required this.index,
-  });
+  BaseFeed({required this.index});
 }
 
 class NotesCommunityFeed extends BaseFeed {
@@ -1304,6 +1251,7 @@ class NotesCommunityFeed extends BaseFeed {
   CommunityFeedOption trending;
   CommunityFeedOption global;
   CommunityFeedOption paid;
+  CommunityFeedOption highlights;
   CommunityFeedOption widgets;
 
   NotesCommunityFeed({
@@ -1312,6 +1260,7 @@ class NotesCommunityFeed extends BaseFeed {
     required this.trending,
     required this.global,
     required this.paid,
+    required this.highlights,
     required this.widgets,
     required super.index,
   });
@@ -1324,6 +1273,7 @@ class NotesCommunityFeed extends BaseFeed {
       trending: trending.deepCopy(),
       global: global.deepCopy(),
       paid: paid.deepCopy(),
+      highlights: highlights.deepCopy(),
       widgets: widgets.deepCopy(),
     );
   }
@@ -1335,12 +1285,11 @@ class NotesCommunityFeed extends BaseFeed {
       trending,
       global,
       paid,
-      widgets
+      highlights,
+      widgets,
     ]..sort((a, b) => a.index.compareTo(b.index));
 
-    return {
-      for (final option in options) option.id: option,
-    };
+    return {for (final option in options) option.id: option};
   }
 
   bool isDisabled() {
@@ -1349,6 +1298,7 @@ class NotesCommunityFeed extends BaseFeed {
         !trending.enabled &&
         !global.enabled &&
         !paid.enabled &&
+        !highlights.enabled &&
         !widgets.enabled;
   }
 
@@ -1359,18 +1309,15 @@ class NotesCommunityFeed extends BaseFeed {
       trending,
       global,
       paid,
-      widgets
+      highlights,
+      widgets,
     ];
 
     options.sort((a, b) => a.index.compareTo(b.index));
 
     return <String, dynamic>{
       'index': index,
-      'list': options
-          .map(
-            (e) => [e.name, e.enabled],
-          )
-          .toList(),
+      'list': options.map((e) => [e.name, e.enabled]).toList(),
     };
   }
 
@@ -1381,18 +1328,15 @@ class NotesCommunityFeed extends BaseFeed {
       trending,
       global,
       paid,
-      widgets
+      highlights,
+      widgets,
     ];
 
     options.sort((a, b) => a.index.compareTo(b.index));
 
     return <String, dynamic>{
       'index': index,
-      'list': options
-          .map(
-            (e) => [e.name, e.enabled],
-          )
-          .toList(),
+      'list': options.map((e) => [e.name, e.enabled]).toList(),
     };
   }
 
@@ -1435,6 +1379,13 @@ class NotesCommunityFeed extends BaseFeed {
 
     CommunityFeedOption widgets = CommunityFeedOption(
       name: SOURCE_WIDGETS,
+      enabled: true,
+      index: 6,
+      id: uuid.v4(),
+    );
+
+    CommunityFeedOption highlights = CommunityFeedOption(
+      name: SOURCE_NIP84_HIGHLIGHTS,
       enabled: true,
       index: 5,
       id: uuid.v4(),
@@ -1489,6 +1440,15 @@ class NotesCommunityFeed extends BaseFeed {
             );
           }
 
+          if (item.first == SOURCE_NIP84_HIGHLIGHTS) {
+            highlights = CommunityFeedOption(
+              name: item.first,
+              enabled: item[1] as bool,
+              index: i,
+              id: uuid.v4(),
+            );
+          }
+
           if (item.first == SOURCE_WIDGETS) {
             widgets = CommunityFeedOption(
               name: item.first,
@@ -1508,6 +1468,7 @@ class NotesCommunityFeed extends BaseFeed {
       trending: trending,
       global: global,
       paid: paid,
+      highlights: highlights,
       widgets: widgets,
     );
   }
@@ -1523,6 +1484,7 @@ class NotesCommunityFeed extends BaseFeed {
     CommunityFeedOption? trending,
     CommunityFeedOption? global,
     CommunityFeedOption? paid,
+    CommunityFeedOption? highlights,
     CommunityFeedOption? widgets,
     int? index,
   }) {
@@ -1533,6 +1495,7 @@ class NotesCommunityFeed extends BaseFeed {
       trending: trending ?? this.trending,
       global: global ?? this.global,
       paid: paid ?? this.paid,
+      highlights: highlights ?? this.highlights,
       widgets: widgets ?? this.widgets,
     );
   }
@@ -1561,11 +1524,7 @@ class CommunityFeedOption {
   }
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'name': name,
-      'enabled': enabled,
-      'index': index,
-    };
+    return <String, dynamic>{'name': name, 'enabled': enabled, 'index': index};
   }
 
   factory CommunityFeedOption.fromMap(Map<String, dynamic> map) {
@@ -1622,9 +1581,7 @@ class DiscoverCommunityFeed extends BaseFeed {
     List<CommunityFeedOption> options = [network, top, global]
       ..sort((a, b) => a.index.compareTo(b.index));
 
-    return {
-      for (final option in options) option.id: option,
-    };
+    return {for (final option in options) option.id: option};
   }
 
   bool isDisabled() {
@@ -1638,11 +1595,7 @@ class DiscoverCommunityFeed extends BaseFeed {
 
     return <String, dynamic>{
       'index': index,
-      'list': options
-          .map(
-            (e) => [e.name, e.enabled],
-          )
-          .toList(),
+      'list': options.map((e) => [e.name, e.enabled]).toList(),
     };
   }
 
@@ -1653,11 +1606,7 @@ class DiscoverCommunityFeed extends BaseFeed {
 
     return <String, dynamic>{
       'index': index,
-      'list': options
-          .map(
-            (e) => [e.name, e.enabled],
-          )
-          .toList(),
+      'list': options.map((e) => [e.name, e.enabled]).toList(),
     };
   }
 
@@ -1770,9 +1719,7 @@ class MediaCommunityFeed extends BaseFeed {
     List<CommunityFeedOption> options = [recent, global]
       ..sort((a, b) => a.index.compareTo(b.index));
 
-    return {
-      for (final option in options) option.id: option,
-    };
+    return {for (final option in options) option.id: option};
   }
 
   bool isDisabled() {
@@ -1786,11 +1733,7 @@ class MediaCommunityFeed extends BaseFeed {
 
     return <String, dynamic>{
       'index': index,
-      'list': options
-          .map(
-            (e) => [e.name, e.enabled],
-          )
-          .toList(),
+      'list': options.map((e) => [e.name, e.enabled]).toList(),
     };
   }
 
@@ -1801,11 +1744,7 @@ class MediaCommunityFeed extends BaseFeed {
 
     return <String, dynamic>{
       'index': index,
-      'list': options
-          .map(
-            (e) => [e.name, e.enabled],
-          )
-          .toList(),
+      'list': options.map((e) => [e.name, e.enabled]).toList(),
     };
   }
 
@@ -1860,9 +1799,7 @@ class MediaCommunityFeed extends BaseFeed {
   String toJson() => json.encode(toMap());
 
   factory MediaCommunityFeed.fromJson(String source) =>
-      MediaCommunityFeed.fromMap(
-        json.decode(source) as Map<String, dynamic>,
-      );
+      MediaCommunityFeed.fromMap(json.decode(source) as Map<String, dynamic>);
 
   MediaCommunityFeed copyWith({
     int? index,
@@ -1880,22 +1817,14 @@ class MediaCommunityFeed extends BaseFeed {
 class DvmFeed extends BaseFeed {
   List<DvmModel> dvms;
 
-  DvmFeed({
-    required this.dvms,
-    required super.index,
-  });
+  DvmFeed({required this.dvms, required super.index});
 
   DvmFeed deepCopy() {
-    return DvmFeed(
-      index: index,
-      dvms: List.from(dvms),
-    );
+    return DvmFeed(index: index, dvms: List.from(dvms));
   }
 
   Map<String, DvmModel> getMappedContent() {
-    return {
-      for (final dvm in dvms) dvm.id: dvm,
-    };
+    return {for (final dvm in dvms) dvm.id: dvm};
   }
 
   Map<String, dynamic> toMap() {
@@ -1941,14 +1870,8 @@ class DvmFeed extends BaseFeed {
 
   String toJson() => json.encode(toMap());
 
-  DvmFeed copyWith({
-    int? index,
-    List<DvmModel>? dvms,
-  }) {
-    return DvmFeed(
-      index: index ?? this.index,
-      dvms: dvms ?? this.dvms,
-    );
+  DvmFeed copyWith({int? index, List<DvmModel>? dvms}) {
+    return DvmFeed(index: index ?? this.index, dvms: dvms ?? this.dvms);
   }
 }
 
